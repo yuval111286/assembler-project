@@ -6,6 +6,7 @@
 #include <stdio.h>   /* For FILE type in print_error */
 #include <ctype.h>
 #include <string.h>
+#include "stdlib.h"
 
 
 /*
@@ -50,5 +51,8 @@ int count_data_items(const ParsedLine *parsed);
  * Returns clean string without space in the start and the end of the string.
  */
 char* trim_spaces(char* str);
+
+
+void *malloc_allocation(size_t size);
 
 #endif 
