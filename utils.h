@@ -4,6 +4,9 @@
 
 #include "globals.h" /* Needed for ParsedLine, AddressingMode, etc. */
 #include <stdio.h>   /* For FILE type in print_error */
+#include <ctype.h>
+#include <string.h>
+
 
 /*
  * Checks if a line is empty or a comment.
@@ -41,5 +44,11 @@ int instruction_word_count(const ParsedLine *parsed);
  * Used to update the DC during first pass.
  */
 int count_data_items(const ParsedLine *parsed);
+
+/*
+ * Receive pointer of a string.
+ * Returns clean string without space in the start and the end of the string.
+ */
+char* trim_spaces(char* str);
 
 #endif 
