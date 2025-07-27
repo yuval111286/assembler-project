@@ -1,6 +1,6 @@
 
 
-#include "linked_list_struct.h"
+#include "linked_list.h"
 #include "utils.h"
 
 node *create_node(char *name, char *content, int line_num) {
