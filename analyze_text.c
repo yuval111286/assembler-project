@@ -1,8 +1,8 @@
 #include "analyze_text.h"
 
 
-char* trim_spaces(char* str) {
-    char* end;
+char *trim_spaces(char *str) {
+    char *end;
     /* Skip leading whitespace */
     while (isspace(*str)) str++;
 
