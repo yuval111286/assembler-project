@@ -1,18 +1,14 @@
-
-
 #ifndef ASSEMBLER_PROJECT_LINKED_LIST_H
 #define ASSEMBLER_PROJECT_LINKED_LIST_H
-
-
-
 
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include <stdarg.h>
 
 /*
- * node in a linked list for macros
- * containing:
+ * Node in a linked list for macros
+ * Containing:
  * macro name
  * macro text - between macro to mcroend
  * number of line
@@ -26,32 +22,51 @@ typedef struct node{
 } node;
 
 
-/*
- * Receive
- * Return new pointer of node
+/**
+ * @brief create node and fill the relevant data
+ *
+ * @param name name of the macro
+ * @param text macro text
+ * @param line_num line number of the start of the macro
+ * @return new pointer of the new node
  */
-node *create_node(char *name, char *content, int line_num);
+node *create_node(char *name, char *text, int line_num);
 
-/*
- * Receive
- * Return new pointer of node
+/**
+ * @brief add node to exising linked list
+ *
+ * @param head the first node of the linked list
+ * @param name name of the required macro
+ * @param text macro text
+ * @param line_num line number of the start of the macro
  */
-void add_to_list(node **head, ...);
+void add_node_to_linked_list(node **head, char *name, char *text, int line_num);
 
-/*
- * Receive
- * Return new pointer of node
+/**
+ * @brief search macro in exising linked list
+ *
+ * @param head the first node of the linked list
+ * @param name name of the required macro
+ * @param found indicate if the macro already exists
+ * @return the required node if found.
+ *         NULL if the list is empty.
+ *         the previous node if node does not exist.
  */
-node *search_list(node *head, char *name, int *found);
+node *search_node_in_linked_list(node *head, char *name, int *found);
 
-/*
- * Receive
- * Return new pointer of node
+/**
+ * @brief Frees memory allocated for a node.
+ *
+ * This function deallocates memory from a node of a macro
+ * @param node a pointer to the node to be free
  */
-void free_list(node *head);
+void free_node(node *node);
 
-
-
-
+/**
+ * @brief Frees memory allocated for whole linked list.
+ *
+ * @param head the first node of the linked list
+ */
+void free_linked_list(node *head);
 
 #endif /*ASSEMBLER_PROJECT_LINKED_LIST_H*/
