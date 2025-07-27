@@ -7,7 +7,6 @@
 #include "globals.h"
 #include "symbol_table.h"
 #include "utils.h"
-#include <stdlib.h>
 #include <stdarg.h>
 
 /**
@@ -29,8 +28,9 @@ void external_error_log(char *error_msg, SourceFilelocation file);
 void internal_error_log(char *error_msg);
 
 /*list of errors*/
-#define Error() "errorExample"
-#define MACRO_MULTI_DEF()"Multi definitions for the same MACRO"
+#define ERROR "errorExample"
+#define MACRO_MULTI_DEF "Multi definitions for the same MACRO"
+
 
 
 

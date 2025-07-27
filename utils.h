@@ -2,18 +2,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "globals.h" /* Needed for ParsedLine, AddressingMode, etc. */
-#include <stdio.h>   /* For FILE type in print_error */
+#include "globals.h" 
+#include <stdio.h>   
 #include <ctype.h>
 #include <string.h>
 #include "stdlib.h"
 
 
-/*
- * Checks if a line is empty or a comment.
- * Returns 1 if the line should be ignored; 0 otherwise.
- */
-int is_empty_or_comment(const char *line);
 
 /*
  * Validates a label name according to the language rules.
@@ -50,7 +45,7 @@ int count_data_items(const ParsedLine *parsed);
  * Receive pointer of a string.
  * Returns clean string without space in the start and the end of the string.
  */
-char* trim_spaces(char* str);
+
 
 
 void *malloc_allocation(size_t size);
