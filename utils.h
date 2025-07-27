@@ -42,14 +42,6 @@ int instruction_word_count(const ParsedLine *parsed);
 int count_data_items(const ParsedLine *parsed);
 
 
-/**
- *
- * @param size
- * @return
- */
-char* trim_spaces(char* str);
-
-
 void *malloc_allocation(size_t size);
 
 #endif 
