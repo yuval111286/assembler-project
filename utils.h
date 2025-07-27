@@ -41,11 +41,13 @@ int instruction_word_count(const ParsedLine *parsed);
  */
 int count_data_items(const ParsedLine *parsed);
 
-/*
- * Receive pointer of a string.
- * Returns clean string without space in the start and the end of the string.
- */
 
+/**
+ *
+ * @param size
+ * @return
+ */
+char* trim_spaces(char* str);
 
 
 void *malloc_allocation(size_t size);
