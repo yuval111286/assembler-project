@@ -37,7 +37,7 @@ void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
     /* If the list already has a macro with the same name */
     if(found && strcmp(temp->text,text) != 0){
         /* same macro name but with different definition */
-        internal_error_log(MACRO_MULTI_DEF());
+        internal_error_log(MACRO_MULTI_DEF);
         free(name);
         free(text);
         return;
