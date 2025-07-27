@@ -54,4 +54,4 @@ void free_list(node *head);
 
 
 
-#endif //ASSEMBLER_PROJECT_LINKED_LIST_H
+#endif /*ASSEMBLER_PROJECT_LINKED_LIST_H*/
