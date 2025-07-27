@@ -1,8 +1,5 @@
-
-
 #ifndef PROJECT_ERRORS_HANDLER_H
 #define PROJECT_ERRORS_HANDLER_H
-
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,6 +30,7 @@ void internal_error_log(char *error_msg);
 
 /*list of errors*/
 #define Error() "errorExample"
+#define MACRO_MULTI_DEF()"Multi definitions for the same MACRO"
 
 
 
