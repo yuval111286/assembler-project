@@ -1,8 +1,6 @@
 #include "parser.h"
 
 
-
-
 int identify_opcode(char* op_code_str) {
 
     int i;

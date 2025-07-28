@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "stdlib.h"
+#include "globals.h"
 
 /**
  * @param str line from file
@@ -19,7 +20,6 @@ char *trim_spaces(char *str);
  */
 int check_and_skip_comment_or_empty_line(char *line);
 
-
-void clean_file_from_notes_and_space();
+FILE* create_clean_file(char* input_file_name, char* output_file_name);
 
 #endif /*ASSEMBLER_PROJECT_ANALYZE_TEXT_H*/
