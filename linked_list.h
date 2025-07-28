@@ -5,6 +5,7 @@
 #include <string.h>
 #include "utils.h"
 #include <stdarg.h>
+#include <stdio.h>
 
 /*
  * Node in a linked list for macros

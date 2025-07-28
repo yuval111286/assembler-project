@@ -2,9 +2,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <stdio.h>
 
 /* Maximum length of a line in the input file (including newline and null) */
-#define MAX_LINE_LENGTH 82
+#define MAX_LINE_LENGTH 81
 
 /* Maximum length of a label name */
 #define MAX_LABEL_LEN 31
@@ -75,6 +76,87 @@ typedef enum {
     OPCODE_STOP,
     OPCODE_INVALID = -1 /* Used for invalid/unrecognized instructions */
 } Opcode;
+
+
+typedef struct {
+    char* name;
+    Opcode opcode;
+} OpcodeEntry;
+
+static const OpcodeEntry opcode_table[] = {
+        {"mov", OPCODE_MOV},
+        {"cmp", OPCODE_CMP},
+        {"add", OPCODE_ADD},
+        {"sub", OPCODE_SUB},
+        {"lea", OPCODE_LEA},
+        {"clr", OPCODE_CLR},
+        {"not", OPCODE_NOT},
+        {"inc", OPCODE_INC},
+        {"dec", OPCODE_DEC},
+        {"jmp", OPCODE_JMP},
+        {"bne", OPCODE_BNE},
+        {"red", OPCODE_RED},
+        {"prn", OPCODE_PRN},
+        {"jsr", OPCODE_JSR},
+        {"rts", OPCODE_RTS},
+        {"stop", OPCODE_STOP},
+        {NULL, OPCODE_INVALID}
+};
+
+
+typedef enum {
+    DATA = 0, /* .data */
+    STRING, /* .string */
+    MAT, /* .mat */
+    ENTRY,  /* .entry */
+    EXTERN  /*.extern*/
+} Directive;
+
+
+typedef struct {
+    char* name;
+    Directive directive;
+} Directive_Mode;
+
+static const Directive_Mode directive_table[] = {
+        {".data", DATA},
+        {".string", STRING},
+        {".mat", MAT},
+        {".entry", ENTRY},
+        {".extern", EXTERN},
+};
+
+
+
+
+typedef enum {
+    R0 = 0,
+    R1,
+    R2,
+    R3,
+    R4,
+    R5,
+    R6,
+    R7,
+    REGISTER_INVALID = -1 /* Used for invalid/unrecognized register */
+} Register;
+
+typedef struct {
+    char* name;
+    Directive reg;
+} Register_Type;
+
+static const Register_Type register_table[] = {
+        {"r0", R0},
+        {"r1", R1},
+        {"r2", R2},
+        {"r3", R3},
+        {"r4", R4},
+        {"r5", R5},
+        {"r6", R6},
+        {"r7", R7},
+};
+
 
 /* ========== Structures ========== */
 
