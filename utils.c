@@ -166,12 +166,28 @@ int count_data_items(const ParsedLine *parsed) {
 }
 
 void *malloc_allocation(size_t size) {
-    void *ptr = malloc(size);                            /* Allocate memory */
+    void *ptr = malloc(size); /* Allocate memory */
 
     if (ptr == NULL) {
         internal_error_log("Memory allocation failed");  /* Report error */
         return NULL;
     }
 
-    return ptr;                                          /* Return pointer */
+    return ptr; /* Return pointer */
+}
+
+char *change_ending_of_file(char *file_name, char *new_ending) {
+    char *c, *new_file_name;
+
+    new_file_name = malloc_allocation(MAX_LINE_LENGTH * sizeof(char));
+    strcpy(new_file_name, file_name);
+
+    /* cuts the exising ending of a file  */
+    if ((c = strchr(new_file_name, '.')) != NULL) {
+        *c = '\0';
+    }
+    /* adds the new ending of the new file name */
+    strcat(new_file_name, new_ending);
+
+    return new_file_name;
 }

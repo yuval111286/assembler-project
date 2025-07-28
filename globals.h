@@ -127,8 +127,6 @@ static const Directive_Mode directive_table[] = {
 };
 
 
-
-
 typedef enum {
     R0 = 0,
     R1,
