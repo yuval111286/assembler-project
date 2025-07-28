@@ -40,7 +40,7 @@ int is_valid_label(const char *label) {
 }
 
 void print_error(const char *filename, int lineno, const char *message) {
-    SourceFilelocation location;
+    SourceFileLocation location;
 
     /* Fill SourceFilelocation struct */
     location.file_name = (char *)filename;
@@ -131,8 +131,8 @@ int instruction_word_count(const ParsedLine *parsed) {
 
 /* Returns the number of memory words required for .data, .string or .mat directives */
 int count_data_items(const ParsedLine *parsed) {
-    int count;
-    int i;
+    /*int count;*/
+    /*int i;*/
 
     if (parsed == NULL) {
         return 0;

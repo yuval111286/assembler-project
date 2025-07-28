@@ -102,6 +102,6 @@ typedef struct {
 typedef struct {
     char *file_name;  /*Name of the source file*/
     int line;         /* Line number in the file*/
-} SourceFilelocation;
+} SourceFileLocation;
 
 #endif /* GLOBALS_H */
