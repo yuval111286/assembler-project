@@ -6,55 +6,56 @@
 
 
 node *create_node(char *name, char *text, int line_num){
-    node *temp;
+    node *tmp;
 
-    /* Memory allocation for the node */
-    temp = malloc_allocation(sizeof(node));
+    /* memory allocation for the node */
+    tmp = malloc_allocation(sizeof(node));
 
-    /* Set the name of the node */
-    temp->name = name;
-    /* Set the string of the node */
-    temp->text = text;
-    /* Sets the line number of the macro */
-    temp->line = line_num;
-    /* Sets the next pointer to be NULL*/
-    temp->next = NULL;
+    /* node name */
+    tmp->name = name;
+    /* node string */
+    tmp->text = text;
+    /* macro line number */
+    tmp->line = line_num;
+    /* next pointer shall be NULL*/
+    tmp->next = NULL;
 
-    /* Returns pointer to the new node */
-    return temp;
+    /* returns pointer to the new node */
+    return tmp;
 }
 
 void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
     int found;
-    node *new_node, *temp;
+    node *new, *tmp;
     found = 0;
 
-    /* Temp is the previous node of the new node in the list
+    /* tmp is the previous node of the new node in the list
      * in the case the macro already exists in the list, temp holds the macro with the same name.
      */
-    temp = search_node_in_linked_list(*head,name,&found);
+    tmp = search_node_in_linked_list(*head,name,&found);
 
-    /* If the list already has a macro with the same name */
-    if(found && strcmp(temp->text,text) != 0){
-        /* same macro name but with different definition */
+    /* check if the list contains macro with the same name */
+    if(found && strcmp(tmp->text,text) != 0){
+        /* found the macro name with different definition */
         internal_error_log(MACRO_MULTI_DEF);
         free(name);
         free(text);
         return;
     }
 
-    /* The macro does not exist - creating new node with the new macro name */
-    if(!found){
-        new_node = create_node(name,text,line_num);
 
-        /* If the list is empty, add the new node to the head of the list */
-        if(temp == NULL){
-            *head = new_node;
+    if(!found){
+        /* meaning the macro does not exist - creating new node for the new macro*/
+        new = create_node(name,text,line_num);
+
+        /* in case the list is empty adding the new node to be the head*/
+        if(tmp == NULL){
+            *head = new;
         }
 
-        /* If the list is not empty, the new node is the last node */
+        /* new node is the last node of the list */
         else{
-            temp->next = new_node;
+            tmp->next = new;
         }
     }
 }
@@ -67,35 +68,35 @@ node *search_node_in_linked_list(node *head, char *name, int *found){
         return NULL;
     }
 
-    /* If the node already exists */
+    /* node found */
     if (strcmp(name, head->name) == 0) {
         *found = 1;
-        printf("Node %s found in the list\n", name);
+        printf("Node %s was found in the linked list\n", name);
         return head;
     }
 
-    /* If reaching to the end of the list */
+    /* reaching to the end of the list */
     if (head->next == NULL) {
         return head;
     }
 
-    /* Recursively search the rest of the list */
+    /* continue thw search in the rest of the list */
     return search_node_in_linked_list(head->next, name, found);
 }
 
 
 void free_node(node *node){
-    /* Free memory allocated for the name, text and node */
+    /* free memory for the node */
     free(node->name);
     free(node->text);
     free(node);
 }
 
 void free_linked_list(node *head){
-    /* Free memory for the current linked list using temp node */
+    /* free memory of the linked list */
     while(head != NULL) {
-        node *temp = head;
+        node *tmp = head;
         head = head->next;
-        free_node(temp);
+        free_node(tmp);
     }
 }
