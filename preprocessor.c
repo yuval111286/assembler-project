@@ -20,11 +20,11 @@ int prepro_first_pass(char *file_name, node **head){
 
     FILE *fp;
     fpos_t pos;
-    char line[MAX_LINE_LENGTH],*mcro_name, *mcro_content;
+    char line[MAX_LINE_LENGTH],*mcro_name = NULL, *mcro_content = NULL;
     int line_counter, starting_mcro;
 
     fp = fopen(file_name,"r");
-    line_counter = 1;
+    line_counter = 0;
 
     if (fp == NULL) {
         printf(FILE_NOT_OPEN_READING);
@@ -93,9 +93,10 @@ int mcro_name_validation(char *mcro_name){
 }
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
-    char str[MAX_LINE_LENGTH];
+    char str[MAX_LINE_LENGTH]={0};
     char *mcro, *extra;
     int mcro_length = 0;
+
 
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
@@ -106,9 +107,9 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     while (fgets(str, MAX_LINE_LENGTH, fp)) {
         (*line_counter)++;
 
-        if (strcmp(str, MCROEND+'\n') == 0) {
+        if (strncmp(str, MCROEND, 7) == 0) {
             /* no extra text after mcroend */
-            extra = skip_spaces(str + strlen(MCROEND));
+            extra = skip_word(MCROEND);
             if (extra && *extra != '\0' && *extra != '\n') {
                 internal_error_log(EXTRA_TEXT_AFTER_MCROEND);
                 return NULL;
@@ -120,11 +121,11 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     }
 
     /* return to first position */
-    if (fsetpos(fp, pos) != 0) {
+  /*  if (fsetpos(fp, pos) != 0) {
         internal_error_log(FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
-
+*/
     mcro = copy_text_from_file_to_string(fp, pos, mcro_length);
 
     return mcro;
@@ -204,7 +205,7 @@ int preprocessor_full_flow(char *file_name){
     }
 
     indication = prepro_first_pass(clean_file_name,&head);
-    if (!indication){
+    if (indication){
         printf(FAIL_EXTRACT_MACROS);
         return -1;
     }
@@ -213,11 +214,10 @@ int preprocessor_full_flow(char *file_name){
 
 
     indication = preproc_second_pass(&head,file_name ,am_file_name);
-    if (!indication){
+    if (indication){
         printf(FAIL_TO_SWITCH_MCRO_NAME);
         return -1;
     }
-
 
  return 0;
 }
