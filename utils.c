@@ -1,9 +1,5 @@
-
-
 #include "utils.h"
 #include "errors_handler.h"
-
-
 
 
 /* Checks whether the given label is valid (starts with letter, alphanumeric, not too long) */

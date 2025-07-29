@@ -23,12 +23,14 @@ int check_as_file_ending(char *file_name)
 int prepro_first_pass(char *file_name){
 
     FILE *fp;
+    char line[MAX_LINE_LENGTH];
+    
     fp = fopen(file_name,"r");
     if (fp == NULL) {
         printf("Error opening the file for reading\n");
         return -1;
     }
-    char line[MAX_LINE_LENGTH];
+
     while (fgets(line, sizeof(line), fp) != NULL) {
         if (strncmp(line, MCRO, 5) == 0){
             identify_macro_name(line);
