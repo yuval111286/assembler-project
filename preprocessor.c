@@ -28,30 +28,29 @@ int check_as_file_ending(char *file_name)
  * Returns 0 on success, -1 on failure
  */
 int preprocessor_full_flow(char *file_name) {
-    FILE *clean_file;                          /* Pointer to cleaned file */
-    char clean_file_name[256];                 /* Name for output file */
-
-    /* Check that the input file ends with .as */
-    if (check_as_file_ending(file_name) != 0) {
+    FILE *clean_file;   
+    char clean_file_name[256];                 
+    
+    if (check_as_file_ending(file_name) != 0) { /* Check that the input file ends with .as */
         printf("Error: Did not receive .as file\n");
-        return -1; /* Invalid file extension */
+        return -1; 
     }
 
     /* Generate new cleaned file name, e.g., prog.as_clean.as */
     snprintf(clean_file_name, sizeof(clean_file_name), "%s_clean.as", file_name);
 
-    /* Create cleaned version of the file (removes whitespace/comments) */
+    /* Create cleaned version of the file  */
     clean_file = create_clean_file(file_name, clean_file_name);
     if (clean_file == NULL) {
         printf("Error: Failed to create clean file\n");
-        return -1; /* Failed to clean */
+        return -1; 
     }
 
-    /* Perform macro extraction and expansion */
+    
     prepro_first_pass();     /* First pass: store macro definitions */
     preproc_second_pass();   /* Second pass: expand macros */
 
-    return 0; /* Success */
+    return 0; 
 }
 
 
@@ -64,14 +63,14 @@ int preprocessor_full_flow(char *file_name) {
  * - Adds each macro as a node to a linked list
  */
 void prepro_first_pass() {
-    FILE *file;                                   /* File pointer to cleaned file */
-    char line[MAX_LINE_LENGTH];                   /* Current line buffer */
-    char *macro_name = NULL;                      /* Name of the macro */
-    char *macro_text = NULL;                      /* Text content (body) of macro */
-    int inside_macro = 0;                         /* Flag indicating we're inside macro definition */
-    int line_num = 0;                             /* Line counter for error reporting */
-    char *name_token;                             /* Token for extracting macro name */
-
+    FILE *file;                                   
+    char line[MAX_LINE_LENGTH];                   
+    char *macro_name = NULL;                      
+    char *macro_text = NULL;                      
+    int inside_macro = 0;                         
+    int line_num = 0;                             
+    char *name_token;                             
+    
     /* Open the cleaned file for reading */
     file = fopen("prog.as_clean.as", "r");
     if (file == NULL) {
