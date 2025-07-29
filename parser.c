@@ -1,10 +1,10 @@
-#include <stdio.h>      
-#include <string.h>     
-#include <ctype.h>      
-#include <stdlib.h>     
-#include "parser.h"     
-#include "globals.h"   
-#include "utils.h" 
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include "parser.h"
+#include "globals.h"
+#include "utils.h"
 #include "analyze_text.h"
 
 
@@ -91,17 +91,17 @@ int parse_line(const char *line, ParsedLine *out) {
     strncpy(buffer, line, MAX_LINE_LENGTH);  /* Copy input line to buffer */
     buffer[MAX_LINE_LENGTH - 1] = '\0';    /* Ensure null-termination */
 
-    token = strtok(buffer, " \t");     
+    token = strtok(buffer, " \t");
     if (token == NULL) {
         (*out).line_type = LINE_EMPTY;    /* Line is empty or whitespace only */
-        return 1;                              
+        return 1;
     }
 
     /* Check if the first token is a label (ends with ':') */
     if (token[strlen(token) - 1] == ':') {
         token[strlen(token) - 1] = '\0';   /* Remove ':' */
         if (!is_valid_label(token)) {
-            return 0;  
+            return 0;
         }
         strncpy((*out).label, token, MAX_LABEL_LEN); /* Save label */
         (*out).label[MAX_LABEL_LEN] = '\0';  /* Ensure null-termination */
@@ -129,14 +129,14 @@ int parse_line(const char *line, ParsedLine *out) {
     }
 
     /* Process operands, if any (separated by commas) */
-     token = strtok(NULL, ",");
-     while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+    token = strtok(NULL, ",");
+    while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
         token = trim_spaces(token); /* Removes leading and trailing whitespace */
         strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1); /* Store operand */
         (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0'; /* Null-terminate */
         (*out).operand_count++;
         token = strtok(NULL, ",");
-}
+    }
 
 
     return 1;  /* Successfully parsed */

@@ -22,4 +22,8 @@ int check_and_skip_comment_or_empty_line(char *line);
 
 FILE* create_clean_file(char* input_file_name, char* output_file_name);
 
+char *skip_spaces(char *str);
+
+char *skip_word(char *str);
+
 #endif /*ASSEMBLER_PROJECT_ANALYZE_TEXT_H*/

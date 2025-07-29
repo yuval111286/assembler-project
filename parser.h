@@ -2,8 +2,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "globals.h"  
-#include "utils.h"    
+#include "globals.h"
+#include "utils.h"
 
 /*
  * Parses a single line of assembly code and fills a ParsedLine structure.

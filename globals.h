@@ -86,7 +86,7 @@ typedef struct {
     Opcode opcode;
 } OpcodeEntry;
 
- const OpcodeEntry opcode_table[] = {
+const OpcodeEntry opcode_table[] = {
         {"mov", OPCODE_MOV},
         {"cmp", OPCODE_CMP},
         {"add", OPCODE_ADD},
@@ -121,7 +121,7 @@ typedef struct {
     Directive directive;
 } Directive_Mode;
 
- const Directive_Mode directive_table[] = {
+const Directive_Mode directive_table[] = {
         {".data", DATA},
         {".string", STRING},
         {".mat", MAT},
@@ -147,7 +147,7 @@ typedef struct {
     Register reg;
 } Register_Type;
 
- const Register_Type register_table[] = {
+const Register_Type register_table[] = {
         {"r0", R0},
         {"r1", R1},
         {"r2", R2},
@@ -186,9 +186,5 @@ typedef struct {
     char *file_name;  /*Name of the source file*/
     int line;         /* Line number in the file*/
 } SourceFileLocation;
-
-
-/* Linked list used by the preprocessor to store macro definitions */
-extern struct node *macro_list;
 
 #endif /* GLOBALS_H */

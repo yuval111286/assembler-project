@@ -2,8 +2,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "globals.h" 
-#include <stdio.h>   
+#include "globals.h"
+#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include "stdlib.h"
