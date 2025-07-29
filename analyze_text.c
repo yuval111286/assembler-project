@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "utils.h"
+#include <stdlib.h>
 
 char *trim_spaces(char *str) {
     char *end;
@@ -97,19 +98,24 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 
 
 
-char *copy_text_from_file_to_string(FILE *fp, fpos_t *position, int length) {
-    /* the function assumes that pos + length < end. this was checked by save_mcro_content function */
+char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
     int i;
     char *str;
-    if (fsetpos(fp, position) != 0) {
+    size_t bytes_read;
+
+    if (fsetpos(fp, pos) != 0) {
         printf("fsetpos failed to set pointer in position\n");
         return NULL;
     }
-    str = malloc_allocation((length + 1) * sizeof(char));
+    str = malloc_allocation((length + 1));
+    if (str == NULL) {
+        return NULL;
+    }
+
     for (i = 0; i < length; i++) {
         *(str + i) = getc(fp);
     }
     *(str + i) = '\0';
-    fgetpos(fp, position);
+    fgetpos(fp, pos);
     return str;
 }
