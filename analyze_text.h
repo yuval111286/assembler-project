@@ -22,4 +22,6 @@ char *skip_spaces(char *str);
 
 char *skip_word(char *str);
 
+char *copy_text_from_file_to_string(FILE *fp, fpos_t *position, int length);
+
 #endif /*ASSEMBLER_PROJECT_ANALYZE_TEXT_H*/
