@@ -1,6 +1,5 @@
 #include "analyze_text.h"
 
-
 char *trim_spaces(char *str) {
     char *end;
     /* Skip leading whitespace */
@@ -18,6 +17,29 @@ char *trim_spaces(char *str) {
     return str;
 }
 
+char *skip_spaces(char *str){
+
+    /* Skip leading whitespace */
+    while (isspace(*str)) str++;
+
+    if (*str == '\0') return NULL;
+
+    return str;
+}
+
+char *skip_word(char *str) {
+    /* skip current word */
+    while (*str != '\0' && !isspace(*str)) {
+        str++;
+    }
+
+    /* skip spaces after the word */
+    while (isspace(*str)) {
+        str++;
+    }
+
+    return (*str == '\0') ? NULL : str;
+}
 
 int check_and_skip_comment_or_empty_line(char *line) {
     /* Checks if the line is a comment or empty */
