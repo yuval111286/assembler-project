@@ -1,5 +1,6 @@
 #include "analyze_text.h"
-#include "globals.h"
+#include <ctype.h>
+#include <string.h>
 
 char *trim_spaces(char *str) {
     char *end;

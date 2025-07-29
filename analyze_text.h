@@ -2,10 +2,6 @@
 #define ASSEMBLER_PROJECT_ANALYZE_TEXT_H
 
 #include <stdio.h>   /* For FILE type in print_error */
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-
 
 /**
  * @param str line from file

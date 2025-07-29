@@ -1,9 +1,6 @@
 #include "preprocessor.h"
-#include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-#include <stdarg.h>
-#include <stdio.h>
 #include "analyze_text.h"
 #include "linked_list.h"
 #include "parser.h"
@@ -24,7 +21,7 @@ int prepro_first_pass(char *file_name){
 
     FILE *fp;
     char line[MAX_LINE_LENGTH];
-    
+
     fp = fopen(file_name,"r");
     if (fp == NULL) {
         printf("Error opening the file for reading\n");
@@ -74,10 +71,10 @@ int add_macro_to_linked_list(){
 
 int preprocessor_full_flow(char *file_name){
 
-    FILE /**fp_read, *fp_write,*/ *first_copy;
+    FILE /* *fp_read, *fp_write,*/ *first_copy;
     /*node *head = NULL;*/
-    char line[MAX_LINE_LENGTH], *new_file_name,clean_file_name[256];
-    SourceFileLocation as_file;
+    char /*line[MAX_LINE_LENGTH],  *new_file_name,*/ clean_file_name[256];
+    /*SourceFileLocation as_file;*/
 
     if(check_as_file_ending(file_name)!=0){
         printf("Error: Did not receive .as file\n");

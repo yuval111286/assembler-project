@@ -1,5 +1,6 @@
 #include "linked_list.h"
 #include "errors_handler.h"
+#include "utils.h"
 
 
 node *create_node(char *name, char *text, int line_num){
