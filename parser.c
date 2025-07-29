@@ -10,15 +10,15 @@
 
 
 
-int identify_opcode(char* op_code_str) {
+int identify_opcode(char* op_code) {
 
     int i;
-    if (op_code_str == NULL) {
+    if (op_code == NULL) {
         return OPCODE_INVALID;
     }
 
     for (i = 0; opcode_table[i].name != NULL; i++) {
-        if (strcasecmp(op_code_str, opcode_table[i].name) == 0) {
+        if (strcasecmp(op_code, opcode_table[i].name) == 0) {
             return opcode_table[i].opcode;
         }
     }
@@ -30,7 +30,7 @@ int identify_opcode(char* op_code_str) {
 int is_directive(char *directive){
 
     int i;
-    for (i = 0; directive_table[i].name != NULL; i++) {
+    for (i = 0; i<NUM_DIRECTIVE; i++) {
         if (strcasecmp(directive, directive_table[i].name) == 0) {
             return directive_table[i].directive;
         }
@@ -42,7 +42,7 @@ int is_directive(char *directive){
 
 int identify_register(char *reg){
     int i;
-    for (i = 0; register_table[i].name != NULL; i++) {
+    for (i = 0; i<NUM_REGISTERS; i++) {
         if (strcasecmp(reg, register_table[i].name) == 0) {
             return register_table[i].reg;
         }
