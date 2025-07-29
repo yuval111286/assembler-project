@@ -35,9 +35,11 @@ void internal_error_log(char *error_msg);
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive or register"
 #define MACRO_REPEAT_DEFINITION "MACRO is define more than once"
 #define MACROEND_WITHOUT_START "mcroend without mcro start"
-#define MACRO_WITHOUT_NAME "MCRO without name"
+#define MACRO_WITHOUT_NAME "MCRO name is missing"
 #define EXTRA_TEXT_AFTER_MCRO_START "Extra text after macro name"
 #define EXTRA_TEXT_AFTER_MCROEND "Extra text after macro end"
+#define FAIL_EXTRACT_MACROS "Fail to extract macros from as file\n"
+#define FAIL_TO_SWITCH_MCRO_NAME "Fail to switch mcro name by it's content\n"
 
 
 /*internal errors*/
@@ -45,6 +47,10 @@ void internal_error_log(char *error_msg);
 #define FILE_NOT_OPEN_READING "Can not open file for reading"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing"
 #define MEMORY_FAIL "Fail to allocate memory"
+#define ARG_NOT_AS_FILE "File does not as file \n"
+#define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line \n"
+#define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
+
 
 
 

@@ -19,7 +19,7 @@ int check_as_file_ending(char *file_name)
 int prepro_first_pass(char *file_name, node **head){
 
     FILE *fp;
-    fpos_t *pos;
+    fpos_t pos;
     char line[MAX_LINE_LENGTH],*mcro_name, *mcro_content;
     int line_counter, starting_mcro;
 
@@ -27,7 +27,7 @@ int prepro_first_pass(char *file_name, node **head){
     line_counter = 1;
 
     if (fp == NULL) {
-        printf("Error opening the file for reading\n");
+        printf(FILE_NOT_OPEN_READING);
         return -1;
     }
 
@@ -38,7 +38,17 @@ int prepro_first_pass(char *file_name, node **head){
         if (strncmp(line, MCRO, 5) == 0){
             starting_mcro = line_counter;
             mcro_name = identify_macro_name(line);
+            if (mcro_name == NULL) {
+                fclose(fp);
+                return -1;
+            }
+            fgetpos(fp, &pos);
             mcro_content = extract_mcro_text(fp,&pos,&line_counter);
+            if (mcro_content == NULL) {
+                free(mcro_name);
+                fclose(fp);
+                return -1;
+            }
             fsetpos(fp, &pos);
             add_node_to_linked_list(head,mcro_name,mcro_content,starting_mcro);
 
@@ -53,16 +63,16 @@ char *identify_macro_name(char *line){
 
     char *mcro_name, *extra_text_after_mcro_name;
 
-    mcro_name = skip_spaces(line);
+    mcro_name = skip_word(line);
     if(mcro_name == NULL)
     {
-        printf("macro name is missing\n");
+        printf(MACRO_WITHOUT_NAME);
         return NULL;
     }
     extra_text_after_mcro_name= skip_word(mcro_name);
     if(extra_text_after_mcro_name !=NULL)
     {
-        printf("extra text after mcro name\n");
+        printf(EXTRA_TEXT_AFTER_MCRO_START);
         return NULL;
     }
 
@@ -89,7 +99,7 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
 
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
-        internal_error_log("Failed to set file position");
+        internal_error_log(FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
 
@@ -111,7 +121,7 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
 
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
-        internal_error_log("Failed to reset to macro start");
+        internal_error_log(FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
 
@@ -126,17 +136,18 @@ int preproc_second_pass(node **head,char *as_file_name, char *am_file_name){
     FILE *fp_as, *fp_am;
     char line[MAX_LINE_LENGTH];
     int found;
+    node *macro_node;
 
 
     fp_as = fopen(as_file_name,"r");
     if (fp_as == NULL) {
-        printf("Error opening the file for reading\n");
+        printf(FILE_NOT_OPEN_READING);
         return -1;
     }
 
     fp_am = fopen(am_file_name,"w");
     if (fp_am == NULL) {
-        printf("Error opening the file for reading\n");
+        printf(FILE_NOT_OPEN_WRITING);
         return -1;
     }
 
@@ -150,7 +161,7 @@ int preproc_second_pass(node **head,char *as_file_name, char *am_file_name){
             }
         }
 
-        node *macro_node = search_node_in_linked_list(head, line, &found);
+        macro_node = search_node_in_linked_list(head, line, &found);
 
         if (found) {
             /*mcro name will be switched with definition */
@@ -168,7 +179,6 @@ int preproc_second_pass(node **head,char *as_file_name, char *am_file_name){
 
 
 
-
 int preprocessor_full_flow(char *file_name){
 
     FILE /* *fp_read, *fp_write,*/ *first_copy;
@@ -181,7 +191,7 @@ int preprocessor_full_flow(char *file_name){
     head = NULL;
     indication = 0;
     if(check_as_file_ending(file_name)!=0){
-        printf("Error: Did not receive .as file\n");
+        printf(ARG_NOT_AS_FILE);
         return -1;
     }
 
@@ -189,13 +199,13 @@ int preprocessor_full_flow(char *file_name){
 
     first_copy = create_clean_file(file_name, clean_file_name);
     if (first_copy == NULL) {
-        printf("Error: Failed to create clean file\n");
+        printf(FAIL_CLEAN_FILE);
         return -1;
     }
 
     indication = prepro_first_pass(clean_file_name,&head);
     if (!indication){
-        printf("Error: in Extraction mcros\n");
+        printf(FAIL_EXTRACT_MACROS);
         return -1;
     }
 
@@ -204,7 +214,7 @@ int preprocessor_full_flow(char *file_name){
 
     indication = preproc_second_pass(&head,file_name ,am_file_name);
     if (!indication){
-        printf("Error: in switch mcro name by it's content\n");
+        printf(FAIL_TO_SWITCH_MCRO_NAME);
         return -1;
     }
 

@@ -1,6 +1,6 @@
 mcro HELLO
   prn #5
-endmcro
+mcroend
 
 HELLO
 mov r1, r2
