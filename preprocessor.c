@@ -54,7 +54,7 @@ int identify_macro_name(char *line){
 
 int mcro_name_validation(char *mcro_name){
 
-    return (identify_opcode(mcro_name)&& identify_register(mcro_name)&&is)
+    return (identify_opcode(mcro_name)&& identify_register(mcro_name)&& is_directive(mcro_name));
 
 }
 
