@@ -135,7 +135,7 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
 int preproc_second_pass(node **head,char *as_file_name, char *am_file_name){
 
     FILE *fp_as, *fp_am;
-    char line[MAX_LINE_LENGTH];
+    char line[MAX_LINE_LENGTH] ={0};
     int found;
     node *macro_node;
 
@@ -156,7 +156,8 @@ int preproc_second_pass(node **head,char *as_file_name, char *am_file_name){
         if (strncmp(line, MCRO, 5) == 0) {
             /* skip lines until mcroend */
             while (fgets(line, sizeof(line), fp_as) != NULL) {
-                if (strncmp(line, MCROEND, 8) == 0) {
+                if (strncmp(line, MCROEND, 7) == 0) {
+                    fgets(line, sizeof(line), fp_as);
                     break;
                 }
             }
@@ -210,7 +211,7 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    am_file_name = change_ending_of_file(file_name, ".am");
+    am_file_name = change_ending_of_file(clean_file_name, ".am");
 
 
     indication = preproc_second_pass(&head,file_name ,am_file_name);
