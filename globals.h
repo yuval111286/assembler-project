@@ -1,4 +1,3 @@
-
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
@@ -80,32 +79,10 @@ typedef enum {
     OPCODE_INVALID = -1 /* Used for invalid/unrecognized instructions */
 } Opcode;
 
-
 typedef struct {
     char* name;
     Opcode opcode;
 } OpcodeEntry;
-
-OpcodeEntry opcode_table[] = {
-        {"mov", OPCODE_MOV},
-        {"cmp", OPCODE_CMP},
-        {"add", OPCODE_ADD},
-        {"sub", OPCODE_SUB},
-        {"lea", OPCODE_LEA},
-        {"clr", OPCODE_CLR},
-        {"not", OPCODE_NOT},
-        {"inc", OPCODE_INC},
-        {"dec", OPCODE_DEC},
-        {"jmp", OPCODE_JMP},
-        {"bne", OPCODE_BNE},
-        {"red", OPCODE_RED},
-        {"prn", OPCODE_PRN},
-        {"jsr", OPCODE_JSR},
-        {"rts", OPCODE_RTS},
-        {"stop", OPCODE_STOP},
-        {NULL, OPCODE_INVALID}
-};
-
 
 typedef enum {
     DATA = 0, /* .data */
@@ -115,20 +92,10 @@ typedef enum {
     EXTERN  /*.extern*/
 } Directive;
 
-
 typedef struct {
     char* name;
     Directive directive;
 } Directive_Mode;
-
-Directive_Mode directive_table[] = {
-        {".data", DATA},
-        {".string", STRING},
-        {".mat", MAT},
-        {".entry", ENTRY},
-        {".extern", EXTERN},
-};
-
 
 typedef enum {
     R0 = 0,
@@ -147,17 +114,10 @@ typedef struct {
     Register reg;
 } Register_Type;
 
-Register_Type register_table[] = {
-        {"r0", R0},
-        {"r1", R1},
-        {"r2", R2},
-        {"r3", R3},
-        {"r4", R4},
-        {"r5", R5},
-        {"r6", R6},
-        {"r7", R7},
-};
-
+/* הכרזה על המשתנים הגלובליים (הגדרה בקובץ globals.c) */
+extern OpcodeEntry opcode_table[];
+extern Directive_Mode directive_table[];
+extern Register_Type register_table[];
 
 /* ========== Structures ========== */
 
@@ -174,8 +134,6 @@ typedef struct {
     int operand_count;                          /* Number of operands found */
     int line_number;                            /* Line number in the original file (for errors) */
 } ParsedLine;
-
-
 
 /**
  * @brief Source file location information
