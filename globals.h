@@ -141,7 +141,7 @@ typedef enum {
 
 typedef struct {
     char* name;
-    Directive reg;
+    Register reg;
 } Register_Type;
 
  const Register_Type register_table[] = {
@@ -183,5 +183,9 @@ typedef struct {
     char *file_name;  /*Name of the source file*/
     int line;         /* Line number in the file*/
 } SourceFileLocation;
+
+
+/* Linked list used by the preprocessor to store macro definitions */
+extern struct node *macro_list;
 
 #endif /* GLOBALS_H */
