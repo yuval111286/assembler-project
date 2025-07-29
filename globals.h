@@ -19,6 +19,9 @@
 /* Maximum number of registers (r0–r7) */
 #define NUM_REGISTERS 8
 
+/* Maximum number of directive options */
+#define NUM_DIRECTIVE 5
+
 /* Maximum number of digits in a 10-bit base-4 word: from 00000 to 33333 */
 #define WORD_BASE4_DIGITS 5
 
