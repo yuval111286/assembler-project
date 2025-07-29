@@ -32,19 +32,19 @@ void init_symbol_table(SymbolTable *table);
  * Adds a new symbol to the table.
  * Returns 1 if added successfully, or 0 if symbol already exists.
  */
-int add_symbol(SymbolTable *table, const char *name, int address, SymbolType type);
+int add_symbol(SymbolTable *table, char *name, int address, SymbolType type);
 
 /*
  * Checks if a symbol with the given name already exists in the table.
  * Returns 1 if exists, 0 otherwise.
  */
-int symbol_exists(SymbolTable *table, const char *name);
+int symbol_exists(SymbolTable *table, char *name);
 
 /*
  * Marks a previously defined symbol as .entry by setting is_entry = 1.
  * Does nothing if the symbol is not found.
  */
-void mark_entry_label(SymbolTable *table, const char *name);
+void mark_entry_label(SymbolTable *table, char *name);
 
 /*
  * Updates all DATA-type symbols by adding IC_final to their address.
@@ -56,7 +56,7 @@ void update_data_symbols_base_address(SymbolTable *table, int ic_final);
  * Returns a pointer to the symbol with the given name, or NULL if not found.
  * This can be used in second pass to resolve label addresses.
  */
-Symbol *get_symbol(SymbolTable *table, const char *name);
+Symbol *get_symbol(SymbolTable *table, char *name);
 
 /*
  * Frees all memory allocated for the symbol table.

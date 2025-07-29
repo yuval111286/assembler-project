@@ -19,6 +19,6 @@
  *   1 if the first pass completed successfully (even if errors were found),
  *   0 if a critical error occurred (e.g., file problem).
  */
-int first_pass(FILE *fp, SymbolTable *table, int *ic, int *dc, const char *filename);
+int first_pass(FILE *fp, SymbolTable *table, int *ic, int *dc, char *filename);
 
 #endif 

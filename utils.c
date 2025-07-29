@@ -3,7 +3,7 @@
 
 
 /* Checks whether the given label is valid (starts with letter, alphanumeric, not too long) */
-int is_valid_label(const char *label) {
+int is_valid_label(char *label) {
     int i;
     int len;
 
@@ -30,7 +30,7 @@ int is_valid_label(const char *label) {
     return 1; /* Valid label */
 }
 
-void print_error(const char *filename, int lineno, const char *message) {
+void print_error(char *filename, int lineno, char *message) {
     SourceFileLocation location;
 
     /* Fill SourceFilelocation struct */
@@ -42,7 +42,7 @@ void print_error(const char *filename, int lineno, const char *message) {
 }
 
 /* Determines the addressing mode of a given operand string */
-int get_addressing_mode(const char *operand) {
+int get_addressing_mode( char *operand) {
     int len;
 
     if (operand == NULL) {
@@ -78,7 +78,7 @@ int get_addressing_mode(const char *operand) {
 }
 
 /* Calculates the number of memory words needed to encode an instruction line */
-int instruction_word_count(const ParsedLine *parsed) {
+int instruction_word_count(ParsedLine *parsed) {
     int count;
     int i;
     int mode;
@@ -121,7 +121,7 @@ int instruction_word_count(const ParsedLine *parsed) {
 }
 
 /* Returns the number of memory words required for .data, .string or .mat directives */
-int count_data_items(const ParsedLine *parsed) {
+int count_data_items(ParsedLine *parsed) {
     /*int count;*/
     /*int i;*/
 

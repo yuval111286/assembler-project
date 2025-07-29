@@ -1,7 +1,7 @@
 
 #include <stdio.h>      
-#include <stdlib.h>     
-#include <string.h>     
+#include <stdlib.h>
+#include <string.h>
 #include "symbol_table.h" 
 
 /* Initializes the symbol table to an empty list */
@@ -10,7 +10,7 @@ void init_symbol_table(SymbolTable *table) {
 }
 
 /* Adds a new symbol to the symbol table */
-int add_symbol(SymbolTable *table, const char *name, int address, SymbolType type) {
+int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
     Symbol *current;
 
     current = (*table).head;
@@ -43,7 +43,7 @@ int add_symbol(SymbolTable *table, const char *name, int address, SymbolType typ
 }
 
 /* Checks if a symbol already exists in the table */
-int symbol_exists(SymbolTable *table, const char *name) {
+int symbol_exists(SymbolTable *table, char *name) {
     Symbol *current;
 
     current = (*table).head;
@@ -59,7 +59,7 @@ int symbol_exists(SymbolTable *table, const char *name) {
 }
 
 /* Marks a symbol as .entry (sets is_entry = 1) */
-void mark_entry_label(SymbolTable *table, const char *name) {
+void mark_entry_label(SymbolTable *table, char *name) {
     Symbol *current;
 
     current = (*table).head;
@@ -90,7 +90,7 @@ void update_data_symbols_base_address(SymbolTable *table, int ic_final) {
 }
 
 /* Retrieves a pointer to a symbol by name (or NULL if not found) */
-Symbol *get_symbol(SymbolTable *table, const char *name) {
+Symbol *get_symbol(SymbolTable *table, char *name) {
     Symbol *current;
 
     current = (*table).head;

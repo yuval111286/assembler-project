@@ -52,7 +52,7 @@ int identify_register(char *reg){
 /*
  * Removes the leading '.' from a directive token and stores the name.
  */
-static void copy_directive_name(const char *token, char *dest) {
+static void copy_directive_name(char *token, char *dest) {
     if (token[0] == '.') {
         strncpy(dest, token + 1, 7); /* Copy up to 7 characters after '.' */
         dest[7] = '\0';  /* Ensure null-termination */
@@ -72,7 +72,7 @@ static void copy_directive_name(const char *token, char *dest) {
  *   1 if parsing was successful (valid line, even if empty or comment)
  *   0 if syntax error occurred (invalid label, directive, etc.)
  */
-int parse_line(const char *line, ParsedLine *out) {
+int parse_line(char *line, ParsedLine *out) {
     char buffer[MAX_LINE_LENGTH];   /* Buffer to hold a mutable copy of the line */
     char *token;   /* Pointer to each token in the line */
     /*int i;*/
