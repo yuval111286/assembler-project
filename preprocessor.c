@@ -7,7 +7,7 @@
 #include "analyze_text.h"
 #include "utils.h"
 #include "globals.h"
-struct node *macro_list = NULL; /* Linked list of macros */
+
 
 
 int check_as_file_ending(char *file_name)
@@ -22,11 +22,7 @@ int check_as_file_ending(char *file_name)
     return -1;
 }
 
-/*
- * - Creates clean version of source file
- * - Performs macro expansion
- * Returns 0 on success, -1 on failure
- */
+
 int preprocessor_full_flow(char *file_name) {
     FILE *clean_file;   
     char clean_file_name[256];                 
@@ -54,86 +50,8 @@ int preprocessor_full_flow(char *file_name) {
 }
 
 
-/*
- * prepro_first_pass
- * First pass of preprocessing:
- * - Opens the cleaned file
- * - Scans each line
- * - If "mcro" is found, extracts and stores macro name and body
- * - Adds each macro as a node to a linked list
- */
-void prepro_first_pass() {
-    FILE *file;                                   
-    char line[MAX_LINE_LENGTH];                   
-    char *macro_name = NULL;                      
-    char *macro_text = NULL;                      
-    int inside_macro = 0;                         
-    int line_num = 0;                             
-    char *name_token;                             
-    
-    /* Open the cleaned file for reading */
-    file = fopen("prog.as_clean.as", "r");
-    if (file == NULL) {
-        internal_error_log(FILE_NOT_OPEN_READING); /* Report error if file can't be opened */
-        return;
-    }
 
-    /* Loop over each line in the file */
-    while (fgets(line, sizeof(line), file) != NULL) {
-        line_num++; /* Increment line counter */
 
-        /* Check if line starts with "mcro" */
-        if (strstr(line, "mcro") == line) {
-            name_token = strtok(line + 4, " \t\n"); /* Skip "mcro" and get name */
 
-            if (name_token == NULL) {
-                internal_error_log(MACRO_WITHOUT_NAME); /* No name after "mcro" */
-            } else {
-                /* Allocate memory for macro name */
-                macro_name = (char *) malloc(strlen(name_token) + 1);
-                if (macro_name == NULL) {
-                    internal_error_log(MEMORY_FAIL);
-                    fclose(file);
-                    return;
-                }
-                strcpy(macro_name, name_token); /* Copy macro name */
-
-                /* Allocate memory for macro body */
-                macro_text = (char *) malloc_allocation(MAX_LINE_LENGTH * MAX_LINE_LENGTH);
-                if (macro_text == NULL) {
-                    internal_error_log(MEMORY_FAIL);
-                    free(macro_name);
-                    fclose(file);
-                    return;
-                }
-                macro_text[0] = '\0'; /* Initialize empty body */
-                inside_macro = 1;     /* Start recording macro body */
-            }
-        }
-        /* Check if line is "endmcro" */
-        else if (strstr(line, "endmcro") == line) {
-            if (!inside_macro) {
-                internal_error_log(MACROEND_WITHOUT_START); /* "endmcro" without "mcro" */
-            } else {
-                add_node_to_linked_list(&macro_list, macro_name, macro_text, line_num); /* Save macro */
-            }
-
-            /* Reset state */
-            inside_macro = 0;
-            macro_name = NULL;
-            macro_text = NULL;
-        }
-        /* Any line inside a macro body */
-        else {
-            if (inside_macro && macro_text != NULL) {
-                strcat(macro_text, line); /* Append line to macro body */
-            }
-        }
-    }
-
-    /* Close the file when done */
-    fclose(file);
-}
-
-   /* To be writting preproc_second_pass();*/
+   
 
