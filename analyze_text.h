@@ -4,8 +4,8 @@
 #include <stdio.h>   /* For FILE type in print_error */
 #include <ctype.h>
 #include <string.h>
-#include "stdlib.h"
-#include "globals.h"
+#include <stdlib.h>
+
 
 /**
  * @param str line from file

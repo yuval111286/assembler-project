@@ -3,11 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "parser.h"
-#include "globals.h"
-#include "utils.h"
 #include "analyze_text.h"
-
-
 
 
 int identify_opcode(char* op_code) {
@@ -79,7 +75,7 @@ static void copy_directive_name(const char *token, char *dest) {
 int parse_line(const char *line, ParsedLine *out) {
     char buffer[MAX_LINE_LENGTH];   /* Buffer to hold a mutable copy of the line */
     char *token;   /* Pointer to each token in the line */
-    int i;
+    /*int i;*/
 
     /* Initialize the ParsedLine structure fields */
     (*out).label[0] = '\0';     /* Clear label */

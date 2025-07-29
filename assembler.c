@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    char *as_file, *am_file;
+    char *as_file/*, *am_file*/;
     while (--argc > 0){
 
         printf("-- PREPROCESSOR --\n");

@@ -2,7 +2,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "globals.h"
+
 #include "utils.h"
 
 /*
@@ -42,10 +42,11 @@ int identify_opcode(char *str);
  */
 int is_directive(char *str);
 
-/* Tables for opcode, directive, and register recognition */
+/* Tables for opcode, directive, and register recognition
 extern const OpcodeEntry opcode_table[];
 extern const Directive_Mode directive_table[];
 extern const Register_Type register_table[];
+ */
 
 
 #endif /* PARSER_H */

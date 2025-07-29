@@ -1,5 +1,12 @@
 #include "preprocessor.h"
-
+#include <stdlib.h>
+#include <string.h>
+#include "utils.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include "analyze_text.h"
+#include "linked_list.h"
+#include "parser.h"
 
 int check_as_file_ending(char *file_name)
 {
@@ -28,6 +35,7 @@ int prepro_first_pass(char *file_name){
         }
     }
 
+    return 0;
 }
 
 int identify_macro_name(char *line){
@@ -48,7 +56,7 @@ int identify_macro_name(char *line){
     }
 
 
-
+return 0;
 
 }
 
@@ -59,13 +67,13 @@ int mcro_name_validation(char *mcro_name){
 }
 
 int add_macro_to_linked_list(){
-
+ return 0;
 }
 
 int preprocessor_full_flow(char *file_name){
 
-    FILE *fp_read, *fp_write, *first_copy;
-    node *head = NULL;
+    FILE /**fp_read, *fp_write,*/ *first_copy;
+    /*node *head = NULL;*/
     char line[MAX_LINE_LENGTH], *new_file_name,clean_file_name[256];
     SourceFileLocation as_file;
 
@@ -82,5 +90,5 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-
+ return 0;
 }

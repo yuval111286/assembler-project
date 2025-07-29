@@ -2,14 +2,6 @@
 #ifndef PROJECT_PREPROCESSOR_H
 #define PROJECT_PREPROCESSOR_H
 
-#include <stdlib.h>
-#include <string.h>
-#include "utils.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include "analyze_text.h"
-#include "linked_list.h"
-#include "parser.h"
 
 
 #define MCRO "mcro "

@@ -1,4 +1,5 @@
 #include "analyze_text.h"
+#include "globals.h"
 
 char *trim_spaces(char *str) {
     char *end;
@@ -49,46 +50,4 @@ int check_and_skip_comment_or_empty_line(char *line) {
     return 0;
 }
 
-FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 
-    FILE *input_file, *output_file;
-    char line[MAX_LINE_LENGTH], line_copy[MAX_LINE_LENGTH] ,*trimmed;
-    int len;
-
-    input_file = fopen(input_file_name, "r");
-    if (input_file == NULL) {
-        printf("Error: Cannot open input file %s\n", input_file_name);
-        return NULL;
-    }
-
-    output_file = fopen(output_file_name, "w");
-    if (output_file == NULL) {
-        printf("Error: Cannot create output file %s\n", output_file_name);
-        fclose(input_file);
-        return NULL;
-    }
-
-    while (fgets(line, sizeof(line), input_file) != NULL)
-    {
-        if(!check_and_skip_comment_or_empty_line(line))
-        {
-            /* Make a copy for trimming (since trim_spaces modifies the string) */
-            strcpy(line_copy, line);
-            trimmed = trim_spaces(line_copy);
-
-            /* Write trimmed line to output file */
-            fputs(trimmed, output_file);
-
-            /* Ensure line ends with \n */
-            len = strlen(trimmed);
-            if (len > 0 && trimmed[len-1] != '\n') {
-                fputs("\n", output_file);
-            }
-        }
-    }
-    /* Close both files */
-    fclose(input_file);
-    fclose(output_file);
-
-    return output_file;
-}

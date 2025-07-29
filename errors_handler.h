@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "globals.h"
+#include <stdarg.h>
 #include "symbol_table.h"
 #include "utils.h"
-#include <stdarg.h>
+
 
 /**
  * @brief Prints an external error message.
