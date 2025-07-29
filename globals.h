@@ -83,7 +83,7 @@ typedef struct {
     Opcode opcode;
 } OpcodeEntry;
 
-static const OpcodeEntry opcode_table[] = {
+ const OpcodeEntry opcode_table[] = {
         {"mov", OPCODE_MOV},
         {"cmp", OPCODE_CMP},
         {"add", OPCODE_ADD},
@@ -118,7 +118,7 @@ typedef struct {
     Directive directive;
 } Directive_Mode;
 
-static const Directive_Mode directive_table[] = {
+ const Directive_Mode directive_table[] = {
         {".data", DATA},
         {".string", STRING},
         {".mat", MAT},
@@ -144,7 +144,7 @@ typedef struct {
     Directive reg;
 } Register_Type;
 
-static const Register_Type register_table[] = {
+ const Register_Type register_table[] = {
         {"r0", R0},
         {"r1", R1},
         {"r2", R2},
