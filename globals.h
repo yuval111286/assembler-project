@@ -114,10 +114,6 @@ typedef struct {
     Register reg;
 } Register_Type;
 
-/* הכרזה על המשתנים הגלובליים (הגדרה בקובץ globals.c) */
-extern OpcodeEntry opcode_table[];
-extern Directive_Mode directive_table[];
-extern Register_Type register_table[];
 
 /* ========== Structures ========== */
 
