@@ -177,6 +177,8 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
 
 
     }
+
+
     return 0;
 
 }
@@ -185,11 +187,9 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
 
 int preprocessor_full_flow(char *file_name){
 
-    FILE /* *fp_read, *fp_write,*/ *first_copy,*second_copy;
+    FILE  *first_copy;
     node *head;
-    /*node *head = NULL;*/
-    char *am_file_name, clean_file_name[256];
-    /*SourceFileLocation as_file;*/
+    char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
     int indication, line_counter = 0;
 
     head = NULL;
@@ -213,13 +213,16 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    am_file_name = change_ending_of_file(clean_file_name, ".am");
+    am_file_name = change_ending_of_file(file_name, ".am");
 
-    indication = preproc_second_pass(&head,file_name,&line_counter,am_file_name);
+    indication = preproc_second_pass(&head,clean_file_name,&line_counter,am_file_name);
+
     if (indication){
         error_log(file_name,line_counter,FAIL_TO_SWITCH_MCRO_NAME);
         return -1;
     }
+
+    remove(clean_file_name);
 
 
     return 0;
