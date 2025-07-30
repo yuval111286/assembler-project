@@ -93,7 +93,7 @@ int mcro_name_validation(char *mcro_name){
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     char line[MAX_LINE_LENGTH]={0};
-    char *mcro, *extra;
+    char *mcro /*, *extra*/;
     int mcro_length = 0, internal_line_counter;
 
 
@@ -213,9 +213,7 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    am_file_name = create_clean_file(file_name, clean_file_name);
-
-
+    am_file_name = change_ending_of_file(clean_file_name, ".am");
 
     indication = preproc_second_pass(&head,file_name,&line_counter,am_file_name);
     if (indication){
