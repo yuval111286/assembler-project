@@ -16,8 +16,9 @@
  * Prints the name of the file the error and the line number
  * @param error_msg error message
  * @param file pointer to the source file name and line number
+ * in case the line is irrelevant will be printed -1
  */
-void external_error_log(char *error_msg, SourceFileLocation file);
+void error_log(char *file_name, int line, char *error_msg);
 
 /**
  * @brief Prints an internal error message.
@@ -25,7 +26,7 @@ void external_error_log(char *error_msg, SourceFileLocation file);
  * Prints to stdout only errors discovered during internal process
  * @param error_msg error message
  */
-void internal_error_log(char *error_msg);
+/* void internal_error_log(char *error_msg);*/
 
 /*list of errors*/
 #define Error "errorExample"

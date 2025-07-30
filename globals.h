@@ -131,14 +131,6 @@ typedef struct {
     int line_number;                            /* Line number in the original file (for errors) */
 } ParsedLine;
 
-/**
- * @brief Source file location information
- * @details Structure to identify line in source file,
- *          containing file name and line number
- */
-typedef struct {
-    char *file_name;  /*Name of the source file*/
-    int line;         /* Line number in the file*/
-} SourceFileLocation;
+
 
 #endif /* GLOBALS_H */
