@@ -94,9 +94,10 @@ int mcro_name_validation(char *mcro_name){
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     char line[MAX_LINE_LENGTH]={0};
     char *mcro, *extra;
-    int mcro_length = 0;
+    int mcro_length = 0, internal_line_counter;
 
 
+    internal_line_counter = *line_counter;
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
         error_log(NULL,*line_counter,FAIL_TO_SET_POSITION_IN_FILE);
@@ -104,15 +105,23 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     }
 
     while (fgets(line, MAX_LINE_LENGTH, fp)) {
-        (*line_counter)++;
+        /*(*line_counter)++;(*/
+        internal_line_counter++;
 
         if (strncmp(line, MCROEND, 7) == 0) {
-            /* no extra text after mcroend */
-            extra = skip_word(MCROEND);
+            if (strncmp(line, MCROEND, 8) != 0)
+            {
+                error_log(NULL,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
+                return NULL;
+
+            }
+
+                /* no extra text after mcroend */
+           /* extra = skip_word(MCROEND);
             if (extra && *extra != '\0' && *extra != '\n') {
                 error_log(NULL,*line_counter,EXTRA_TEXT_AFTER_MCROEND);
                 return NULL;
-            }
+            }*/
 
             break; /* reach to mcroend*/
         }
@@ -176,7 +185,7 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
 
 int preprocessor_full_flow(char *file_name){
 
-    FILE /* *fp_read, *fp_write,*/ *first_copy;
+    FILE /* *fp_read, *fp_write,*/ *first_copy,*second_copy;
     node *head;
     /*node *head = NULL;*/
     char *am_file_name, clean_file_name[256];
@@ -204,7 +213,8 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    am_file_name = change_ending_of_file(clean_file_name, ".am");
+    am_file_name = create_clean_file(file_name, clean_file_name);
+
 
 
     indication = preproc_second_pass(&head,file_name,&line_counter,am_file_name);
@@ -213,5 +223,6 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
- return 0;
+
+    return 0;
 }
