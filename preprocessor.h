@@ -6,7 +6,7 @@
 #include "linked_list.h"
 
 #define MCRO "mcro "
-#define MCROEND "mcroend"
+#define MCROEND "mcroend\n"
 
 int preprocessor_full_flow(char file_name[]);
 

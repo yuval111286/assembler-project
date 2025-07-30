@@ -26,6 +26,20 @@ void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
     int found;
     node *new, *tmp;
     found = 0;
+    char *new_name, *new_text;
+
+    new_name = malloc_allocation(strlen(name) + 1);
+    if (new_name == NULL) return;
+
+    new_text = malloc_allocation(strlen(text) + 1);
+    if (new_text == NULL) {
+        free(new_name);
+        return;
+    }
+
+    strcpy(new_name, name);
+    strcpy(new_text, text);
+
 
     /* tmp is the previous node of the new node in the list
      * in the case the macro already exists in the list, temp holds the macro with the same name.
@@ -44,7 +58,7 @@ void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
 
 
         /* meaning the macro does not exist - creating new node for the new macro*/
-        new = create_node(name,text,line_num);
+        new = create_node(new_name,new_text,line_num);
 
         /* in case the list is empty adding the new node to be the head*/
         /*if(*head== NULL){
