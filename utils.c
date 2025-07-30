@@ -30,16 +30,6 @@ int is_valid_label(char *label) {
     return 1; /* Valid label */
 }
 
-void print_error(char *filename, int lineno, char *message) {
-    SourceFileLocation location;
-
-    /* Fill SourceFilelocation struct */
-    location.file_name = (char *)filename;
-    location.line = lineno;
-
-    /* Use standardized error logger */
-    external_error_log((char *)message, location);
-}
 
 /* Determines the addressing mode of a given operand string */
 int get_addressing_mode( char *operand) {
@@ -160,7 +150,7 @@ void *malloc_allocation(size_t size) {
     void *ptr = malloc(size); /* Allocate memory */
 
     if (ptr == NULL) {
-        internal_error_log("Memory allocation failed");  /* Report error */
+        printf(MEMORY_FAIL);  /* Report error */
         return NULL;
     }
 

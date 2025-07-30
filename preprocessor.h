@@ -12,11 +12,11 @@ int preprocessor_full_flow(char file_name[]);
 
 int check_as_file_ending(char *file_name);
 
-int prepro_first_pass(char *file_name, node **head);
+int prepro_first_pass(char *file_name, int *line_counter, node **head);
 
-int preproc_second_pass(node **head,char *as_file_name, char *am_file_name);
+int preproc_second_pass(node **head,char *as_file_name,int *line_counter, char *am_file_name);
 
-char *identify_macro_name(char *line);
+char *identify_macro_name(char *line, char *file_name, int *line_counter);
 
 int mcro_name_validation(char *mcro_name);
 

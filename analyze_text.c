@@ -101,7 +101,6 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
     int i;
     char *str;
-    size_t bytes_read;
 
     if (fsetpos(fp, pos) != 0) {
         printf("fsetpos failed to set pointer in position\n");
