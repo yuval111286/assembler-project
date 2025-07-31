@@ -43,6 +43,9 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAIL_EXTRACT_MACROS "Fail to extract macros from as file\n"
 #define FAIL_TO_SWITCH_MCRO_NAME "Fail to switch mcro name by it's content\n"
 
+#define PREPROCCESSOR_SUCCESS "Preprocessor step completed successfully"
+
+
 
 /*internal errors*/
 
