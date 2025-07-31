@@ -66,7 +66,7 @@ int identify_opcode(char* op_code) {
 }
 
 
-int is_directive(char *directive){
+int identify_directive(char *directive){
 
     int i;
     for (i = 0; i<NUM_DIRECTIVE; i++) {
@@ -153,7 +153,7 @@ int parse_line(char *line, ParsedLine *out) {
 
     /* Check if it's a directive */
     if (token[0] == '.') {
-        if (is_directive(token) == -1) {
+        if (identify_directive(token) == -1) {
             return 0; /* Invalid directive name */
         }
         (*out).line_type = LINE_DIRECTIVE;     /* Mark line type as directive */

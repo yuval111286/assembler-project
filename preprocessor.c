@@ -4,6 +4,8 @@
 #include "parser.h"
 #include "errors_handler.h"
 
+char *directive_table_no_dot[] = {"data", "string", "mat", "entry", "extern", NULL};
+
 int check_as_file_ending(char *file_name)
 {
     char *c;
@@ -113,7 +115,8 @@ char *identify_macro_name(char *line, char *file_name, int *line_counter){
 
 int mcro_name_validation(char *mcro_name){
 
-    return (mcro_name_only_letters_num_underscore(mcro_name) && identify_opcode(mcro_name) && identify_register(mcro_name) && is_directive(mcro_name));
+    return (mcro_name_only_letters_num_underscore(mcro_name) && identify_opcode(mcro_name) && identify_register(mcro_name)
+    && identify_directive(mcro_name) && is_directive_no_dot(mcro_name));
 
 }
 
@@ -128,6 +131,19 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
     }
 
     return 1;
+}
+
+int is_directive_no_dot(char *directive){
+
+    int i;
+    for (i = 0; i<NUM_DIRECTIVE; i++) {
+        if (strcasecmp(directive, directive_table_no_dot[i]) == 0) {
+           return 0;
+        }
+    }
+
+    return -1;
+
 }
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
@@ -243,7 +259,6 @@ int preprocessor_full_flow(char *file_name){
 
     indication = prepro_first_pass(file_name,clean_file_name,&line_counter, &head);
     if (indication){
-        /*error_log(file_name,line_counter, FAIL_EXTRACT_MACROS);*/
         /* release mcro linked list, delete files */
         free_linked_list(head);
         remove(clean_file_name);

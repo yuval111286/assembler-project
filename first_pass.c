@@ -67,7 +67,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 continue;
             }
             else if (identify_opcode(parsed.label) != OPCODE_INVALID ||
-                     is_directive(parsed.label) != -1 ||
+                    identify_directive(parsed.label) != -1 ||
                      identify_register(parsed.label) != -1)
             {
                 error_log(file_name, line_number, LABEL_RESERVED_WORD);
