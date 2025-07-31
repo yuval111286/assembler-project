@@ -42,5 +42,5 @@ int binary_line_to_base_4(int binary_line, char *code){
 
 int second_pass()
 {
-
+    return 0;
 }
