@@ -1,7 +1,8 @@
 #include "analyze_text.h"
 #include <ctype.h>
 #include <string.h>
-#include "globals.h"
+#include "utils.h"
+#include "errors_handler.h"
 
 char *trim_spaces(char *str) {
     char *end;
@@ -106,4 +107,26 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     fclose(output_file);
 
     return output_file;
+}
+
+
+char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
+    int i;
+    char *str;
+
+    if (fsetpos(fp, pos) != 0) {
+        printf(FAIL_TO_SET_POSITION_IN_FILE);
+        return NULL;
+    }
+    str = malloc_allocation((length + 1));
+    if (str == NULL) {
+        return NULL;
+    }
+
+    for (i = 0; i < length; i++) {
+        str[i] = getc(fp);
+    }
+    str[length] = '\0';
+    fgetpos(fp, pos);
+    return str;
 }
