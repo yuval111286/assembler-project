@@ -56,42 +56,50 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
         }
 
         /* first word in the line is mcro*/
-        if (strncmp(line, MCRO, 5) == 0){
-            mcroend_without_mcro = 1;
-            starting_mcro = *line_counter;
+        if (strncmp(line, MCRO, 4) == 0) {
+            /*mcroend after mcro, need to ignore*/
 
-            mcro_name = identify_macro_name(org_file_name,line,file_name,line_counter);
-            if (mcro_name == NULL) {
-                fclose(fp);
-                return -1;
-            }
-            fgetpos(fp, &pos);
-            mcro_content = extract_mcro_text(fp,&pos,line_counter);
-            if (mcro_content == NULL) {
-                free(mcro_name);
-                fclose(fp);
-                return -1;
-            }
-            fsetpos(fp, &pos);
+            if (strncmp(line, MCROEND, 7) != 0) {
+                mcro_name = skip_spaces(line);
+                if (mcro_name == NULL) {
+                    error_log(org_file_name, *line_counter, MACRO_WITHOUT_NAME);
+                    return -1;
+                }
 
-            is_mcro_exist = search_node_in_linked_list(*head,mcro_name,&found);
+                mcroend_without_mcro = 1;
+                starting_mcro = *line_counter;
 
-            if (found){
-                if(strcmp(is_mcro_exist->text,mcro_content) != 0){
-                    error_log(org_file_name, *line_counter, MACRO_MULTI_DEF);
-                    free(mcro_name);
-                    free(mcro_content);
+                mcro_name = identify_macro_name(org_file_name, line, file_name, line_counter);
+                if (mcro_name == NULL) {
                     fclose(fp);
                     return -1;
                 }
-                else{
+                fgetpos(fp, &pos);
+                mcro_content = extract_mcro_text(fp, &pos, line_counter);
+                if (mcro_content == NULL) {
                     free(mcro_name);
-                    free(mcro_content);
+                    fclose(fp);
+                    return -1;
                 }
+                fsetpos(fp, &pos);
 
-            }
-            else{
-                add_node_to_linked_list(head,mcro_name,mcro_content,starting_mcro);
+                is_mcro_exist = search_node_in_linked_list(*head, mcro_name, &found);
+
+                if (found) {
+                    if (strcmp(is_mcro_exist->text, mcro_content) != 0) {
+                        error_log(org_file_name, *line_counter, MACRO_MULTI_DEF);
+                        free(mcro_name);
+                        free(mcro_content);
+                        fclose(fp);
+                        return -1;
+                    } else {
+                        free(mcro_name);
+                        free(mcro_content);
+                    }
+
+                } else {
+                    add_node_to_linked_list(head, mcro_name, mcro_content, starting_mcro);
+                }
             }
         }
     }
