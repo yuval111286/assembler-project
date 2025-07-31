@@ -71,7 +71,6 @@ node *search_node_in_linked_list(node *head, char *name, int *found){
     /* node found */
     if (strcmp(name, head->name) == 0) {
         *found = 1;
-        printf("Node %s was found in the linked list\n", name);
         return head;
     }
 
