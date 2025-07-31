@@ -15,11 +15,6 @@
  */
 int is_valid_label(char *label);
 
-/*
- * Prints a formatted error message with file name and line number.
- * Used for consistent error reporting.
- */
-void print_error(char *filename, int lineno, char *message);
 
 /*
  * Returns the addressing mode of a given operand string.
