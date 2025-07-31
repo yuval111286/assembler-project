@@ -4,7 +4,7 @@
 #include "parser.h"
 #include "errors_handler.h"
 
-char *directive_table_no_dot[] = {"data", "string", "mat", "entry", "extern", NULL};
+char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
 
 int check_as_file_ending(char *file_name)
 {
@@ -24,7 +24,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
     fpos_t pos;
     node *is_mcro_exist = NULL;
     char line[MAX_LINE_LENGTH] ={0},*mcro_name = NULL, *mcro_content = NULL;
-    int starting_mcro, found=0;
+    int starting_mcro, found=0,mcroend_without_mcro = 0;
 
     fp = fopen(file_name,"r");
 
@@ -39,13 +39,28 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
         /* check if line is too long*/
         if (strlen(line) >= MAX_LINE_LENGTH - 1) {
             error_log(org_file_name, *line_counter, LONG_LINE);
+            fclose(fp);
             return -1;
+        }
+
+       /*check for mcroend without mcro start*/
+        if (strncmp(line, MCROEND, 7) == 0) {
+            if(mcroend_without_mcro != 1)
+            {
+                error_log(org_file_name,*line_counter,MACROEND_WITHOUT_START);
+                fclose(fp);
+                return -1;
+
+            }
+            mcroend_without_mcro = 0;
         }
 
         /* first word in the line is mcro*/
         if (strncmp(line, MCRO, 5) == 0){
+            mcroend_without_mcro = 1;
             starting_mcro = *line_counter;
-            mcro_name = identify_macro_name(line,file_name,line_counter);
+
+            mcro_name = identify_macro_name(org_file_name,line,file_name,line_counter);
             if (mcro_name == NULL) {
                 fclose(fp);
                 return -1;
@@ -77,7 +92,6 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
             }
             else{
                 add_node_to_linked_list(head,mcro_name,mcro_content,starting_mcro);
-
             }
         }
     }
@@ -86,26 +100,26 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
     return 0;
 }
 
-char *identify_macro_name(char *line, char *file_name, int *line_counter){
+char *identify_macro_name(char *org_file_name, char *line, char *file_name, int *line_counter){
 
     char *mcro_name, *extra_text_after_mcro_name;
 
     mcro_name = skip_word(line);
     if(mcro_name == NULL)
     {
-        error_log(file_name,*line_counter,MACRO_WITHOUT_NAME);
+        error_log(org_file_name,*line_counter,MACRO_WITHOUT_NAME);
         return NULL;
     }
     extra_text_after_mcro_name= skip_word(mcro_name);
     if(extra_text_after_mcro_name !=NULL)
     {
-        error_log(file_name,*line_counter,EXTRA_TEXT_AFTER_MCRO_START);
+        error_log(org_file_name,*line_counter,EXTRA_TEXT_AFTER_MCRO_START);
         return NULL;
     }
 
     if (!mcro_name_validation(mcro_name))
     {
-        error_log(file_name,*line_counter,ILLEGAL_MACRO_NAME);
+        error_log(org_file_name,*line_counter,ILLEGAL_MACRO_NAME);
         return NULL;
     }
 
@@ -115,8 +129,13 @@ char *identify_macro_name(char *line, char *file_name, int *line_counter){
 
 int mcro_name_validation(char *mcro_name){
 
-    return (mcro_name_only_letters_num_underscore(mcro_name) && identify_opcode(mcro_name) && identify_register(mcro_name)
-    && identify_directive(mcro_name) && is_directive_no_dot(mcro_name));
+    char temp_name[MAX_LINE_LENGTH];
+    strncpy(temp_name, mcro_name, strlen(mcro_name) - 1);
+    temp_name[strlen(mcro_name) - 1] = '\0';
+
+
+    return (mcro_name_only_letters_num_underscore(temp_name) && identify_opcode(temp_name) && identify_register(temp_name)
+    && identify_directive(temp_name) && is_save_word(temp_name));
 
 }
 
@@ -124,7 +143,7 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
 
     int i;
 
-    for (i = 0; mcro_name[i] != '\0'; i++) {
+    for (i = 0; i < strlen(mcro_name); i++) {
         if (!isalpha(mcro_name[i]) && !isdigit(mcro_name[i]) && mcro_name[i]!='_') {
             return 0;
         }
@@ -133,16 +152,16 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
     return 1;
 }
 
-int is_directive_no_dot(char *directive){
+int is_save_word(char *mcro_name){
 
     int i;
     for (i = 0; i<NUM_DIRECTIVE; i++) {
-        if (strcasecmp(directive, directive_table_no_dot[i]) == 0) {
+        if (strcasecmp(mcro_name, saved_words[i]) == 0) {
            return 0;
         }
     }
 
-    return -1;
+    return 1;
 
 }
 
@@ -160,7 +179,6 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     }
 
     while (fgets(line, MAX_LINE_LENGTH, fp)) {
-        /*(*line_counter)++;(*/
         internal_line_counter++;
 
         if (strncmp(line, MCROEND, 7) == 0) {
@@ -171,12 +189,15 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
 
             }
 
-            break; /* reach to mcroend*/
+            /* reach to mcroend*/
+            break;
         }
         mcro_length += strlen(line);
     }
 
     mcro = copy_text_from_file_to_string(fp, pos, mcro_length);
+
+    *line_counter = internal_line_counter-1;
 
     return mcro;
 }
@@ -253,7 +274,7 @@ int preprocessor_full_flow(char *file_name){
 
     first_copy = create_clean_file(file_name, clean_file_name);
     if (first_copy == NULL) {
-        printf(FAIL_CLEAN_FILE);
+        error_log(file_name,line_counter,FAIL_CLEAN_FILE);
         return -1;
     }
 
@@ -276,7 +297,6 @@ int preprocessor_full_flow(char *file_name){
     indication = preproc_second_pass(file_name,&head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
-        /*error_log(file_name,line_counter,FAIL_TO_SWITCH_MCRO_NAME);*/
         /* release mcro linked list, delete files */
         free_linked_list(head);
         free(am_file_name);
