@@ -29,10 +29,10 @@ symbol_table.o: symbol_table.c symbol_table.h $(GLOBAL_DEPS)
 utils.o: utils.c utils.h $(GLOBAL_DEPS)
 	$(CC) -c utils.c $(CFLAGS) -o $@
 
-Errors.o: errors_handler.c errors_handler.h $(GLOBAL_DEPS)
+errors_handler.o: errors_handler.c errors_handler.h $(GLOBAL_DEPS)
 	$(CC) -c errors_handler.c $(CFLAGS) -o $@
 
-handle_text.o: analyze_text.c analyze_text.h $(GLOBAL_DEPS)
+analyze_text.o: analyze_text.c analyze_text.h $(GLOBAL_DEPS)
 	$(CC) -c analyze_text.c $(CFLAGS) -o $@
 
 parser.o: parser.c parser.h $(GLOBAL_DEPS)

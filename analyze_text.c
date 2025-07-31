@@ -1,8 +1,7 @@
 #include "analyze_text.h"
 #include <ctype.h>
 #include <string.h>
-#include "utils.h"
-#include <stdlib.h>
+#include "globals.h"
 
 char *trim_spaces(char *str) {
     char *end;
@@ -53,6 +52,19 @@ int check_and_skip_comment_or_empty_line(char *line) {
     return 0;
 }
 
+int is_empty_or_comment(char *line) {
+    char *p = line;
+
+    /* Skip leading spaces */
+    while (*p && isspace((unsigned char)*p)) {
+        p++;
+    }
+
+    /* Check if line is empty or comment */
+    return (*p == '\0' || *p == ';');
+}
+
+
 
 FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     FILE *input_file, *output_file;
@@ -94,27 +106,4 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     fclose(output_file);
 
     return output_file;
-}
-
-
-
-char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
-    int i;
-    char *str;
-
-    if (fsetpos(fp, pos) != 0) {
-        printf("fsetpos failed to set pointer in position\n");
-        return NULL;
-    }
-    str = malloc_allocation((length + 1));
-    if (str == NULL) {
-        return NULL;
-    }
-
-    for (i = 0; i < length; i++) {
-        *(str + i) = getc(fp);
-    }
-    *(str + i) = '\0';
-    fgetpos(fp, pos);
-    return str;
 }
