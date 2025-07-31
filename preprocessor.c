@@ -16,7 +16,7 @@ int check_as_file_ending(char *file_name)
     return -1;
 }
 
-int prepro_first_pass(char *file_name, int *line_counter , node **head){
+int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head){
 
     FILE *fp;
     fpos_t pos;
@@ -27,12 +27,18 @@ int prepro_first_pass(char *file_name, int *line_counter , node **head){
     fp = fopen(file_name,"r");
 
     if (fp == NULL) {
-        error_log(file_name,*line_counter,FILE_NOT_OPEN_READING);
+        error_log(org_file_name,*line_counter,FILE_NOT_OPEN_READING);
         return -1;
     }
 
     while (fgets(line, sizeof(line), fp)) {
         (*line_counter)++;
+
+        /* check if line is too long*/
+        if (strlen(line) >= MAX_LINE_LENGTH - 1) {
+            error_log(org_file_name, *line_counter, LONG_LINE);
+            return -1;
+        }
 
         /* first word in the line is mcro*/
         if (strncmp(line, MCRO, 5) == 0){
@@ -55,7 +61,7 @@ int prepro_first_pass(char *file_name, int *line_counter , node **head){
 
             if (found){
                 if(strcmp(is_mcro_exist->text,mcro_content) != 0){
-                    error_log(file_name, *line_counter, MACRO_MULTI_DEF);
+                    error_log(org_file_name, *line_counter, MACRO_MULTI_DEF);
                     free(mcro_name);
                     free(mcro_content);
                     fclose(fp);
@@ -107,8 +113,21 @@ char *identify_macro_name(char *line, char *file_name, int *line_counter){
 
 int mcro_name_validation(char *mcro_name){
 
-    return (identify_opcode(mcro_name)&& identify_register(mcro_name)&& is_directive(mcro_name));
+    return (mcro_name_only_letters_num_underscore(mcro_name) && identify_opcode(mcro_name) && identify_register(mcro_name) && is_directive(mcro_name));
 
+}
+
+int mcro_name_only_letters_num_underscore(char *mcro_name){
+
+    int i;
+
+    for (i = 0; mcro_name[i] != '\0'; i++) {
+        if (!isalpha(mcro_name[i]) && !isdigit(mcro_name[i]) && mcro_name[i]!='_') {
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
@@ -147,7 +166,7 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
 }
 
 
-int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char *am_file_name){
+int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name){
 
     FILE *fp_as, *fp_am;
     char line[MAX_LINE_LENGTH] ={0};
@@ -157,13 +176,13 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
 
     fp_as = fopen(as_file_name,"r");
     if (fp_as == NULL) {
-        printf(FILE_NOT_OPEN_READING);
+        error_log(org_file_name,0,FILE_NOT_OPEN_READING);
         return -1;
     }
 
     fp_am = fopen(am_file_name,"w");
     if (fp_am == NULL) {
-        printf(FILE_NOT_OPEN_WRITING);
+        error_log(org_file_name,0,FILE_NOT_OPEN_WRITING);
         /* close files */
         fclose(fp_as);
         return -1;
@@ -222,9 +241,9 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    indication = prepro_first_pass(clean_file_name,&line_counter, &head);
+    indication = prepro_first_pass(file_name,clean_file_name,&line_counter, &head);
     if (indication){
-        error_log(file_name,line_counter, FAIL_EXTRACT_MACROS);
+        /*error_log(file_name,line_counter, FAIL_EXTRACT_MACROS);*/
         /* release mcro linked list, delete files */
         free_linked_list(head);
         remove(clean_file_name);
@@ -239,10 +258,10 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
-    indication = preproc_second_pass(&head,clean_file_name,&line_counter,am_file_name);
+    indication = preproc_second_pass(file_name,&head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
-        error_log(file_name,line_counter,FAIL_TO_SWITCH_MCRO_NAME);
+        /*error_log(file_name,line_counter,FAIL_TO_SWITCH_MCRO_NAME);*/
         /* release mcro linked list, delete files */
         free_linked_list(head);
         free(am_file_name);

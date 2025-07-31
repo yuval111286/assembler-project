@@ -33,40 +33,41 @@ void error_log(char *file_name, int line, char *error_msg);
 #define Error "errorExample"
 
 /*macro errors*/
-#define MACRO_MULTI_DEF "Multi definitions for the same MACRO"
-#define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive or register"
-#define MACRO_REPEAT_DEFINITION "MACRO is define more than once"
-#define MACROEND_WITHOUT_START "mcroend without mcro start"
-#define MACRO_WITHOUT_NAME "MCRO name is missing"
-#define EXTRA_TEXT_AFTER_MCRO_START "Extra text after macro name"
-#define EXTRA_TEXT_AFTER_MCROEND "Extra text after macro end"
+#define LONG_LINE "Line too long exceeds 80 characters \n"
+#define MACRO_MULTI_DEF "Multi definitions for the same MACRO \n"
+#define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
+                          "or char different than letters, digits and underscore \n"
+#define MACROEND_WITHOUT_START "mcroend without mcro start \n"
+#define MACRO_WITHOUT_NAME "MCRO name is missing \n"
+#define EXTRA_TEXT_AFTER_MCRO_START "Extra text after macro name \n"
+#define EXTRA_TEXT_AFTER_MCROEND "Extra text after macro end \n"
 #define FAIL_EXTRACT_MACROS "Fail to extract macros from as file\n"
 #define FAIL_TO_SWITCH_MCRO_NAME "Fail to switch mcro name by it's content\n"
 
-#define PREPROCCESSOR_SUCCESS "Preprocessor step completed successfully"
+#define PREPROCCESSOR_SUCCESS "Preprocessor step completed successfully \n"
 
 
 
 /*internal errors*/
 
-#define FILE_NOT_OPEN_READING "Can not open file for reading"
-#define FILE_NOT_OPEN_WRITING "Can not open file for writing"
-#define MEMORY_FAIL "Fail to allocate memory"
-#define ARG_NOT_AS_FILE "File does not as file \n"
+#define FILE_NOT_OPEN_READING "Can not open file for reading \n"
+#define FILE_NOT_OPEN_WRITING "Can not open file for writing \n"
+#define MEMORY_FAIL "Fail to allocate memory \n"
+#define ARG_NOT_AS_FILE "File does not .as file \n"
 #define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line \n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
 
 /* first Pass Parsing Errors */
 #define SYNTAX_ERROR "Syntax error"
-#define INVALID_LABEL_NAME "Invalid label name"
-#define LABEL_RESERVED_WORD "Label name cannot be opcode, directive or register"
-#define DUPLICATE_LABEL "Label already defined"
-#define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label"
-#define FAILED_ADD_DATA_LABEL "Failed to add data label"
-#define ILLEGAL_EXTERN_LABEL "Label cannot be defined for .extern"
-#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands"
-#define EXTERN_SYNTAX_ERROR "Invalid .extern syntax"
-#define DUPLICATE_EXTERN "Duplicate .extern definition"
+#define INVALID_LABEL_NAME "Invalid label name \n"
+#define LABEL_RESERVED_WORD "Label name cannot be opcode, directive or register \n"
+#define DUPLICATE_LABEL "Label already defined \n"
+#define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label \n"
+#define FAILED_ADD_DATA_LABEL "Failed to add data label \n"
+#define ILLEGAL_EXTERN_LABEL "Label cannot be defined for .extern \n"
+#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands \n"
+#define EXTERN_SYNTAX_ERROR "Invalid .extern syntax \n"
+#define DUPLICATE_EXTERN "Duplicate .extern definition \n"
 
 
 

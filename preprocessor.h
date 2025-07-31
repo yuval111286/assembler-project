@@ -12,13 +12,16 @@ int preprocessor_full_flow(char file_name[]);
 
 int check_as_file_ending(char *file_name);
 
-int prepro_first_pass(char *file_name, int *line_counter, node **head);
+int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head);
 
-int preproc_second_pass(node **head,char *as_file_name,int *line_counter, char *am_file_name);
+int preproc_second_pass(char *org_file_name,node **head,char *as_file_name,int *line_counter, char *am_file_name);
 
 char *identify_macro_name(char *line, char *file_name, int *line_counter);
 
 int mcro_name_validation(char *mcro_name);
+
+
+int mcro_name_only_letters_num_underscore(char *mcro_name);
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter);
 
