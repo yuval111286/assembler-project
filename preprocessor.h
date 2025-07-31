@@ -25,7 +25,7 @@ int mcro_name_only_letters_num_underscore(char *mcro_name);
 
 int is_save_word(char *mcro_name);
 
-char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter);
+char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_counter);
 
 
 #endif /*PROJECT_PREPROCESSOR_H*/
