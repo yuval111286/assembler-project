@@ -7,15 +7,21 @@ void add_entry_label_to_symbol_table();
 
 void add_extern_label_to_symbol_table();
 
-int binary_line_to_base_4(int binary_line, char *code);
+int binary_line_to_base_4(char *code);
 
 char *two_binary_digits_one_base4_char (int binary_num);
 
-void create_obj_file();
+int create_obj_file(char *obj_file_name);
 
-void create_ent_file();
+int create_ent_file(char *ent_file_name);
 
-void create_ext_file();
+int create_ext_file(char *ext_file_name);
+
+int create_files(char *org_file_name);
+
+int second_pass(char *org_file_name);
+
+
 
 
 
