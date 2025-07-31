@@ -20,6 +20,7 @@
  * @param DC_final Pointer to store final data counter
  * @return 1 if successful, 0 if errors occurred
  */
+
 int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final)
 {
     FILE *fp;                               
@@ -30,8 +31,8 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     ParsedLine parsed;                      
     int words;                              
 
-    fp = fopen(file_name, "r");             /* Open the file for reading */
-    if (fp == NULL)                         /* If file couldn't be opened, log error */
+    fp = fopen(file_name, "r");   /* Open the file for reading */
+    if (fp == NULL)                        
     {
         error_log(file_name, 0, FILE_NOT_OPEN_READING);
         return 0;
@@ -39,21 +40,21 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) /* Read each line from the file */
     {
-        line_number++;                      /* Update line number */
+        line_number++;  /* Update line number */
 
         if (is_empty_or_comment(line))      /* Skip comments and empty lines */
         {
             continue;
         }
 
-        if (!parse_line(line, &parsed))     /* If parsing fails, report syntax error */
+        if (!parse_line(line, &parsed))   /* If parsing fails, report syntax error */
         {
             error_log(file_name, line_number, "Syntax error");
             continue;
         }
 
         /* Handle Label Definitions  */
-        if (parsed.label[0] != '\0')        /* If the line has a label */
+        if (parsed.label[0] != '\0')    /* If the line has a label */
         {
             if (symbol_exists(symbol_table, parsed.label)) /* Check for duplicates */
             {
@@ -88,7 +89,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             words = instruction_word_count(&parsed); /* Count words needed for instruction */
             if (words > 0)
             {
-                IC += words;                         /* Update instruction counter */
+                IC += words;   /* Update instruction counter */
             }
             else
             {
@@ -96,7 +97,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
         }
 
-        /* ---- Handle Directives ---- */
+        /*  Handle Directives */
         if (parsed.line_type == LINE_DIRECTIVE)
         {
             if (strcmp(parsed.directive_name, "data") == 0 ||
@@ -120,9 +121,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         }
     }
 
-    fclose(fp);                              /* Close the source file */
+    fclose(fp);       /* Close the source file */
 
-    *IC_final = IC;                          /* Set final IC and DC values */
+    *IC_final = IC;     /* Set final IC and DC values */
     *DC_final = DC;
 
     update_data_symbols_base_address(symbol_table, IC); /* Adjust all data symbol addresses */
