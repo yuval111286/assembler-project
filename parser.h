@@ -40,7 +40,7 @@ int identify_opcode(char *str);
  * Identifies the directive type from string (e.g., .data).
  * Returns directive enum value if found, or -1 if invalid.
  */
-int is_directive(char *str);
+int identify_directive(char *str);
 
 /* Tables for opcode, directive, and register recognition
 extern const OpcodeEntry opcode_table[];

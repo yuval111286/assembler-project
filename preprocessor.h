@@ -23,6 +23,8 @@ int mcro_name_validation(char *mcro_name);
 
 int mcro_name_only_letters_num_underscore(char *mcro_name);
 
+int is_directive_no_dot(char *directive);
+
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter);
 
 
