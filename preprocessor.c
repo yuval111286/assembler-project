@@ -20,8 +20,9 @@ int prepro_first_pass(char *file_name, int *line_counter , node **head){
 
     FILE *fp;
     fpos_t pos;
+    node *is_mcro_exist = NULL;
     char line[MAX_LINE_LENGTH] ={0},*mcro_name = NULL, *mcro_content = NULL;
-    int starting_mcro;
+    int starting_mcro, found=0;
 
     fp = fopen(file_name,"r");
 
@@ -49,8 +50,27 @@ int prepro_first_pass(char *file_name, int *line_counter , node **head){
                 return -1;
             }
             fsetpos(fp, &pos);
-            add_node_to_linked_list(head,mcro_name,mcro_content,starting_mcro);
 
+            is_mcro_exist = search_node_in_linked_list(*head,mcro_name,&found);
+
+            if (found){
+                if(strcmp(is_mcro_exist->text,mcro_content) != 0){
+                    error_log(file_name, *line_counter, MACRO_MULTI_DEF);
+                    free(mcro_name);
+                    free(mcro_content);
+                    fclose(fp);
+                    return -1;
+                }
+                else{
+                    free(mcro_name);
+                    free(mcro_content);
+                }
+
+            }
+            else{
+                add_node_to_linked_list(head,mcro_name,mcro_content,starting_mcro);
+
+            }
         }
     }
 
@@ -81,7 +101,7 @@ char *identify_macro_name(char *line, char *file_name, int *line_counter){
         return NULL;
     }
 
-   return mcro_name;
+    return mcro_name;
 
 }
 
@@ -93,7 +113,7 @@ int mcro_name_validation(char *mcro_name){
 
 char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     char line[MAX_LINE_LENGTH]={0};
-    char *mcro /*, *extra*/;
+    char *mcro;
     int mcro_length = 0, internal_line_counter;
 
 
@@ -115,13 +135,6 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
                 return NULL;
 
             }
-
-                /* no extra text after mcroend */
-           /* extra = skip_word(MCROEND);
-            if (extra && *extra != '\0' && *extra != '\n') {
-                error_log(NULL,*line_counter,EXTRA_TEXT_AFTER_MCROEND);
-                return NULL;
-            }*/
 
             break; /* reach to mcroend*/
         }
@@ -151,6 +164,8 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
     fp_am = fopen(am_file_name,"w");
     if (fp_am == NULL) {
         printf(FILE_NOT_OPEN_WRITING);
+        /* close files */
+        fclose(fp_as);
         return -1;
     }
 
@@ -171,16 +186,16 @@ int preproc_second_pass(node **head,char *as_file_name, int *line_counter, char 
             /*mcro name will be switched with definition */
             fputs(macro_node->text, fp_am);
         } else {
-             /* regular line will be copied to am file */
+            /* regular line will be copied to am file */
             fputs(line, fp_am);
         }
-
-
     }
 
+    /* close files*/
+    fclose(fp_as);
+    fclose(fp_am);
 
     return 0;
-
 }
 
 
@@ -210,20 +225,36 @@ int preprocessor_full_flow(char *file_name){
     indication = prepro_first_pass(clean_file_name,&line_counter, &head);
     if (indication){
         error_log(file_name,line_counter, FAIL_EXTRACT_MACROS);
+        /* release mcro linked list, delete files */
+        free_linked_list(head);
+        remove(clean_file_name);
         return -1;
     }
 
     am_file_name = change_ending_of_file(file_name, ".am");
+    if (am_file_name == NULL) {
+        /* release mcro linked list, delete files */
+        free_linked_list(head);
+        remove(clean_file_name);
+        return -1;
+    }
 
     indication = preproc_second_pass(&head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
         error_log(file_name,line_counter,FAIL_TO_SWITCH_MCRO_NAME);
+        /* release mcro linked list, delete files */
+        free_linked_list(head);
+        free(am_file_name);
+        remove(clean_file_name);
         return -1;
     }
 
+    /* release mcro linked list, delete and close files */
+    free_linked_list(head);
+    free(am_file_name);
     remove(clean_file_name);
 
-
+    printf(PREPROCCESSOR_SUCCESS);
     return 0;
 }

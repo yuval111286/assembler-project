@@ -23,66 +23,41 @@ node *create_node(char *name, char *text, int line_num){
 }
 
 void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
-    int found;
     node *new, *tmp;
-    found = 0;
     char *new_name, *new_text;
 
+    /* Allocate memory for name copy */
     new_name = malloc_allocation(strlen(name) + 1);
-    if (new_name == NULL) return;
+    if (new_name == NULL) {
+        return;
+    }
 
+    /* Allocate memory for text copy */
     new_text = malloc_allocation(strlen(text) + 1);
     if (new_text == NULL) {
         free(new_name);
         return;
     }
 
+    /* Copy strings to allocated memory */
     strcpy(new_name, name);
     strcpy(new_text, text);
 
+    /* Create new node for the macro */
+    new = create_node(new_name, new_text, line_num);
 
-    /* tmp is the previous node of the new node in the list
-     * in the case the macro already exists in the list, temp holds the macro with the same name.
-     */
-    /*tmp = search_node_in_linked_list(*head,name,&found);*/
-
-    /* check if the list contains macro with the same name */
-    /*if(found && strcmp(tmp->text,text) != 0){
-        /* found the macro name with different definition
-        printf(MACRO_MULTI_DEF);
-        free(name);
-        free(text);
-        return;
-    }*/
-
-
-
-        /* meaning the macro does not exist - creating new node for the new macro*/
-        new = create_node(new_name,new_text,line_num);
-
-        /* in case the list is empty adding the new node to be the head*/
-        /*if(*head== NULL){
-            *head = new;
-        }
-
-        /* new node is the last node of the list */
-       /* else{
-            tmp->next = new;
-        }
-
-    /* in case the list is empty adding the new node to be the head*/
+    /* Check if list is empty */
     if (*head == NULL) {
+        /* List is empty - new node becomes the head */
         *head = new;
     } else {
-        /* new node is the last node of the list */
-
+        /* List is not empty - find last node and add new node at the end */
         tmp = *head;
         while (tmp->next != NULL) {
             tmp = tmp->next;
         }
         tmp->next = new;
     }
-
 }
 
 node *search_node_in_linked_list(node *head, char *name, int *found){
