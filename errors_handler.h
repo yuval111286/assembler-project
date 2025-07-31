@@ -20,6 +20,7 @@
  */
 void error_log(char *file_name, int line, char *error_msg);
 
+
 /**
  * @brief Prints an internal error message.
  *
@@ -51,6 +52,19 @@ void error_log(char *file_name, int line, char *error_msg);
 #define ARG_NOT_AS_FILE "File does not as file \n"
 #define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line \n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
+
+/* first Pass Parsing Errors */
+#define SYNTAX_ERROR "Syntax error"
+#define INVALID_LABEL_NAME "Invalid label name"
+#define LABEL_RESERVED_WORD "Label name cannot be opcode, directive or register"
+#define DUPLICATE_LABEL "Label already defined"
+#define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label"
+#define FAILED_ADD_DATA_LABEL "Failed to add data label"
+#define ILLEGAL_EXTERN_LABEL "Label cannot be defined for .extern"
+#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands"
+#define EXTERN_SYNTAX_ERROR "Invalid .extern syntax"
+#define DUPLICATE_EXTERN "Duplicate .extern definition"
+
 
 
 
