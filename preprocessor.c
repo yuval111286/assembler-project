@@ -75,7 +75,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
                     return -1;
                 }
                 fgetpos(fp, &pos);
-                mcro_content = extract_mcro_text(fp, &pos, line_counter);
+                mcro_content = extract_mcro_text(org_file_name,fp, &pos, line_counter);
                 if (mcro_content == NULL) {
                     free(mcro_name);
                     fclose(fp);
@@ -173,7 +173,7 @@ int is_save_word(char *mcro_name){
 
 }
 
-char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
+char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_counter) {
     char line[MAX_LINE_LENGTH]={0};
     char *mcro;
     int mcro_length = 0, internal_line_counter;
@@ -182,17 +182,23 @@ char *extract_mcro_text(FILE *fp, fpos_t *pos, int *line_counter) {
     internal_line_counter = *line_counter;
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
-        error_log(NULL,*line_counter,FAIL_TO_SET_POSITION_IN_FILE);
+        error_log(org_file_name,*line_counter,FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
 
     while (fgets(line, MAX_LINE_LENGTH, fp)) {
         internal_line_counter++;
 
+
+        if (strlen(line) >= MAX_LINE_LENGTH - 1) {
+            error_log(org_file_name, internal_line_counter, LONG_LINE);
+            return NULL;
+        }
+
         if (strncmp(line, MCROEND, 7) == 0) {
             if (strncmp(line, MCROEND, 8) != 0)
             {
-                error_log(NULL,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
+                error_log(org_file_name,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
                 return NULL;
 
             }
