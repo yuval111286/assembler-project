@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "globals.h"
 #include "symbol_table.h"
 #include "parser.h"
 #include "utils.h"
@@ -43,12 +41,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL)
     {
         line_number++;
-
-        /* Skip empty lines or comment lines */
-        if (is_empty_or_comment(line))
-        {
-            continue;
-        }
 
         /* Parse the current line */
         if (!parse_line(line, &parsed))

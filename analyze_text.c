@@ -42,7 +42,9 @@ char *skip_word(char *str) {
         str++;
     }
 
-    return (*str == '\0') ? NULL : str;
+    if (*str == '\0') return NULL;
+
+    return str;
 }
 
 int check_and_skip_comment_or_empty_line(char *line) {
@@ -51,18 +53,6 @@ int check_and_skip_comment_or_empty_line(char *line) {
         return 1;
     }
     return 0;
-}
-
-int is_empty_or_comment(char *line) {
-    char *p = line;
-
-    /* Skip leading spaces */
-    while (*p && isspace((unsigned char)*p)) {
-        p++;
-    }
-
-    /* Check if line is empty or comment */
-    return (*p == '\0' || *p == ';');
 }
 
 
@@ -74,13 +64,13 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 
     input_file = fopen(input_file_name, "r");
     if (input_file == NULL) {
-        printf("Error: Cannot open input file %s\n", input_file_name);
+        error_log(input_file_name,0,FILE_NOT_OPEN_READING);
         return NULL;
     }
 
     output_file = fopen(output_file_name, "w");
     if (output_file == NULL) {
-        printf("Error: Cannot create output file %s\n", output_file_name);
+        error_log(output_file_name,0,FILE_NOT_OPEN_WRITING);
         fclose(input_file);
         return NULL;
     }
@@ -110,7 +100,7 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 }
 
 
-char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
+char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len) {
     int i;
     char *str;
 
@@ -118,15 +108,15 @@ char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int length) {
         printf(FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
-    str = malloc_allocation((length + 1));
+    str = malloc_allocation((len + 1));
     if (str == NULL) {
         return NULL;
     }
 
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < len; i++) {
         str[i] = getc(fp);
     }
-    str[length] = '\0';
+    str[len] = '\0';
     fgetpos(fp, pos);
     return str;
 }
