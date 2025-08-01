@@ -15,16 +15,17 @@ void *malloc_allocation(size_t size) {
 }
 
 char *change_ending_of_file(char *file_name, char *new_ending) {
-    char *c, *new_file_name;
+    char *new_file_name, *ch;
 
     new_file_name = malloc_allocation(MAX_LINE_LENGTH * sizeof(char));
+    /*puts the current file name into new file name*/
     strcpy(new_file_name, file_name);
 
     /* cuts the exising ending of a file  */
-    if ((c = strchr(new_file_name, '.')) != NULL) {
-        *c = '\0';
+    if ((ch = strchr(new_file_name, '.')) != NULL) {
+        *ch = '\0';
     }
-    /* adds the new ending of the new file name */
+    /* link the new file name and the new ending */
     strcat(new_file_name, new_ending);
 
     return new_file_name;
