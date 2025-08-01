@@ -160,7 +160,7 @@ int get_addressing_mode( char *operand) {
 
 
     /* Register addressing: matches exactly r0 to r7 */
-    if (identify_register(operand)!=-1) return ADDRESS_REGISTER;;
+    if (identify_register(operand)!=-1) return ADDRESS_REGISTER;
 
     /* Otherwise: assume direct addressing (a label) */
     return ADDRESS_DIRECT;
