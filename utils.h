@@ -6,7 +6,7 @@
 
 
 /**
- * Perform memory allocation according to given size using malloc
+ * @brief Perform memory allocation according to given size using malloc
  *
  * @param size - requested memory type
  * @return pointer to requested data

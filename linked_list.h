@@ -7,10 +7,10 @@
 #include <stdio.h>
 
 /*
- * Node in a linked list for macros
+ * Node in a linked list
  * Containing:
- * macro name
- * macro text - between macro to mcroend
+ * node name
+ * node text -
  * number of line
  * pointer to the next node in the list
  */
@@ -25,9 +25,9 @@ typedef struct node{
 /**
  * @brief create node and fill the relevant data
  *
- * @param name name of the macro
- * @param text macro text
- * @param line_num line number of the start of the macro
+ * @param name name of the node
+ * @param text node text
+ * @param line_num line number of the start of the required text
  * @return new pointer of the new node
  */
 node *create_node(char *name, char *text, int line_num);
@@ -36,18 +36,18 @@ node *create_node(char *name, char *text, int line_num);
  * @brief add node to exising linked list
  *
  * @param head the first node of the linked list
- * @param name name of the required macro
- * @param text macro text
- * @param line_num line number of the start of the macro
+ * @param name name of the required node
+ * @param text node text
+ * @param line_num line number of the start of the required text
  */
 void add_node_to_linked_list(node **head, char *name, char *text, int line_num);
 
 /**
- * @brief search macro in exising linked list
+ * @brief search node in exising linked list according to the name
  *
  * @param head the first node of the linked list
- * @param name name of the required macro
- * @param found indicate if the macro already exists
+ * @param name name of the required node
+ * @param found indicate if the name already exists
  * @return the required node if found.
  *         NULL if the list is empty.
  *         the previous node if node does not exist.
@@ -55,15 +55,14 @@ void add_node_to_linked_list(node **head, char *name, char *text, int line_num);
 node *search_node_in_linked_list(node *head, char *name, int *found);
 
 /**
- * @brief Frees memory allocated for a node.
+ * @brief Frees memory allocation for node.
  *
- * This function deallocates memory from a node of a macro
  * @param node a pointer to the node to be free
  */
 void free_node(node *node);
 
 /**
- * @brief Frees memory allocated for whole linked list.
+ * @brief Frees memory allocation for the linked list.
  *
  * @param head the first node of the linked list
  */

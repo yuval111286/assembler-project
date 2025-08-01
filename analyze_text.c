@@ -6,12 +6,12 @@
 
 char *trim_spaces(char *str) {
     char *end;
-    /* Skip leading whitespace */
+    /* skip leading whitespace */
     while (isspace(*str)) str++;
 
     if (*str == '\0') return str;
 
-    /* Find end of string and trim trailing whitespace */
+    /* find end of string and trim trailing whitespace */
     end = str + strlen(str) - 1;
     while (end > str && isspace(*end)) {
         *end = '\0';
@@ -23,7 +23,7 @@ char *trim_spaces(char *str) {
 
 char *skip_spaces(char *str){
 
-    /* Skip leading whitespace */
+    /* skip leading whitespace */
     while (isspace(*str)) str++;
 
     if (*str == '\0') return NULL;
@@ -47,8 +47,8 @@ char *skip_word(char *str) {
     return str;
 }
 
-int check_and_skip_comment_or_empty_line(char *line) {
-    /* Checks if the line is a comment or empty */
+int check_line_comment_or_empty(char *line) {
+    /* checks if the line is a comment or empty */
     if (*line == ';' || *line == '\0' || *line == '\n') {
         return 1;
     }
@@ -59,15 +59,17 @@ int check_and_skip_comment_or_empty_line(char *line) {
 
 FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     FILE *input_file, *output_file;
-    char line[MAX_LINE_LENGTH], line_copy[MAX_LINE_LENGTH], *trimmed;
+    char line[MAX_LINE_LENGTH], line_copy[MAX_LINE_LENGTH], *clean;
     int len;
 
+    /* open original file to read from*/
     input_file = fopen(input_file_name, "r");
     if (input_file == NULL) {
         error_log(input_file_name,0,FILE_NOT_OPEN_READING);
         return NULL;
     }
 
+    /* open output file to write to*/
     output_file = fopen(output_file_name, "w");
     if (output_file == NULL) {
         error_log(output_file_name,0,FILE_NOT_OPEN_WRITING);
@@ -76,17 +78,17 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     }
 
     while (fgets(line, sizeof(line), input_file) != NULL) {
-        if (!check_and_skip_comment_or_empty_line(line)) {
-            /* Make a copy for trimming (since trim_spaces modifies the string) */
+        if (!check_line_comment_or_empty(line)) {
+            /* create copy string for trimming space */
             strcpy(line_copy, line);
-            trimmed = trim_spaces(line_copy);
+            clean = trim_spaces(line_copy);
 
-            /* Write trimmed line to output file */
-            fputs(trimmed, output_file);
+            /* write clean line to output file */
+            fputs(clean, output_file);
 
-            /* Ensure line ends with \n */
-            len = strlen(trimmed);
-            if (len > 0 && trimmed[len-1] != '\n') {
+            /* verify line ends with \n */
+            len = strlen(clean);
+            if (len > 0 && clean[len-1] != '\n') {
                 fputs("\n", output_file);
             }
         }
