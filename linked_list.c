@@ -18,7 +18,7 @@ node *create_node(char *name, char *text, int line_num){
     /* next pointer shall be NULL*/
     tmp->next = NULL;
 
-    /* returns pointer to the new node */
+    /* returns pointer of the new node */
     return tmp;
 }
 
@@ -26,32 +26,32 @@ void add_node_to_linked_list(node **head, char *name, char *text, int line_num){
     node *new, *tmp;
     char *new_name, *new_text;
 
-    /* Allocate memory for name copy */
+    /* allocate memory for name copy */
     new_name = malloc_allocation(strlen(name) + 1);
     if (new_name == NULL) {
         return;
     }
 
-    /* Allocate memory for text copy */
+    /* allocate memory for text copy */
     new_text = malloc_allocation(strlen(text) + 1);
     if (new_text == NULL) {
         free(new_name);
         return;
     }
 
-    /* Copy strings to allocated memory */
+    /* copy strings to allocated memory */
     strcpy(new_name, name);
     strcpy(new_text, text);
 
-    /* Create new node for the macro */
+    /* create new node  */
     new = create_node(new_name, new_text, line_num);
 
-    /* Check if list is empty */
+    /* check if list is empty */
     if (*head == NULL) {
-        /* List is empty - new node becomes the head */
+        /* list is empty so new node becomes the head */
         *head = new;
     } else {
-        /* List is not empty - find last node and add new node at the end */
+        /* list is not empty so finds the last node and adds the new node */
         tmp = *head;
         while (tmp->next != NULL) {
             tmp = tmp->next;
@@ -79,7 +79,7 @@ node *search_node_in_linked_list(node *head, char *name, int *found){
         return head;
     }
 
-    /* continue thw search in the rest of the list */
+    /* continue the search in the rest of the list */
     return search_node_in_linked_list(head->next, name, found);
 }
 

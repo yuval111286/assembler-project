@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
         if (!preprocessor_full_flow(as_file)) {
             continue;
         }
+        printf("-- FIRST PASS --\n");
+
+        printf("-- SECOND PASS --\n");
 
     }
 

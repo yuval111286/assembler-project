@@ -27,6 +27,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
     char line[MAX_LINE_LENGTH] ={0},*mcro_name = NULL, *mcro_content = NULL;
     int starting_mcro, found=0,mcroend_without_mcro = 0;
 
+    /*open clean file for reading*/
     fp = fopen(file_name,"r");
 
     if (fp == NULL) {
@@ -34,6 +35,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
         return -1;
     }
 
+    /* starts reading lines*/
     while (fgets(line, sizeof(line), fp)) {
         (*line_counter)++;
 
@@ -70,12 +72,15 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
                 mcroend_without_mcro = 1;
                 starting_mcro = *line_counter;
 
-                mcro_name = identify_macro_name(org_file_name, line, file_name, line_counter);
+                /* extract mcro name*/
+                mcro_name = identify_macro_name(org_file_name, line, line_counter);
                 if (mcro_name == NULL) {
                     fclose(fp);
                     return -1;
                 }
                 fgetpos(fp, &pos);
+
+                /* extract mcro text*/
                 mcro_content = extract_mcro_text(org_file_name,fp, &pos, line_counter);
                 if (mcro_content == NULL) {
                     free(mcro_name);
@@ -84,9 +89,13 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
                 }
                 fsetpos(fp, &pos);
 
+                /* before adding mcro to linked list check if already exist*/
                 is_mcro_exist = search_node_in_linked_list(*head, mcro_name, &found);
 
+                /* mcro name exist already*/
                 if (found) {
+
+                    /* different definitions for the same mcro name*/
                     if (strcmp(is_mcro_exist->text, mcro_content) != 0) {
                         error_log(org_file_name, *line_counter, MACRO_MULTI_DEF);
                         free(mcro_name);
@@ -94,11 +103,13 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
                         fclose(fp);
                         return -1;
                     } else {
+                        /*mcro exist therefore no need to add to list, continue to the next line*/
                         free(mcro_name);
                         free(mcro_content);
                     }
 
                 } else {
+                    /*add mcro to the macros linked list*/
                     add_node_to_linked_list(head, mcro_name, mcro_content, starting_mcro);
                 }
             }
@@ -109,16 +120,20 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
     return 0;
 }
 
-char *identify_macro_name(char *org_file_name, char *line, char *file_name, int *line_counter){
+char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
 
     char *mcro_name, *extra_text_after_mcro_name;
 
+    /* skip mcro word to reach mcro name*/
     mcro_name = skip_word(line);
+
+    /* no mcro name exist*/
     if(mcro_name == NULL)
     {
         error_log(org_file_name,*line_counter,MACRO_WITHOUT_NAME);
         return NULL;
     }
+    /* check for extra text after mcro name*/
     extra_text_after_mcro_name= skip_word(mcro_name);
     if(extra_text_after_mcro_name !=NULL)
     {
@@ -126,6 +141,7 @@ char *identify_macro_name(char *org_file_name, char *line, char *file_name, int 
         return NULL;
     }
 
+    /* check mcro name validity*/
     if (!mcro_name_validation(mcro_name))
     {
         error_log(org_file_name,*line_counter,ILLEGAL_MACRO_NAME);
@@ -139,10 +155,11 @@ char *identify_macro_name(char *org_file_name, char *line, char *file_name, int 
 int mcro_name_validation(char *mcro_name){
 
     char temp_name[MAX_LINE_LENGTH];
+    /* temp name for safety*/
     strncpy(temp_name, mcro_name, strlen(mcro_name) - 1);
     temp_name[strlen(mcro_name) - 1] = '\0';
 
-
+    /* return validation result*/
     return (mcro_name_only_letters_num_underscore(temp_name) && identify_opcode(temp_name) && identify_register(temp_name)
     && identify_directive(temp_name) && is_save_word(temp_name));
 
@@ -151,10 +168,9 @@ int mcro_name_validation(char *mcro_name){
 int mcro_name_only_letters_num_underscore(char *mcro_name){
 
     int i;
-
     for (i = 0; i < strlen(mcro_name); i++) {
         if (!isalpha(mcro_name[i]) && !isdigit(mcro_name[i]) && mcro_name[i]!='_') {
-            return 0;
+            return 0; /*mcro name contain forbidden char*/
         }
     }
 
@@ -163,6 +179,7 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
 
 int is_save_word(char *mcro_name){
 
+    /*check if mcro_name is one of the forbidden saved word*/
     int i;
     for (i = 0; i<NUM_DIRECTIVE; i++) {
         if (strcasecmp(mcro_name, saved_words[i]) == 0) {
@@ -190,18 +207,17 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
     while (fgets(line, MAX_LINE_LENGTH, fp)) {
         internal_line_counter++;
 
-
+        /* check if mcro text is more than 80 chars*/
         if (strlen(line) >= MAX_LINE_LENGTH - 1) {
             error_log(org_file_name, internal_line_counter, LONG_LINE);
             return NULL;
         }
 
         if (strncmp(line, MCROEND, 7) == 0) {
-            if (strncmp(line, MCROEND, 8) != 0)
-            {
+            /*check for extra text after mcroend*/
+            if (strncmp(line, MCROEND, 8) != 0){
                 error_log(org_file_name,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
                 return NULL;
-
             }
 
             /* reach to mcroend*/
@@ -210,6 +226,7 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
         mcro_length += strlen(line);
     }
 
+    /* extract mcro text*/
     mcro = copy_text_from_file_to_string(fp, pos, mcro_length);
 
     *line_counter = internal_line_counter-1;
@@ -225,16 +242,17 @@ int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int 
     int found;
     node *macro_node;
 
-
+    /*open clean file for reading*/
     fp_as = fopen(as_file_name,"r");
     if (fp_as == NULL) {
-        error_log(org_file_name,0,FILE_NOT_OPEN_READING);
+        error_log(org_file_name,*line_counter,FILE_NOT_OPEN_READING);
         return -1;
     }
 
+    /*open am file for writing*/
     fp_am = fopen(am_file_name,"w");
     if (fp_am == NULL) {
-        error_log(org_file_name,0,FILE_NOT_OPEN_WRITING);
+        error_log(org_file_name,*line_counter,FILE_NOT_OPEN_WRITING);
         /* close files */
         fclose(fp_as);
         return -1;
@@ -251,6 +269,7 @@ int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int 
             }
         }
 
+        /* search for mcro define in linked list*/
         macro_node = search_node_in_linked_list(*head, line, &found);
 
         if (found) {
@@ -287,12 +306,14 @@ int preprocessor_full_flow(char *file_name){
 
     snprintf(clean_file_name, sizeof(clean_file_name), "%s_clean.as", file_name);
 
+    /* create clean file with no comment line or spaces*/
     first_copy = create_clean_file(file_name, clean_file_name);
     if (first_copy == NULL) {
         error_log(file_name,line_counter,FAIL_CLEAN_FILE);
         return -1;
     }
 
+    /* map mcro definitions */
     indication = prepro_first_pass(file_name,clean_file_name,&line_counter, &head);
     if (indication){
         /* release mcro linked list, delete files */
@@ -309,6 +330,8 @@ int preprocessor_full_flow(char *file_name){
         return -1;
     }
 
+    line_counter = 0;
+    /*replace mcro call by its text*/
     indication = preproc_second_pass(file_name,&head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){

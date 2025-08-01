@@ -10,7 +10,7 @@
 char *trim_spaces(char *str);
 
 /**
- *Checks if the line is a comment or empty
+ *@brief Checks if the line is a comment or empty
  *
  * @param line the tested line
  * @return 1 if the line is a comment or empty 0 otherwise
@@ -26,7 +26,7 @@ int check_line_comment_or_empty(char *line);
 FILE* create_clean_file(char* input_file_name, char* output_file_name);
 
 /**
- * Skip spaces before string
+ * @brief Skip spaces before string
  *
  * @param str string with spaces before
  * @return NULL if new string is empty, otherwise returns the string with no space before
@@ -34,7 +34,7 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name);
 char *skip_spaces(char *str);
 
 /**
- * Skip the first word str points
+ * @brief Skip the first word str points
  *
  * @param str starts of string
  * @return the next word after str
@@ -42,7 +42,7 @@ char *skip_spaces(char *str);
 char *skip_word(char *str);
 
 /**
- * Read text from file and place it in string
+ * @brief Read text from file and place it in string
  *
  * @param fp File to read from
  * @param pos position in the file
