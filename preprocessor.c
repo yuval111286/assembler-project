@@ -3,6 +3,7 @@
 #include "analyze_text.h"
 #include "parser.h"
 #include "errors_handler.h"
+#include <ctype.h>
 
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
 
