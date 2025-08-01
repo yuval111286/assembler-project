@@ -1,7 +1,7 @@
 #ifndef ASSEMBLER_PROJECT_ANALYZE_TEXT_H
 #define ASSEMBLER_PROJECT_ANALYZE_TEXT_H
 
-#include <stdio.h>   /* For FILE type in print_error */
+#include <stdio.h>
 
 /**
  * @param str line from file
