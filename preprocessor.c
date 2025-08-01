@@ -301,7 +301,7 @@ int preprocessor_full_flow(char *file_name){
     indication = 0;
     if(check_as_file_ending(file_name)!=0){
         error_log(file_name,line_counter,ARG_NOT_AS_FILE);
-        return -1;
+        return 1;
     }
 
     snprintf(clean_file_name, sizeof(clean_file_name), "%s_clean.as", file_name);
@@ -310,7 +310,7 @@ int preprocessor_full_flow(char *file_name){
     first_copy = create_clean_file(file_name, clean_file_name);
     if (first_copy == NULL) {
         error_log(file_name,line_counter,FAIL_CLEAN_FILE);
-        return -1;
+        return 1;
     }
 
     /* map mcro definitions */
@@ -319,7 +319,7 @@ int preprocessor_full_flow(char *file_name){
         /* release mcro linked list, delete files */
         free_linked_list(head);
         remove(clean_file_name);
-        return -1;
+        return 1;
     }
 
     am_file_name = change_ending_of_file(file_name, ".am");
@@ -327,7 +327,7 @@ int preprocessor_full_flow(char *file_name){
         /* release mcro linked list, delete files */
         free_linked_list(head);
         remove(clean_file_name);
-        return -1;
+        return 1;
     }
 
     line_counter = 0;
@@ -339,7 +339,7 @@ int preprocessor_full_flow(char *file_name){
         free_linked_list(head);
         free(am_file_name);
         remove(clean_file_name);
-        return -1;
+        return 1;
     }
 
     /* release mcro linked list, delete and close files */

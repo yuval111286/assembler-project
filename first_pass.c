@@ -17,7 +17,7 @@
  * @param symbol_table Pointer to the symbol table.
  * @param IC_final Pointer to store final instruction counter value.
  * @param DC_final Pointer to store final data counter value.
- * @return 1 on success, 0 on failure (e.g., file read error or parsing issue).
+ * @return 0 on success, -1 on failure (e.g., file read error or parsing issue).
  */
 int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final)
 {
@@ -34,7 +34,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     if (fp == NULL)
     {
         error_log(file_name, 0, FILE_NOT_OPEN_READING);
-        return 0;
+        return 1;
     }
 
     /* Process file line-by-line */
@@ -143,5 +143,5 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     /* Adjust DATA symbols base addresses (DC += IC offset) */
     update_data_symbols_base_address(symbol_table, IC);
 
-    return 1;
+    return 0;
 }
