@@ -58,7 +58,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
 
         /* first word in the line is mcro*/
         if (strncmp(line, MCRO, 4) == 0) {
-            /*mcroend after mcro, need to ignore*/
+            /*mcroend after mcro, needs to ignore*/
 
             if (strncmp(line, MCROEND, 7) != 0) {
                 mcro_name = skip_spaces(line);
