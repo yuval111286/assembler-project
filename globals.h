@@ -24,6 +24,13 @@
 /* Maximum number of digits in a 10-bit base-4 word: from 00000 to 33333 */
 #define WORD_BASE4_DIGITS 5
 
+/* Maximum data section size */
+#define MAX_DATA_SIZE 1024
+
+/* Global data image – stores encoded .data/.string/.mat values */
+extern unsigned int data_image[MAX_DATA_SIZE];
+
+
 /* ========== Enums ========== */
 
 /*

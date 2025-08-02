@@ -69,6 +69,10 @@ void error_log(char *file_name, int line, char *error_msg);
 #define EXTERN_SYNTAX_ERROR "Invalid .extern syntax \n"
 #define DUPLICATE_EXTERN "Duplicate .extern definition \n"
 
+#define INVALID_MATRIX_DIMENSIONS "Invalid matrix dimensions in .mat directive"
+#define MATRIX_VALUE_COUNT_MISMATCH "Number of matrix values does not match dimensions"
+#define DATA_IMAGE_OVERFLOW "Data image overflow – too much .data/.string/.mat content"
+
 
 
 
