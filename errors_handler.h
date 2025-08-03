@@ -72,6 +72,8 @@ void error_log(char *file_name, int line, char *error_msg);
 #define INVALID_MATRIX_DIMENSIONS "Invalid matrix dimensions in .mat directive"
 #define MATRIX_VALUE_COUNT_MISMATCH "Number of matrix values does not match dimensions"
 #define DATA_IMAGE_OVERFLOW "Data image overflow – too much .data/.string/.mat content"
+#define CODE_IMAGE_OVERFLOW "Code image overflow – exceeded MAX_CODE_SIZE\n"
+
 
 
 

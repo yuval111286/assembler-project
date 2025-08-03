@@ -24,7 +24,8 @@
 /* Maximum number of digits in a 10-bit base-4 word: from 00000 to 33333 */
 #define WORD_BASE4_DIGITS 5
 
-/* Maximum data section size */
+/* Maximum code and data section sizes */
+#define MAX_CODE_SIZE 1024
 #define MAX_DATA_SIZE 1024
 
 /* Global data image – stores encoded .data/.string/.mat values */
@@ -33,9 +34,7 @@ extern unsigned int data_image[MAX_DATA_SIZE];
 
 /* ========== Enums ========== */
 
-/*
- * Represents the type of line in the source file
- */
+/* Type of line in source file */
 typedef enum {
     LINE_EMPTY,
     LINE_COMMENT,
@@ -44,28 +43,22 @@ typedef enum {
     LINE_INVALID
 } LineType;
 
-/*
- * Represents the type of symbol stored in the symbol table
- */
+/* Type of symbol in symbol table */
 typedef enum {
     SYMBOL_CODE,
     SYMBOL_DATA,
     SYMBOL_EXTERN
 } SymbolType;
 
-/*
- * Represents the addressing modes used by operands
- */
+/* Addressing modes */
 typedef enum {
-    ADDRESS_IMMEDIATE = 0, /* #5       */
-    ADDRESS_DIRECT    = 1, /* LABEL    */
-    ADDRESS_MATRIX    = 2, /* LABEL[r1][r2] */
-    ADDRESS_REGISTER  = 3  /* r0–r7    */
+    ADDRESS_IMMEDIATE = 0,
+    ADDRESS_DIRECT    = 1,
+    ADDRESS_MATRIX    = 2,
+    ADDRESS_REGISTER  = 3
 } AddressingMode;
 
-/*
- * Represents all valid opcodes (machine instructions)
- */
+/* Opcodes */
 typedef enum {
     OPCODE_MOV = 0,
     OPCODE_CMP,
@@ -83,27 +76,29 @@ typedef enum {
     OPCODE_JSR,
     OPCODE_RTS,
     OPCODE_STOP,
-    OPCODE_INVALID = -1 /* Used for invalid/unrecognized instructions */
+    OPCODE_INVALID = -1
 } Opcode;
 
 typedef struct {
-    char* name;
+    char *name;
     Opcode opcode;
 } OpcodeEntry;
 
+/* Directive types */
 typedef enum {
-    DATA = 0, /* .data */
-    STRING, /* .string */
-    MAT, /* .mat */
-    ENTRY,  /* .entry */
-    EXTERN  /*.extern*/
+    DATA = 0,
+    STRING,
+    MAT,
+    ENTRY,
+    EXTERN
 } Directive;
 
 typedef struct {
-    char* name;
+    char *name;
     Directive directive;
 } Directive_Mode;
 
+/* Register types */
 typedef enum {
     R0 = 0,
     R1,
@@ -113,31 +108,39 @@ typedef enum {
     R5,
     R6,
     R7,
-    REGISTER_INVALID = -1 /* Used for invalid/unrecognized register */
+    REGISTER_INVALID = -1
 } Register;
 
 typedef struct {
-    char* name;
+    char *name;
     Register reg;
 } Register_Type;
 
 
-/* ========== Structures ========== */
+/* ========== Code Word / Code Image ========== */
 
-/*
- * ParsedLine represents the result of parsing a single line from the source file.
- * It stores metadata used by first pass and second pass of the assembler.
- */
 typedef struct {
-    char label[MAX_LABEL_LEN + 1];              /* Optional label (if exists), or empty string */
-    LineType line_type;                         /* Type of line: directive, instruction, etc. */
-    Opcode opcode;                              /* Opcode if this is an instruction */
-    char directive_name[8];                     /* Name of directive (e.g., "data", "string") */
-    char operands[MAX_OPERANDS][MAX_LINE_LENGTH]; /* Up to two operands (as strings) */
-    int operand_count;                          /* Number of operands found */
-    int line_number;                            /* Line number in the original file (for errors) */
+    int address;            /* Memory address (starts at 100) */
+    unsigned int value;     /* Encoded machine word (10-bit integer) */
+    char ARE;               /* 'A', 'R', or 'E' */
+} CodeWord;
+
+typedef struct {
+    CodeWord words[MAX_CODE_SIZE];
+    int size;               /* Number of words stored */
+} CodeImage;
+
+
+/* ========== Parsed Line Struct ========== */
+
+typedef struct {
+    char label[MAX_LABEL_LEN + 1];
+    LineType line_type;
+    Opcode opcode;
+    char directive_name[8];
+    char operands[MAX_OPERANDS][MAX_LINE_LENGTH];
+    int operand_count;
+    int line_number;
 } ParsedLine;
-
-
 
 #endif /* GLOBALS_H */
