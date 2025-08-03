@@ -31,7 +31,6 @@
 /* Global data image – stores encoded .data/.string/.mat values */
 extern unsigned int data_image[MAX_DATA_SIZE];
 
-
 /* ========== Enums ========== */
 
 /* Type of line in source file */
