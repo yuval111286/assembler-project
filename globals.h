@@ -25,8 +25,8 @@
 #define WORD_BASE4_DIGITS 5
 
 /* Maximum code and data section sizes */
-#define MAX_CODE_SIZE 1024
-#define MAX_DATA_SIZE 1024
+#define MAX_CODE_SIZE 255
+#define MAX_DATA_SIZE 255
 
 /* Global data image – stores encoded .data/.string/.mat values */
 extern unsigned int data_image[MAX_DATA_SIZE];

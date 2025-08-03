@@ -52,11 +52,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
         line_number++;
 
-        /* Skip comment or empty lines */
-        if (check_line_comment_or_empty(line)) {
-            continue;
-        }
-
         /* Parse current line */
         if (!parse_line(line, &parsed)) {
             error_log(file_name, line_number, SYNTAX_ERROR);
