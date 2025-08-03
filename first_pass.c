@@ -25,7 +25,7 @@ unsigned int data_image[MAX_DATA_SIZE];
  * @param IC_final      Pointer to store the final instruction counter.
  * @param DC_final      Pointer to store the final data counter.
  * @param code_image    Pointer to the code image structure.
- * @return 1 on success, 0 on error.
+ * @return 0 on success, 1 on error.
  */
 int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image)
 {
@@ -35,14 +35,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     int IC = IC_INIT_VALUE;
     int DC = 0;
     ParsedLine parsed;
-    int words;
+    int words,i;
     unsigned int encoded_word;
 
     /* Open source file for reading */
     fp = fopen(file_name, "r");
     if (fp == NULL) {
         error_log(file_name, 0, FILE_NOT_OPEN_READING);
-        return 0;
+        return 1;
     }
 
     /* Initialize code image */
@@ -126,7 +126,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         /* === Handle .data, .string, .mat === */
         if (parsed.line_type == LINE_DIRECTIVE) {
             if (strcmp(parsed.directive_name, "data") == 0) {
-                int i;
                 for (i = 0; i < parsed.operand_count; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
@@ -136,7 +135,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
                 char *s = parsed.operands[0];
-                int i;
                 for (i = 0; s[i] != '\0'; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
@@ -197,5 +195,5 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     /* Update base addresses of data symbols */
     update_data_symbols_base_address(symbol_table, IC);
 
-    return 1;
+    return 0;
 }

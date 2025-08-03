@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         am_file = change_ending_of_file(argv[argc], ".am");
 
         printf("-- FIRST PASS --\n");
-        if (!first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image)) {
+        if (first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image)) {
             return 1;
         }
 
