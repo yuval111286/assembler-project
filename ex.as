@@ -1,1 +1,1 @@
-DATA_LABEL: .data 1, 2, 3
+MAT5: .mat [2][2] 4,-5,7,9
