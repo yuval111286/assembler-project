@@ -125,7 +125,7 @@ int is_valid_label(char *label) {
     }
 
     for (i = 1; i < len; i++) {
-        if (!isalnum((unsigned char)label[i]) && label[i] != '_') {
+        if (!isalnum((unsigned char)label[i])) {
             return 0; /* Label must contain only alphanumeric characters */
         }
     }
