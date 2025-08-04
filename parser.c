@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "analyze_text.h"
+#include <ctype.h>
+
 
 
 
@@ -258,68 +260,83 @@ int count_data_items(ParsedLine *parsed) {
  *   0 if syntax error occurred (invalid label, directive, etc.)
  */
 int parse_line(char *line, ParsedLine *out) {
-    char buffer[MAX_LINE_LENGTH];   /* Buffer to hold a mutable copy of the line */
-    char *token;   /* Pointer to each token in the line */
-    /*int i;*/
+    char buffer[MAX_LINE_LENGTH];
+    char *token, *rest;
+    int len;
 
-    /* Initialize the ParsedLine structure fields */
-    (*out).label[0] = '\0';     /* Clear label */
-    (*out).directive_name[0] = '\0';  /* Clear directive name */
-    (*out).operand_count = 0;  /* Start with zero operands */
-    (*out).opcode = OPCODE_INVALID;  /* Default to invalid opcode */
-    (*out).line_type = LINE_INVALID;   /* Default to invalid line */
+    (*out).label[0] = '\0';
+    (*out).directive_name[0] = '\0';
+    (*out).operand_count = 0;
+    (*out).opcode = OPCODE_INVALID;
+    (*out).line_type = LINE_INVALID;
 
-    strncpy(buffer, line, MAX_LINE_LENGTH);  /* Copy input line to buffer */
-    buffer[MAX_LINE_LENGTH - 1] = '\0';    /* Ensure null-termination */
+    strncpy(buffer, line, MAX_LINE_LENGTH);
+    buffer[MAX_LINE_LENGTH - 1] = '\0';
 
     token = strtok(buffer, " \t");
     if (token == NULL) {
-        (*out).line_type = LINE_EMPTY;    /* Line is empty or whitespace only */
+        (*out).line_type = LINE_EMPTY;
         return 1;
     }
 
-    /* Check if the first token is a label (ends with ':') */
     if (token[strlen(token) - 1] == ':') {
-        token[strlen(token) - 1] = '\0';   /* Remove ':' */
-        if (!is_valid_label(token)) {
-            return 0;
-        }
-        strncpy((*out).label, token, MAX_LABEL_LEN); /* Save label */
-        (*out).label[MAX_LABEL_LEN] = '\0';  /* Ensure null-termination */
-
-        token = strtok(NULL, " \t\n");   /* Get next token after label */
-        if (token == NULL) {
-            return 0;    /* Label without directive/instruction */
-        }
+        token[strlen(token) - 1] = '\0';
+        if (!is_valid_label(token)) return 0;
+        strncpy((*out).label, token, MAX_LABEL_LEN);
+        (*out).label[MAX_LABEL_LEN] = '\0';
+        token = strtok(NULL, " \t");
+        if (token == NULL) return 0;
     }
 
-    /* Check if it's a directive */
     if (token[0] == '.') {
-        if (identify_directive(token) == -1) {
-            return 0; /* Invalid directive name */
-        }
-        (*out).line_type = LINE_DIRECTIVE;     /* Mark line type as directive */
-        copy_directive_name(token, (*out).directive_name);  /* Save directive name (without '.') */
+        if (identify_directive(token) == -1) return 0;
+        (*out).line_type = LINE_DIRECTIVE;
+        copy_directive_name(token, (*out).directive_name);
     } else {
-        /* Must be an instruction */
-        (*out).line_type = LINE_INSTRUCTION;   /* Mark line type as instruction */
-        (*out).opcode = identify_opcode(token);  /* Translate to enum */
-        if ((*out).opcode == OPCODE_INVALID) {
-            return 0;     /* Unknown instruction */
+        (*out).line_type = LINE_INSTRUCTION;
+        (*out).opcode = identify_opcode(token);
+        if ((*out).opcode == OPCODE_INVALID) return 0;
+    }
+
+    if ((*out).line_type == LINE_DIRECTIVE &&
+        strcmp((*out).directive_name, "mat") == 0) {
+
+        /* Get rest of line from original line after .mat */
+        rest = strstr(line, ".mat");
+        if (rest == NULL) return 0;
+
+        rest = strchr(rest, ' ');
+        if (rest == NULL) return 0;
+
+        rest = trim_spaces(rest);
+
+        /* Now split the entire operand string */
+        token = strtok(rest, ",");
+        while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+            token = trim_spaces(token);
+
+            /* Remove trailing comma if exists */
+             len = strlen(token);
+            if (len > 0 && token[len - 1] == ',') {
+                token[len - 1] = '\0';
+            }
+
+            strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
+            (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
+            (*out).operand_count++;
+            token = strtok(NULL, ",");
+        }
+
+    } else {
+        token = strtok(NULL, ",");
+        while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+            token = trim_spaces(token);
+            strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
+            (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
+            (*out).operand_count++;
+            token = strtok(NULL, ",");
         }
     }
 
-    /* Process operands, if any (separated by commas) */
-    token = strtok(NULL, ",");
-    while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
-        token = trim_spaces(token); /* Removes leading and trailing whitespace */
-        strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1); /* Store operand */
-        (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0'; /* Null-terminate */
-        (*out).operand_count++;
-        token = strtok(NULL, ",");
-    }
-
-
-    return 1;  /* Successfully parsed */
+    return 1;
 }
-

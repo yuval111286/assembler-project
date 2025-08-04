@@ -7,13 +7,13 @@
 #include "first_pass.h"
 #include "second_pass.h"
 #include "preprocessor.h"
-#include "code_image.h" /* <-- חובה עבור CodeImage */
+#include "code_image.h" 
 
 int main(int argc, char *argv[])
 {
     char *as_file, *am_file;
     SymbolTable symbol_table;
-    CodeImage code_image;         /* <-- נוספה */
+    CodeImage code_image;         
     int IC_final, DC_final;
 
     while (--argc > 0) {

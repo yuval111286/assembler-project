@@ -13,6 +13,8 @@
  */
 void *malloc_allocation(size_t size);
 
+int parse_matrix_dimensions(const char *token, int *rows, int *cols);
+
 /**
  *
  * @param file_name file name for the new file

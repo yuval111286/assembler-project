@@ -10,7 +10,7 @@
 #define MAX_LABEL_LEN 31
 
 /* Maximum number of operands per instruction */
-#define MAX_OPERANDS 2
+#define MAX_OPERANDS 10
 
 /* Starting address for instructions (IC) */
 #define IC_INIT_VALUE 100

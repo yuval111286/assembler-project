@@ -1,5 +1,7 @@
 #include "utils.h"
 #include "errors_handler.h"
+#include <ctype.h>
+
 
 void *malloc_allocation(size_t size) {
     void *ptr = malloc(size); /* allocate memory */
@@ -12,6 +14,37 @@ void *malloc_allocation(size_t size) {
 
     /* return pointer */
     return ptr;
+}
+
+int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
+    char cleaned[MAX_LINE_LENGTH];
+    int len;
+
+    if (token == NULL || rows == NULL || cols == NULL) {
+        return 0;
+    }
+
+    /* Copy and sanitize token */
+    strncpy(cleaned, token, MAX_LINE_LENGTH - 1);
+    cleaned[MAX_LINE_LENGTH - 1] = '\0';
+
+    /* Remove trailing commas or spaces */
+    len = strlen(cleaned);
+    while (len > 0 && (cleaned[len - 1] == ',' || isspace((unsigned char)cleaned[len - 1]))) {
+        cleaned[len - 1] = '\0';
+        len--;
+    }
+
+    /* Now extract dimensions */
+    if (sscanf(cleaned, "[%d][%d]", rows, cols) != 2) {
+        return 0;
+    }
+
+    if (*rows <= 0 || *cols <= 0) {
+        return 0;
+    }
+
+    return 1;
 }
 
 char *change_ending_of_file(char *file_name, char *new_ending) {
