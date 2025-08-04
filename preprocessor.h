@@ -16,7 +16,7 @@
  * @param file_name as file name
  * @return 0 if preprocessor succeed or 1 if fail
  */
-int preprocessor_full_flow(char *file_name);
+int preprocessor_full_flow(char *file_name,node **head);
 
 /**
  *
@@ -34,7 +34,7 @@ int check_as_file_ending(char *file_name);
  * @param head head of linked list of macros
  * @return 0 for success, -1 for fail
  */
-int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head);
+int prepro_first_pass(char *org_file_name, char *file_name, int *line_counter, node **head);
 
 /**
  * @brief go over as file and replace maco call in it's text
@@ -46,7 +46,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
  * @param am_file_name am file name to write to
  * @return 0 for success, -1 for fail
  */
-int preproc_second_pass(char *org_file_name,node **head,char *as_file_name , int *line_counter, char *am_file_name);
+int preproc_second_pass(char *org_file_name, node **head, char *as_file_name, int *line_counter, char *am_file_name);
 
 /**
  *@brief extract macro name from line and verify if valid name using internal functions

@@ -290,14 +290,14 @@ int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int 
 
 
 
-int preprocessor_full_flow(char *file_name){
+int preprocessor_full_flow(char *file_name,node **head){
 
     FILE  *first_copy;
-    node *head;
+   /* node *head;*/
     char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
     int indication, line_counter = 0;
 
-    head = NULL;
+    /*head = NULL;*/
     indication = 0;
     if(check_as_file_ending(file_name)!=0){
         error_log(file_name,line_counter,ARG_NOT_AS_FILE);
@@ -314,10 +314,10 @@ int preprocessor_full_flow(char *file_name){
     }
 
     /* map mcro definitions */
-    indication = prepro_first_pass(file_name,clean_file_name,&line_counter, &head);
+    indication = prepro_first_pass(file_name,clean_file_name,&line_counter, head);
     if (indication){
         /* release mcro linked list, delete files */
-        free_linked_list(head);
+        /*free_linked_list(head);*/
         remove(clean_file_name);
         return 1;
     }
@@ -325,25 +325,25 @@ int preprocessor_full_flow(char *file_name){
     am_file_name = change_ending_of_file(file_name, ".am");
     if (am_file_name == NULL) {
         /* release mcro linked list, delete files */
-        free_linked_list(head);
+        /*free_linked_list(head);*/
         remove(clean_file_name);
         return 1;
     }
 
     line_counter = 0;
     /*replace mcro call by its text*/
-    indication = preproc_second_pass(file_name,&head,clean_file_name,&line_counter,am_file_name);
+    indication = preproc_second_pass(file_name,head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
         /* release mcro linked list, delete files */
-        free_linked_list(head);
+        /*free_linked_list(head);*/
         free(am_file_name);
         remove(clean_file_name);
         return 1;
     }
 
     /* release mcro linked list, delete and close files */
-    free_linked_list(head);
+    /*free_linked_list(head);*/
     free(am_file_name);
     remove(clean_file_name);
 
