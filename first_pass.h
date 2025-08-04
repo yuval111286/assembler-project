@@ -3,8 +3,17 @@
 
 #include "globals.h"
 #include "symbol_table.h"
+#include "linked_list.h"
 #include <stdio.h>
 
+/**
+ *
+ * @param symbol_table
+ * @param macro_head
+ * @param file_name
+ * @return 0 if mcro name is not like label name , 1 if does
+ */
+int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name);
 /*
  * Runs the first pass on the given source file.
  *
@@ -19,6 +28,5 @@
  *   1 if the first pass completed successfully (even if errors were found),
  *   0 if a critical error occurred (e.g., file problem).
  */
-int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image);
-
+int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image,node **head);
 #endif /* FIRST_PASS_H */

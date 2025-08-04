@@ -33,10 +33,11 @@ void error_log(char *file_name, int line, char *error_msg);
 #define Error "errorExample"
 
 /*macro errors*/
-#define LONG_LINE "Line too long exceeds 80 characters \n"
+#define LONG_LINE "Line too long more than 80 characters \n"
 #define MACRO_MULTI_DEF "Multi definitions for the same MACRO \n"
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
                           "or char different than letters, digits and underscore \n"
+#define MACRO_NAME_AS_LABEL "MACRO name is the same as exising label name"
 #define MACROEND_WITHOUT_START "mcroend without mcro start \n"
 #define MACRO_WITHOUT_NAME "MCRO name is missing \n"
 #define EXTRA_TEXT_AFTER_MCRO_START "Extra text after macro name \n"
