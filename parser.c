@@ -262,14 +262,16 @@ int count_data_items(ParsedLine *parsed) {
 int parse_line(char *line, ParsedLine *out) {
     char buffer[MAX_LINE_LENGTH];
     char *token, *rest;
-    int len;
 
+
+    /* Initialize ParsedLine struct fields */
     (*out).label[0] = '\0';
     (*out).directive_name[0] = '\0';
     (*out).operand_count = 0;
     (*out).opcode = OPCODE_INVALID;
     (*out).line_type = LINE_INVALID;
 
+    /* Copy original line into buffer to tokenize */
     strncpy(buffer, line, MAX_LINE_LENGTH);
     buffer[MAX_LINE_LENGTH - 1] = '\0';
 
@@ -279,29 +281,34 @@ int parse_line(char *line, ParsedLine *out) {
         return 1;
     }
 
+    /* Check for label (ends with ':') */
     if (token[strlen(token) - 1] == ':') {
         token[strlen(token) - 1] = '\0';
         if (!is_valid_label(token)) return 0;
         strncpy((*out).label, token, MAX_LABEL_LEN);
         (*out).label[MAX_LABEL_LEN] = '\0';
+
         token = strtok(NULL, " \t");
         if (token == NULL) return 0;
     }
 
+    /* Handle directive */
     if (token[0] == '.') {
         if (identify_directive(token) == -1) return 0;
         (*out).line_type = LINE_DIRECTIVE;
         copy_directive_name(token, (*out).directive_name);
     } else {
+        /* Handle instruction */
         (*out).line_type = LINE_INSTRUCTION;
         (*out).opcode = identify_opcode(token);
         if ((*out).opcode == OPCODE_INVALID) return 0;
     }
 
+    /* Special parsing for .mat directive */
     if ((*out).line_type == LINE_DIRECTIVE &&
         strcmp((*out).directive_name, "mat") == 0) {
 
-        /* Get rest of line from original line after .mat */
+        /* Get rest of original line after ".mat" */
         rest = strstr(line, ".mat");
         if (rest == NULL) return 0;
 
@@ -310,30 +317,39 @@ int parse_line(char *line, ParsedLine *out) {
 
         rest = trim_spaces(rest);
 
-        /* Now split the entire operand string */
+        /* Check for illegal comma before first operand */
+        if (rest[0] == ',') {
+            return 0; /* Illegal comma before operand */
+        }
+
+        /* Split operands by comma */
         token = strtok(rest, ",");
-        while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+        while (token != NULL && (*out).operand_count < MAX_OPERANDS + 100) {
             token = trim_spaces(token);
 
-            /* Remove trailing comma if exists */
-             len = strlen(token);
-            if (len > 0 && token[len - 1] == ',') {
-                token[len - 1] = '\0';
-            }
+            /* Illegal empty operand (e.g., two consecutive commas) */
+            if (token[0] == '\0') return 0;
 
             strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
             (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
             (*out).operand_count++;
+
             token = strtok(NULL, ",");
         }
 
     } else {
+        /* Regular instruction/directive operand parsing */
         token = strtok(NULL, ",");
         while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
             token = trim_spaces(token);
+
+            /* Disallow leading comma before operand */
+            if (token[0] == '\0') return 0;
+
             strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
             (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
             (*out).operand_count++;
+
             token = strtok(NULL, ",");
         }
     }

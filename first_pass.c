@@ -68,7 +68,7 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
  * Performs the first pass over a .am file and builds the symbol table,
  * encodes instructions, and processes data directives into the image arrays.
  */
-int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image,node **head)
+int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image, node **head)
 {
     FILE *fp;
     char line[MAX_LINE_LENGTH];
@@ -104,7 +104,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 has_errors = 1;
                 continue;
             }
-
             if (identify_opcode(parsed.label) != OPCODE_INVALID ||
                 identify_directive(parsed.label) != -1 ||
                 identify_register(parsed.label) != -1) {
@@ -112,13 +111,11 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 has_errors = 1;
                 continue;
             }
-
             if (symbol_exists(symbol_table, parsed.label)) {
                 error_log(file_name, line_number, DUPLICATE_LABEL);
                 has_errors = 1;
                 continue;
             }
-
             if (parsed.line_type == LINE_INSTRUCTION) {
                 if (!add_symbol(symbol_table, parsed.label, IC, SYMBOL_CODE)) {
                     error_log(file_name, line_number, FAILED_ADD_INSTRUCTION_LABEL);
@@ -149,14 +146,33 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 continue;
             }
 
-            encoded_word = 0;
-            add_code_word(code_image, IC, encoded_word, 'A');
-            IC++;
+            /* Encode base word of instruction */
+            {
+                int opcode = parsed.opcode;
+                int src_mode = 0, dest_mode = 0;
+                int ARE = 0; /* Absolute */
 
-            while (words > 1) {
-                add_code_word(code_image, IC, 0, 'A');
+                if (parsed.operand_count == 2) {
+                    src_mode = get_addressing_mode(parsed.operands[0]);
+                    dest_mode = get_addressing_mode(parsed.operands[1]);
+                } else if (parsed.operand_count == 1) {
+                    dest_mode = get_addressing_mode(parsed.operands[0]);
+                }
+
+                encoded_word = 0;
+                encoded_word |= (opcode & 0xF) << 6;
+                encoded_word |= (src_mode & 0x3) << 4;
+                encoded_word |= (dest_mode & 0x3) << 2;
+                encoded_word |= (ARE & 0x3);
+
+                add_code_word(code_image, IC, encoded_word, 'A');
                 IC++;
-                words--;
+
+                while (words > 1) {
+                    add_code_word(code_image, IC, 0, 'A');
+                    IC++;
+                    words--;
+                }
             }
         }
 
@@ -197,7 +213,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 }
 
                 expected_values = mat_rows * mat_cols;
-               
 
                 if (parsed.operand_count != 1 + expected_values) {
                     error_log(file_name, line_number, MATRIX_VALUE_COUNT_MISMATCH);
@@ -236,7 +251,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
     update_data_symbols_base_address(symbol_table, IC);
 
-    /*check if mcro name is the same as saved label*/
     if (check_mcro_name_not_label(symbol_table, head, file_name)) {
         has_errors = 1;
     }
