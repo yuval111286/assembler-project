@@ -324,15 +324,13 @@ int preprocessor_full_flow(char *file_name,node **head){
 
     am_file_name = change_ending_of_file(file_name, ".am");
     if (am_file_name == NULL) {
-        /* release mcro linked list, delete files */
-        /*free_linked_list(head);*/
         remove(clean_file_name);
         return 1;
     }
 
     line_counter = 0;
     /*replace mcro call by its text*/
-    indication = preproc_second_pass(file_name,head,clean_file_name,&line_counter,am_file_name);
+    indication = preproc_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
         /* release mcro linked list, delete files */
@@ -347,6 +345,5 @@ int preprocessor_full_flow(char *file_name,node **head){
     free(am_file_name);
     remove(clean_file_name);
 
-    printf(PREPROCCESSOR_SUCCESS);
     return 0;
 }
