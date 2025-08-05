@@ -1,23 +1,74 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "globals.h"
-#include "symbol_table.h"
+#include "first_pass.h"
 #include "parser.h"
 #include "utils.h"
 #include "errors_handler.h"
 #include "analyze_text.h"
 #include "code_image.h"
 
+
 /* Global array to store data values from .data, .string, .mat */
 unsigned int data_image[MAX_DATA_SIZE];
+
+int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name) {
+    node *current_macro;
+    Symbol *current_symbol;
+    int len,same_name = 0;
+    char macro_name_without_last_char[MAX_LINE_LENGTH];
+
+    /* check if macro list is empty no need to check*/
+    if (macro_head == NULL || *macro_head == NULL) {
+        return 0;
+    }
+
+    /* Check if symbol table is empty no need to check*/
+    if (symbol_table == NULL || symbol_table->head == NULL) {
+        return 0;
+    }
+
+    /* go over macro linked list */
+    current_macro = *macro_head;
+
+    len = strlen(current_macro->name);
+    if (len > 0) {
+        strncpy(macro_name_without_last_char, current_macro->name, len - 1);
+        macro_name_without_last_char[len - 1] = '\0';
+    } else {
+        strcpy(macro_name_without_last_char, current_macro->name);
+    }
+
+    while (current_macro != NULL) {
+
+        /* For each macro, check against all symbols in symbol table */
+        current_symbol = symbol_table->head;
+        while (current_symbol != NULL) {
+
+            /* Compare macro name with symbol name */
+            if (strcmp(macro_name_without_last_char, current_symbol->name) == 0) {
+                /* report error */
+                error_log(file_name, current_macro->line,
+                          MACRO_NAME_AS_LABEL);
+                same_name = 1;
+                break;
+            }
+
+            current_symbol = current_symbol->next;
+        }
+
+        current_macro = current_macro->next;
+    }
+
+    return same_name;
+}
+
 
 /**
  * Performs the first pass over a .am file and builds the symbol table,
  * encodes instructions, and processes data directives into the image arrays.
  */
-int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image)
+int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image,node **head)
 {
     FILE *fp;
     char line[MAX_LINE_LENGTH];
@@ -184,6 +235,11 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     *DC_final = DC;
 
     update_data_symbols_base_address(symbol_table, IC);
+
+    /*check if mcro name is the same as saved label*/
+    if (check_mcro_name_not_label(symbol_table, head, file_name)) {
+        has_errors = 1;
+    }
 
     return has_errors;
 }
