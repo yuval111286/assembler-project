@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
 
 
-        /*note*/
+        /*note2*/
         /* second pass */
         printf("-- SECOND PASS --\n");
         if (second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image)) {
