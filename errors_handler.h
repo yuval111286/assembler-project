@@ -60,6 +60,10 @@ void error_log(char *file_name, int line, char *error_msg);
 #define MATRIX_VALUE_COUNT_MISMATCH "Number of matrix values does not match dimensions"
 #define DATA_IMAGE_OVERFLOW "Data image overflow – too much .data/.string/.mat content"
 #define CODE_IMAGE_OVERFLOW "Code image overflow – exceeded MAX_CODE_SIZE\n"
+#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands \n"
+#define EXTRANEOUS_TEXT_AFTER_COMMAND "Extraneous text after end of command"
+
+
 
 
 

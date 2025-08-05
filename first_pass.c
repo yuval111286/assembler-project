@@ -91,11 +91,11 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
         line_number++;
 
-        if (!parse_line(line, &parsed)) {
-            error_log(file_name, line_number, SYNTAX_ERROR);
-            has_errors = 1;
-            continue;
-        }
+        if (!parse_line(line, &parsed, file_name, line_number)) {
+    has_errors = 1;
+    continue;
+}
+
 
         /* === LABEL HANDLING === */
         if (parsed.label[0] != '\0') {

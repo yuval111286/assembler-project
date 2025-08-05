@@ -5,6 +5,8 @@
 #include "parser.h"
 #include "analyze_text.h"
 #include <ctype.h>
+#include "errors_handler.h"
+
 
 
 
@@ -248,110 +250,139 @@ int count_data_items(ParsedLine *parsed) {
 }
 
 
-/*
- * Parses a single line of assembly code and fills the ParsedLine structure.
+
+/**
+ * @brief Parses a single line from the source file.
  *
- * Parameters:
- *   line - the original text line from the source file
- *   out  - pointer to a ParsedLine struct to be populated
+ * Identifies label (if present), type of line (instruction/directive),
+ * opcode or directive name, and splits operands.
  *
- * Returns:
- *   1 if parsing was successful (valid line, even if empty or comment)
- *   0 if syntax error occurred (invalid label, directive, etc.)
+ * @param line       The input line to parse
+ * @param out        Pointer to ParsedLine struct to populate
+ * @param file_name  Name of the source file (for error logging)
+ * @param line_number Line number (for error logging)
+ * @return 1 if the line is valid and parsed successfully, 0 otherwise
  */
-int parse_line(char *line, ParsedLine *out) {
+
+int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char buffer[MAX_LINE_LENGTH];
     char *token, *rest;
+    
 
-
-    /* Initialize ParsedLine struct fields */
+    
     (*out).label[0] = '\0';
     (*out).directive_name[0] = '\0';
     (*out).operand_count = 0;
     (*out).opcode = OPCODE_INVALID;
     (*out).line_type = LINE_INVALID;
 
-    /* Copy original line into buffer to tokenize */
     strncpy(buffer, line, MAX_LINE_LENGTH);
     buffer[MAX_LINE_LENGTH - 1] = '\0';
 
-    token = strtok(buffer, " \t");
-    if (token == NULL) {
-        (*out).line_type = LINE_EMPTY;
+    
+    token = strtok(buffer, " \t\n");
+    if (token == NULL || token[0] == ';') {
+        (*out).line_type = LINE_COMMENT;
         return 1;
     }
 
-    /* Check for label (ends with ':') */
+    
+
+    
     if (token[strlen(token) - 1] == ':') {
         token[strlen(token) - 1] = '\0';
-        if (!is_valid_label(token)) return 0;
+        if (!is_valid_label(token)) {
+            error_log(file_name, line_number, INVALID_LABEL_NAME);
+            return 0;
+        }
         strncpy((*out).label, token, MAX_LABEL_LEN);
         (*out).label[MAX_LABEL_LEN] = '\0';
 
-        token = strtok(NULL, " \t");
-        if (token == NULL) return 0;
+        token = strtok(NULL, " \t\n");
+        if (token == NULL) {
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
     }
 
-    /* Handle directive */
+    
     if (token[0] == '.') {
-        if (identify_directive(token) == -1) return 0;
+        int d = identify_directive(token);
+        if (d == -1) {
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
         (*out).line_type = LINE_DIRECTIVE;
         copy_directive_name(token, (*out).directive_name);
     } else {
-        /* Handle instruction */
+        Opcode op = identify_opcode(token);
+        if (op == OPCODE_INVALID) {
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
         (*out).line_type = LINE_INSTRUCTION;
-        (*out).opcode = identify_opcode(token);
-        if ((*out).opcode == OPCODE_INVALID) return 0;
+        (*out).opcode = op;
+
+        
+        if (op == OPCODE_STOP || op == OPCODE_RTS) {
+            token = strtok(NULL, "\n");
+            if (token != NULL) {
+                token = trim_spaces(token);
+                if (token[0] != '\0' && token[0] != ';') {
+                    error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
+                    return 0;
+                }
+            }
+            return 1;
+        }
     }
 
-    /* Special parsing for .mat directive */
+    
+    rest = strstr(line, token);
+    if (rest == NULL) return 1;
+    rest += strlen(token);
+    rest = trim_spaces(rest);
+
+    
+    if ((*out).line_type == LINE_DIRECTIVE &&
+        strcmp((*out).directive_name, "string") == 0) {
+        if (rest[0] != '"') {
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
+        token = strtok(rest, "\n");
+        if (token == NULL || token[strlen(token) - 1] != '"') {
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
+        strncpy((*out).operands[0], token, MAX_LINE_LENGTH - 1);
+        (*out).operands[0][MAX_LINE_LENGTH - 1] = '\0';
+        (*out).operand_count = 1;
+        return 1;
+    }
+
+    
     if ((*out).line_type == LINE_DIRECTIVE &&
         strcmp((*out).directive_name, "mat") == 0) {
-
-        /* Get rest of original line after ".mat" */
-        rest = strstr(line, ".mat");
-        if (rest == NULL) return 0;
-
-        rest = strchr(rest, ' ');
-        if (rest == NULL) return 0;
-
-        rest = trim_spaces(rest);
-
-        /* Check for illegal comma before first operand */
         if (rest[0] == ',') {
-            return 0; /* Illegal comma before operand */
+            error_log(file_name, line_number, SYNTAX_ERROR);
+            return 0;
+        }
+    }
+
+    
+    token = strtok(rest, ",");
+    while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+        token = trim_spaces(token);
+        if (token[0] == '\0') {
+            error_log(file_name, line_number, SYNTAX_ERROR); 
+            return 0;
         }
 
-        /* Split operands by comma */
-        token = strtok(rest, ",");
-        while (token != NULL && (*out).operand_count < MAX_OPERANDS + 100) {
-            token = trim_spaces(token);
-
-            /* Illegal empty operand (e.g., two consecutive commas) */
-            if (token[0] == '\0') return 0;
-
-            strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
-            (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
-            (*out).operand_count++;
-
-            token = strtok(NULL, ",");
-        }
-
-    } else {
-        /* Regular instruction/directive operand parsing */
+        strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
+        (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
+        (*out).operand_count++;
         token = strtok(NULL, ",");
-        while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
-            token = trim_spaces(token);
-
-            /* Disallow leading comma before operand */
-            if (token[0] == '\0') return 0;
-
-            strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
-            (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
-            (*out).operand_count++;
-
-            token = strtok(NULL, ",");
-        }
     }
 
     return 1;

@@ -16,7 +16,8 @@
  *   1 if parsing succeeded,
  *   0 if syntax error detected
  */
-int parse_line(char *line, ParsedLine *out);
+int parse_line(char *line, ParsedLine *out, char *file_name, int line_number);
+
 
 /*
  * Checks if the given string is a valid instruction.
