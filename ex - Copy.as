@@ -1,0 +1,11 @@
+.extern EXTERNALVAR
+    .entry MAINLOOP
+
+MAINLOOP: mov #5, r1
+add COUNTER, r2
+lea DATAARRAY, r3
+jmp EXTERNALVAR
+
+
+COUNTER: .data 10
+DATAARRAY: .data 1,2,3,4,5
