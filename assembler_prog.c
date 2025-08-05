@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         }
 
         printf("-- SECOND PASS --\n");
-        if (second_pass(as_file)) {
+        if (second_pass(am_file,&symbol_table,&code_image)) {
             return 1;
         }
     }

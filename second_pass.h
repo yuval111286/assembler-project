@@ -1,7 +1,7 @@
 #ifndef ASSEMBLER_PROJECT_SECOND_PASS_H
 #define ASSEMBLER_PROJECT_SECOND_PASS_H
 
-
+#include "first_pass.h"
 
 void add_entry_label_to_symbol_table();
 
@@ -19,7 +19,7 @@ int create_ext_file(char *ext_file_name);
 
 int create_files(char *org_file_name);
 
-int second_pass(char *org_file_name);
+int second_pass(char *file_name,SymbolTable *symbol_table, CodeImage *code_image);
 
 
 

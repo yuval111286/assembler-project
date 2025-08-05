@@ -1,9 +1,6 @@
-#include "second_pass.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include "second_pass.h"
 #include "utils.h"
 #include "errors_handler.h"
 
@@ -135,9 +132,7 @@ int create_ext_file(char *ext_file_name){
 
 
 
-int create_files(char *org_file_name)
-{
-    /*perform pass on the file for labels*/
+int create_files(char *org_file_name){
 
     /* create files*/
 
@@ -184,15 +179,14 @@ int create_files(char *org_file_name)
     return 0;
 }
 
-int second_pass(char *org_file_name){
+int second_pass(char *file_name,SymbolTable *symbol_table, CodeImage *code_image){
 
-    int success = 1;
-
-    success = create_files(org_file_name);
-    if(success)
-    {
-        return -1;
-    }
     return 0;
-
 }
+
+
+
+
+
+
+
