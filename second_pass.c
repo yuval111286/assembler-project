@@ -33,7 +33,7 @@ int binary_line_to_base_4(char *code){
 
 
     for (j = 0; j < 5; j++) {
-        letter = two_binary_digits_one_base4_char_delete(temp & 3);
+        letter = two_binary_digits_one_base4_char(temp & 3);
         if (letter == NULL) {
             return -1;
         }
