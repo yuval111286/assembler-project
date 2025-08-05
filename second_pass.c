@@ -11,42 +11,6 @@
 
 
 
-
-char *two_binary_digits_one_base4_char(int binary_num){
-
-    if (binary_num == 0) return "a";
-    if (binary_num == 1) return "b";
-    if (binary_num == 2) return "c";
-    if (binary_num == 3) return "d";
-
-    return NULL;
-}
-
-int binary_line_to_base_4(char *code){
-
-    unsigned int temp;
-    int i = 6,j;
-    char *letter;
-
-
-    code[i] = '\0';
-
-
-    for (j = 0; j < 5; j++) {
-        letter = two_binary_digits_one_base4_char(temp & 3);
-        if (letter == NULL) {
-            return -1;
-        }
-        i--;
-        code[i] = letter[0];
-        temp >>= 2;
-    }
-
-    return 0;
-}
-
-
-
 /* Helper function to check if operand is a label */
 int is_label_operand(char *operand) {
     /* Not immediate (#5) */
@@ -99,7 +63,7 @@ void free_extern_list(ExternList *extern_list) {
 /* Write .ext file if there are extern references */
 void write_ext_file(char *base_filename, ExternList *extern_list) {
     FILE *fp;
-    char *ext_filename;
+    char *ext_filename, *base4_address;
     ExternRef *current;
 
     /* Check if there are any extern references */
@@ -122,7 +86,9 @@ void write_ext_file(char *base_filename, ExternList *extern_list) {
     /* Write all extern references */
     current = extern_list->head;
     while (current != NULL) {
-        fprintf(fp, "%s %04d\n", current->symbol_name, current->address);
+
+        base4_address = turn_address_to_base_4(current->address);
+        fprintf(fp, "%s %s\n", current->symbol_name, base4_address);
         current = current->next;
     }
 
@@ -133,7 +99,7 @@ void write_ext_file(char *base_filename, ExternList *extern_list) {
 /* Write .ent file for entry symbols */
 void write_ent_file(char *base_filename, SymbolTable *symbol_table) {
     FILE *fp;
-    char *ent_filename;
+    char *ent_filename, *base4_address;
     Symbol *current;
     int has_entries = 0;
 
@@ -167,7 +133,10 @@ void write_ent_file(char *base_filename, SymbolTable *symbol_table) {
     current = symbol_table->head;
     while (current != NULL) {
         if (current->is_entry == 1) {
-            fprintf(fp, "%s %04d\n", current->name, current->address);
+
+            base4_address = turn_address_to_base_4(current->address);
+            fprintf(fp, "%s %s\n", current->name, base4_address);
+
         }
         current = current->next;
     }
@@ -243,7 +212,7 @@ void encode_operand(CodeImage *code_image, int *code_index, char *operand,
 /* Encode complete instruction */
 void encode_instruction(CodeImage *code_image, ParsedLine *parsed, int current_address,
                                SymbolTable *symbol_table, ExternList *extern_list) {
-    unsigned int first_word = 0;
+    unsigned int encoded_word = 0;
     int i,code_index = 0;
     int src_mode = -1, dst_mode = -1;
 
@@ -256,17 +225,17 @@ void encode_instruction(CodeImage *code_image, ParsedLine *parsed, int current_a
     }
 
     /* Encode first word: opcode and addressing modes */
-    first_word |= (parsed->opcode << 6); /* Opcode in bits 6-9 */
+    encoded_word |= (parsed->opcode << 6); /* Opcode in bits 6-9 */
     if (src_mode != -1) {
-        first_word |= (src_mode << 4); /* Source mode in bits 4-5 */
+        encoded_word |= (src_mode << 4); /* Source mode in bits 4-5 */
     }
     if (dst_mode != -1) {
-        first_word |= (dst_mode << 2); /* Destination mode in bits 2-3 */
+        encoded_word |= (dst_mode << 2); /* Destination mode in bits 2-3 */
     }
     /* ARE bits 0-1 are always 'A' for first word */
 
     /* Add first word to code image */
-    add_code_word(code_image, current_address, first_word, 'A');
+    add_code_word(code_image, current_address, encoded_word, 'A');
     code_index = 1;
 
     /* Encode operands */
@@ -309,7 +278,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
         line_number++;
 
         /* Parse the line */
-        if (!parse_line(line, &parsed)) {
+        if (!parse_line(line, &parsed, am_file, line_number)) {
             continue; /* Skip invalid lines */
         }
 

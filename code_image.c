@@ -66,21 +66,18 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
         return;
     }
 
-    /* Write the IC and DC sizes on the first line */
-    fprintf(fp, "%d %d\n", ic_size, dc_size);
 
     /* Write the code image section */
     for (i = 0; i < (*img).size; i++) {
-        fprintf(fp, "%04d %s\n", 
-                (*img).words[i].address, 
-                convert_to_base4((*img).words[i].value));
+
+        fprintf(fp, "%s %s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
     }
 
     /* Write the data image section */
     for (i = 0; i < dc_size; i++) {
-        fprintf(fp, "%04d %s\n", 
-                IC_INIT_VALUE + ic_size + i, 
-                convert_to_base4(data_image[i]));
+
+        fprintf(fp, "%s %s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
+
     }
 
     fclose(fp);
@@ -95,16 +92,54 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
  *
  * @param value The number to convert (expected ≤ 1023).
  * @return Pointer to a null-terminated 5-character base-4 string.
- */
-char *convert_to_base4(unsigned int value) {
-    static char base4[6]; /* 5 digits + null terminator */
-    int i;
-
-    for (i = 4; i >= 0; i--) {
-        base4[i] = "abcd"[value % 4];
-        value /= 4;
-    }
+*/
+char *turn_line_to_base_4(unsigned int value) {
+    static char base4[6] = {0};
+    char digits[4] = {'a', 'b', 'c', 'd'};
+    int i,remainder;
 
     base4[5] = '\0';
+
+    for (i = 4; i >= 0; i--) {
+        remainder = value % 4;
+
+        base4[i] = digits[remainder];
+        value = value / 4;
+    }
+
     return base4;
 }
+
+char *turn_address_to_base_4(unsigned int value) {
+    static char base4[6] = {0};         /* 5 digits + null terminator */
+    char digits[4] = {'a', 'b', 'c', 'd'};
+    char temp[6];                       /* מערך זמני */
+    int i, remainder, start_index;
+
+    /* טיפול במקרה מיוחד של 0 */
+    if (value == 0) {
+        base4[0] = 'a';
+        base4[1] = '\0';
+        return base4;
+    }
+
+    /* המרה למערך זמני */
+    temp[5] = '\0';
+    for (i = 4; i >= 0; i--) {
+        remainder = value % 4;
+        temp[i] = digits[remainder];
+        value = value / 4;
+    }
+
+    /* מצא את הספרה הראשונה שאינה 'a' (אפס מוביל) */
+    start_index = 0;
+    while (start_index < 5 && temp[start_index] == 'a') {
+        start_index++;
+    }
+
+    /* העתק ללא אפסים מובילים */
+    strcpy(base4, &temp[start_index]);
+
+    return base4;
+}
+

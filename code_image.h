@@ -37,6 +37,8 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
  * @param value Integer value to convert (max 1023).
  * @return Pointer to a statically allocated base-4 string (e.g., "01231").
  */
-char *convert_to_base4(unsigned int value);
+char *turn_line_to_base_4(unsigned int value);
+
+char *turn_address_to_base_4(unsigned int value);
 
 #endif /* CODE_IMAGE_H */
