@@ -12,7 +12,7 @@ typedef struct Symbol {
     char name[MAX_LABEL_LEN + 1]; /* Label name  */
     int address;      /* Memory address (IC or DC value) */
     SymbolType type; /* Type of symbol: CODE / DATA / EXTERN */
-    int is_entry;    /* Boolean flag 1 if .entry, 0 otherwise */
+    int is_entry;    /* Boolean flag 1 if .entry, 0 for extern */
     struct Symbol *next;  /* Pointer to next symbol in the list */
 } Symbol;
 
@@ -22,6 +22,23 @@ typedef struct Symbol {
 typedef struct {
     Symbol *head; /* Pointer to the first symbol (NULL if empty) */
 } SymbolTable;
+
+/*
+ * draft
+ */
+typedef struct ExternRef {
+    char symbol_name[MAX_LABEL_LEN + 1];
+    int address;
+    struct ExternRef *next;
+} ExternRef;
+
+typedef struct {
+    ExternRef *head;
+} ExternList;
+
+
+
+
 
 /*
  * Initializes the symbol table by setting its head to NULL.

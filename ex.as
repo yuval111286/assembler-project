@@ -1,13 +1,25 @@
 
+.extern externalfunc
+.extern externalvar
 
+main:   mov #5, r1
+        cmp r1, #10
+        jmp end
 
+loop:   add #1, r1
+        cmp r1, limit
+        bne loop
+        red r2
 
-mcro COUNTE
-mov #1, r1
-add r1, r2
-mcroend
+end:    prn r1
+        jsr externalfunc
+        mov externalvar, r3
+        
 
+.data 10, 20, 30
+limit:  .data 15
 
-MAIN: mov #0, r1
+message: .string "Hello World"
 
-    COUNTER: .data 5
+.entry main
+.entry limit

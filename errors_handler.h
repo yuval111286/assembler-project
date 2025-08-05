@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include "symbol_table.h"
-
 
 
 /**
@@ -21,18 +19,7 @@
 void error_log(char *file_name, int line, char *error_msg);
 
 
-/**
- * @brief Prints an internal error message.
- *
- * Prints to stdout only errors discovered during internal process
- * @param error_msg error message
- */
-/* void internal_error_log(char *error_msg);*/
-
-/*list of errors*/
-#define Error "errorExample"
-
-/*macro errors*/
+/*Macro Errors*/
 #define LONG_LINE "Line too long more than 80 characters \n"
 #define MACRO_MULTI_DEF "Multi definitions for the same MACRO \n"
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
@@ -45,11 +32,10 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAIL_EXTRACT_MACROS "Fail to extract macros from as file\n"
 #define FAIL_TO_SWITCH_MCRO_NAME "Fail to switch mcro name by it's content\n"
 
-#define PREPROCCESSOR_SUCCESS "Preprocessor step completed successfully \n"
 
 
 
-/*internal errors*/
+/*Internal errors*/
 
 #define FILE_NOT_OPEN_READING "Can not open file for reading \n"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing \n"
@@ -58,7 +44,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line \n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
 
-/* first Pass Parsing Errors */
+/* First Pass Parsing Errors */
 #define SYNTAX_ERROR "Syntax error"
 #define INVALID_LABEL_NAME "Invalid label name \n"
 #define LABEL_RESERVED_WORD "Label name cannot be opcode, directive or register \n"
@@ -77,7 +63,10 @@ void error_log(char *file_name, int line, char *error_msg);
 
 
 
+/* Second Pass Parsing Errors */
 
+#define ENTRY_LABEL_NO_DEF "Entry label was not defined"
+#define SAME_NAME_ENTRY_AND_EXTERNAL_LABEL "Same label is external and entry"
 
 
 #endif /*PROJECT_ERRORS_HANDLER_H*/
