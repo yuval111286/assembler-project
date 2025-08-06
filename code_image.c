@@ -111,13 +111,13 @@ char *turn_line_to_base_4(unsigned int value) {
 }
 
 char *turn_address_to_base_4(unsigned int value) {
-    static char base4[6] = {0};         /* 5 digits + null terminator */
+    static char base4[5] = {0};         /* 5 digits + null terminator */
     char digits[4] = {'a', 'b', 'c', 'd'};
     int i, remainder;
 
-    base4[5] = '\0';
+    base4[4] = '\0';
 
-    for (i = 4; i >= 0; i--) {
+    for (i = 3; i >= 0; i--) {
         remainder = value % 4;
         base4[i] = digits[remainder];
         value = value / 4;

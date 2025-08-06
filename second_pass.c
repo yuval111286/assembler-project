@@ -315,7 +315,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     /* Generate output files if no errors */
     if (!discover_errors) {
         /* Write .ob file */
-        write_code_image_to_ob_file(code_image, ic_final, dc_final, data_image, am_file);
+        write_code_image_to_ob_file(code_image, ic_final- IC_INIT_VALUE, dc_final, data_image, am_file);
 
         /* Write .ent file (only if there are entry symbols) */
         write_ent_file(am_file, symbol_table);
