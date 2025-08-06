@@ -100,7 +100,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         /* === LABEL HANDLING === */
         if (parsed.label[0] != '\0') {
             
-    
 
             if (identify_opcode(parsed.label) != OPCODE_INVALID ||
                 identify_directive(parsed.label) != -1 ||

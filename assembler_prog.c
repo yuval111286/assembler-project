@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "utils.h"
 #include "first_pass.h"
 #include "second_pass.h"
@@ -13,9 +12,18 @@ int main(int argc, char *argv[])
     node *mcro_head;
     SymbolTable symbol_table;
     CodeImage code_image;
-    int IC_final, DC_final;
+    int IC_final, DC_final,file_name_len;
 
     while (--argc > 0) {
+
+        file_name_len = strlen(argv[argc]);
+
+        if (file_name_len>MAX_FILE_NAME_LENGTH)
+        {
+            printf("File name too long, moving to next file %s \n\n",argv[argc]);
+            continue;
+        }
+
         as_file = change_ending_of_file(argv[argc], ".as");
 
         mcro_head = NULL;
