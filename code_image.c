@@ -113,33 +113,17 @@ char *turn_line_to_base_4(unsigned int value) {
 char *turn_address_to_base_4(unsigned int value) {
     static char base4[6] = {0};         /* 5 digits + null terminator */
     char digits[4] = {'a', 'b', 'c', 'd'};
-    char temp[6];                       /* מערך זמני */
-    int i, remainder, start_index;
+    int i, remainder;
 
-    /* טיפול במקרה מיוחד של 0 */
-    if (value == 0) {
-        base4[0] = 'a';
-        base4[1] = '\0';
-        return base4;
-    }
+    base4[5] = '\0';
 
-    /* המרה למערך זמני */
-    temp[5] = '\0';
     for (i = 4; i >= 0; i--) {
         remainder = value % 4;
-        temp[i] = digits[remainder];
+        base4[i] = digits[remainder];
         value = value / 4;
     }
 
-    /* מצא את הספרה הראשונה שאינה 'a' (אפס מוביל) */
-    start_index = 0;
-    while (start_index < 5 && temp[start_index] == 'a') {
-        start_index++;
-    }
-
-    /* העתק ללא אפסים מובילים */
-    strcpy(base4, &temp[start_index]);
-
     return base4;
 }
+
 

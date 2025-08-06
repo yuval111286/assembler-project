@@ -18,33 +18,32 @@ void *malloc_allocation(size_t size) {
 
 int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
     char cleaned[MAX_LINE_LENGTH];
-    int len;
+    int len, read_len;
 
     if (token == NULL || rows == NULL || cols == NULL) {
         return 0;
     }
 
-    /* Copy and sanitize token */
     strncpy(cleaned, token, MAX_LINE_LENGTH - 1);
     cleaned[MAX_LINE_LENGTH - 1] = '\0';
 
-    /* Remove trailing commas or spaces */
     len = strlen(cleaned);
     while (len > 0 && (cleaned[len - 1] == ',' || isspace((unsigned char)cleaned[len - 1]))) {
         cleaned[len - 1] = '\0';
         len--;
     }
 
-    /* Now extract dimensions */
-    if (sscanf(cleaned, "[%d][%d]", rows, cols) != 2) {
-        return 0;
+    if (sscanf(cleaned, "[%d][%d]%n", rows, cols, &read_len) == 2) {
+        if (cleaned[read_len] != '\0') {
+            return 0; /* extra characters after matrix dimension */
+        }
+
+        if (*rows > 0 && *cols > 0) {
+            return 1;
+        }
     }
 
-    if (*rows <= 0 || *cols <= 0) {
-        return 0;
-    }
-
-    return 1;
+    return 0;
 }
 
 char *change_ending_of_file(char *file_name, char *new_ending) {

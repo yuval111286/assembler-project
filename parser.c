@@ -51,6 +51,26 @@ Register_Type register_table[] = {
         {"r6", R6},
         {"r7", R7}
 };
+/* Expected number of operands for each opcode */
+static const int expected_operands[16] = {
+    2, /* mov */
+    2, /* cmp */
+    2, /* add */
+    2, /* sub */
+    2, /* lea */
+    1, /* clr */
+    1, /* not */
+    1, /* inc */
+    1, /* dec */
+    1, /* jmp */
+    1, /* bne */
+    1, /* red */
+    1, /* prn */
+    1, /* jsr */
+    0, /* rts */
+    0  /* stop */
+};
+
 
 
 int identify_opcode(char* op_code) {
@@ -264,39 +284,58 @@ int count_data_items(ParsedLine *parsed) {
  * @return 1 if the line is valid and parsed successfully, 0 otherwise
  */
 
+
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char buffer[MAX_LINE_LENGTH];
-    char *token, *rest;
-    
+    char *token, *rest, *original_rest;
+    int i;
 
-    
+    /* Reset output */
     (*out).label[0] = '\0';
     (*out).directive_name[0] = '\0';
     (*out).operand_count = 0;
     (*out).opcode = OPCODE_INVALID;
     (*out).line_type = LINE_INVALID;
 
-    strncpy(buffer, line, MAX_LINE_LENGTH);
+    /* Check for overly long lines */
+    if (strchr(line, '\n') == NULL && strlen(line) >= MAX_LINE_LENGTH - 1) {
+        error_log(file_name, line_number, LONG_LINE);
+        return 0;
+    }
+
+    /* Copy line to buffer for tokenization */
+    strncpy(buffer, line, MAX_LINE_LENGTH - 1);
     buffer[MAX_LINE_LENGTH - 1] = '\0';
 
-    
+    /* Check for double commas */
+    if (strstr(buffer, ",,") != NULL) {
+        error_log(file_name, line_number, MULTIPLE_COMMAS);
+        return 0;
+    }
+
     token = strtok(buffer, " \t\n");
     if (token == NULL || token[0] == ';') {
         (*out).line_type = LINE_COMMENT;
         return 1;
     }
 
-    
-
-    
+    /* === LABEL === */
     if (token[strlen(token) - 1] == ':') {
         token[strlen(token) - 1] = '\0';
+
         if (!is_valid_label(token)) {
-            error_log(file_name, line_number, INVALID_LABEL_NAME);
+            if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
+                error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
+            } else if (identify_register(token) != -1) {
+                error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
+            } else {
+                error_log(file_name, line_number, INVALID_LABEL_NAME);
+            }
             return 0;
         }
-        strncpy((*out).label, token, MAX_LABEL_LEN);
-        (*out).label[MAX_LABEL_LEN] = '\0';
+
+        strncpy(out->label, token, MAX_LABEL_LEN);
+        out->label[MAX_LABEL_LEN] = '\0';
 
         token = strtok(NULL, " \t\n");
         if (token == NULL) {
@@ -305,25 +344,24 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         }
     }
 
-    
+    /* === DIRECTIVE or OPCODE === */
     if (token[0] == '.') {
         int d = identify_directive(token);
         if (d == -1) {
             error_log(file_name, line_number, SYNTAX_ERROR);
             return 0;
         }
-        (*out).line_type = LINE_DIRECTIVE;
-        copy_directive_name(token, (*out).directive_name);
+        out->line_type = LINE_DIRECTIVE;
+        copy_directive_name(token, out->directive_name);
     } else {
         Opcode op = identify_opcode(token);
         if (op == OPCODE_INVALID) {
             error_log(file_name, line_number, SYNTAX_ERROR);
             return 0;
         }
-        (*out).line_type = LINE_INSTRUCTION;
-        (*out).opcode = op;
+        out->line_type = LINE_INSTRUCTION;
+        out->opcode = op;
 
-        
         if (op == OPCODE_STOP || op == OPCODE_RTS) {
             token = strtok(NULL, "\n");
             if (token != NULL) {
@@ -337,53 +375,126 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         }
     }
 
-    
+    /* Extract remaining line */
     rest = strstr(line, token);
     if (rest == NULL) return 1;
     rest += strlen(token);
     rest = trim_spaces(rest);
+    original_rest = rest;
 
-    
-    if ((*out).line_type == LINE_DIRECTIVE &&
-        strcmp((*out).directive_name, "string") == 0) {
-        if (rest[0] != '"') {
-            error_log(file_name, line_number, SYNTAX_ERROR);
+        /* === SPECIAL DIRECTIVE CHECKS === */
+    if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "string") == 0) {
+        if (rest[0] != '"' || rest[strlen(rest) - 1] != '"') {
+            error_log(file_name, line_number, STRING_MISSING_QUOTES);
             return 0;
         }
-        token = strtok(rest, "\n");
-        if (token == NULL || token[strlen(token) - 1] != '"') {
-            error_log(file_name, line_number, SYNTAX_ERROR);
-            return 0;
-        }
-        strncpy((*out).operands[0], token, MAX_LINE_LENGTH - 1);
-        (*out).operands[0][MAX_LINE_LENGTH - 1] = '\0';
-        (*out).operand_count = 1;
+        strncpy(out->operands[0], rest, MAX_LINE_LENGTH - 1);
+        out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
+        out->operand_count = 1;
         return 1;
     }
 
-    
-    if ((*out).line_type == LINE_DIRECTIVE &&
-        strcmp((*out).directive_name, "mat") == 0) {
-        if (rest[0] == ',') {
-            error_log(file_name, line_number, SYNTAX_ERROR);
-            return 0;
-        }
+    if (out->line_type == LINE_DIRECTIVE &&
+        strcmp(out->directive_name, "data") == 0 && rest[0] == '\0') {
+        error_log(file_name, line_number, MISSING_OPERANDS_DATA);
+        return 0;
     }
 
-    
-    token = strtok(rest, ",");
-    while (token != NULL && (*out).operand_count < MAX_OPERANDS) {
+    if (out->line_type == LINE_DIRECTIVE &&
+        strcmp(out->directive_name, "extern") == 0 && rest[0] == '\0') {
+        error_log(file_name, line_number, MISSING_OPERAND_EXTERN);
+        return 0;
+    }
+
+    if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "mat") == 0) {
+        int n, m;
+        char *after_dims;
+        if (sscanf(rest, " [%d][%d]%n", &n, &m, &i) != 2) {
+            error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
+            return 0;
+        }
+
+        /* Add the matrix dimensions string as first operand */
+        strncpy(out->operands[0], rest, i);
+        out->operands[0][i] = '\0';
+        out->operand_count = 1;
+
+        after_dims = rest + i;
+        after_dims = trim_spaces(after_dims);
+
+        if (after_dims[0] == ',') {
+            error_log(file_name, line_number, MULTIPLE_COMMAS);
+            return 0;
+        }
+
+        /* Now parse the remaining values */
+        token = strtok(after_dims, ",");
+        while (token != NULL) {
+            token = trim_spaces(token);
+            if (token[0] == '\0') {
+                error_log(file_name, line_number, MULTIPLE_COMMAS);
+                return 0;
+            }
+            if (out->operand_count >= MAX_OPERANDS) {
+                error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
+                return 0;
+            }
+
+            strncpy(out->operands[out->operand_count], token, MAX_LINE_LENGTH - 1);
+            out->operands[out->operand_count][MAX_LINE_LENGTH - 1] = '\0';
+            out->operand_count++;
+
+            token = strtok(NULL, ",");
+        }
+
+        if (original_rest[strlen(original_rest) - 1] == ',') {
+            error_log(file_name, line_number, MULTIPLE_COMMAS);
+            return 0;
+        }
+
+        return 1;
+    }
+
+    if (rest[0] == ',') {
+        error_log(file_name, line_number, MULTIPLE_COMMAS);
+        return 0;
+    }
+
+    /* === Default operand parsing === */
+    i = 0;
+    while ((token = strtok((i == 0) ? rest : NULL, ",")) != NULL) {
         token = trim_spaces(token);
         if (token[0] == '\0') {
-            error_log(file_name, line_number, SYNTAX_ERROR); 
+            error_log(file_name, line_number, MULTIPLE_COMMAS);
             return 0;
         }
 
-        strncpy((*out).operands[(*out).operand_count], token, MAX_LINE_LENGTH - 1);
-        (*out).operands[(*out).operand_count][MAX_LINE_LENGTH - 1] = '\0';
-        (*out).operand_count++;
-        token = strtok(NULL, ",");
+        if (i >= MAX_OPERANDS) {
+            error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
+            return 0;
+        }
+
+        strncpy(out->operands[i], token, MAX_LINE_LENGTH - 1);
+        out->operands[i][MAX_LINE_LENGTH - 1] = '\0';
+        i++;
     }
 
+    if (original_rest[strlen(original_rest) - 1] == ',') {
+        error_log(file_name, line_number, MULTIPLE_COMMAS);
+        return 0;
+    }
+
+        /* === Validate operand count for instructions === */
+    if (out->line_type == LINE_INSTRUCTION) {
+        int expected = expected_operands[out->opcode];
+
+        if (out->operand_count != expected) {
+            error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
+            return 0;
+        }
+    }
+
+
+       out->operand_count = i;
     return 1;
 }

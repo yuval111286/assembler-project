@@ -47,7 +47,6 @@ void error_log(char *file_name, int line, char *error_msg);
 /* First Pass Parsing Errors */
 #define SYNTAX_ERROR "Syntax error"
 #define INVALID_LABEL_NAME "Invalid label name \n"
-#define LABEL_RESERVED_WORD "Label name cannot be opcode, directive or register \n"
 #define DUPLICATE_LABEL "Label already defined \n"
 #define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label \n"
 #define FAILED_ADD_DATA_LABEL "Failed to add data label \n"
@@ -60,9 +59,16 @@ void error_log(char *file_name, int line, char *error_msg);
 #define MATRIX_VALUE_COUNT_MISMATCH "Number of matrix values does not match dimensions"
 #define DATA_IMAGE_OVERFLOW "Data image overflow – too much .data/.string/.mat content"
 #define CODE_IMAGE_OVERFLOW "Code image overflow – exceeded MAX_CODE_SIZE\n"
-#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands \n"
 #define EXTRANEOUS_TEXT_AFTER_COMMAND "Extraneous text after end of command"
 
+
+#define REGISTER_NAME_AS_LABEL "Register name cannot be used as label"
+#define RESERVED_WORD_AS_LABEL "Reserved word cannot be used as label"
+#define STRING_MISSING_QUOTES "String must be enclosed in quotation marks"
+#define MISSING_OPERAND_EXTERN "Missing operand for .extern directive"
+#define MISSING_OPERANDS_DATA "Missing operands for .data directive"
+#define MATRIX_DIMENSION_FORMAT "[n][m] format is required for .mat dimensions"
+#define MULTIPLE_COMMAS "Multiple consecutive commas"
 
 
 
