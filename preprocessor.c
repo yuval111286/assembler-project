@@ -293,7 +293,6 @@ int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int 
 int preprocessor_full_flow(char *file_name,node **head){
 
     FILE  *first_copy;
-   /* node *head;*/
     char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
     int indication, line_counter = 0;
 

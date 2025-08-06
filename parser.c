@@ -297,11 +297,6 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     (*out).opcode = OPCODE_INVALID;
     (*out).line_type = LINE_INVALID;
 
-    /* Check for overly long lines */
-    if (strchr(line, '\n') == NULL && strlen(line) >= MAX_LINE_LENGTH - 1) {
-        error_log(file_name, line_number, LONG_LINE);
-        return 0;
-    }
 
     /* Copy line to buffer for tokenization */
     strncpy(buffer, line, MAX_LINE_LENGTH - 1);
