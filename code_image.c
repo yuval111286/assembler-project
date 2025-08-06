@@ -39,3 +39,4 @@ void add_code_word(CodeImage *img, int address, unsigned int value, char are) {
     (*img).words[(*img).size].ARE = are;
     (*img).size++;
 }
+

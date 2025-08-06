@@ -393,8 +393,6 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
 
     /* Generate output files if no errors */
     if (!discover_errors) {
-        /* creating .ob file containing code and data words and their address */
-        write_code_image_to_ob_file(code_image, ic_final, dc_final, data_image, am_file);
 
         /* creating .ent file containing label name and their address only if exists*/
         write_ent_file(am_file, symbol_table);
