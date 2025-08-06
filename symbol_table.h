@@ -26,17 +26,15 @@ typedef struct {
 /*
  * draft
  */
-typedef struct ExternRef {
+typedef struct ExternSymbol {
     char symbol_name[MAX_LABEL_LEN + 1];
     int address;
-    struct ExternRef *next;
-} ExternRef;
+    struct ExternSymbol *next;
+} ExternSymbol;
 
 typedef struct {
-    ExternRef *head;
+    ExternSymbol *head;
 } ExternList;
-
-
 
 
 

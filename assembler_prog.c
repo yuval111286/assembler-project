@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
                 free_linked_list(mcro_head);
             }
             free(as_file);
-            return 1;
+            printf("Finish processing file %s \n\n",argv[argc]);
+            continue;
         }
 
         init_symbol_table(&symbol_table);
@@ -41,7 +42,8 @@ int main(int argc, char *argv[])
             }
             free(as_file);
             free(am_file);
-            return 1;
+            printf("Finish processing file %s \n\n",argv[argc]);
+            continue;
         }
 
         /*free mcro linked list after use*/
@@ -56,13 +58,15 @@ int main(int argc, char *argv[])
             free_symbol_table(&symbol_table);
             free(as_file);
             free(am_file);
-            return 1;
+            printf("Finish processing file %s \n\n",argv[argc]);
+            continue;
         }
+        free_symbol_table(&symbol_table);
+        free(as_file);
+        free(am_file);
+        printf("Finish processing file %s \n\n",argv[argc]);
     }
 
-    free_symbol_table(&symbol_table);
-    free(as_file);
-    free(am_file);
-
+    printf("\nNo more files, end of assembler program. \nHope you enjoyed!\n");
     return 0;
 }
