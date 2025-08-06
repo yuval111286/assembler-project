@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "analyze_text.h"
-#include <ctype.h>
 #include "errors_handler.h"
-
-
 
 
 
@@ -81,7 +78,7 @@ int identify_opcode(char* op_code) {
     }
 
     for (i = 0; opcode_table[i].name != NULL; i++) {
-        if (strcasecmp(op_code, opcode_table[i].name) == 0) {
+        if (strcmp(op_code, opcode_table[i].name) == 0) {
             return opcode_table[i].opcode;
         }
     }
@@ -94,7 +91,7 @@ int identify_directive(char *directive){
 
     int i;
     for (i = 0; i<NUM_DIRECTIVE; i++) {
-        if (strcasecmp(directive, directive_table[i].name) == 0) {
+        if (strcmp(directive, directive_table[i].name) == 0) {
             return directive_table[i].directive;
         }
     }

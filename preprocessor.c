@@ -1,9 +1,12 @@
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
 #include "preprocessor.h"
 #include "utils.h"
 #include "analyze_text.h"
 #include "parser.h"
 #include "errors_handler.h"
-#include <ctype.h>
+
 
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
 
@@ -181,8 +184,8 @@ int is_save_word(char *mcro_name){
 
     /*check if mcro_name is one of the forbidden saved word*/
     int i;
-    for (i = 0; i<NUM_DIRECTIVE; i++) {
-        if (strcasecmp(mcro_name, saved_words[i]) == 0) {
+    for (i = 0; saved_words[i] != NULL; i++) {
+        if (strcmp(mcro_name, saved_words[i]) == 0) {
            return 0;
         }
     }
@@ -303,7 +306,7 @@ int preprocessor_full_flow(char *file_name,node **head){
         return 1;
     }
 
-    snprintf(clean_file_name, sizeof(clean_file_name), "%s_clean.as", file_name);
+    sprintf(clean_file_name, "%s_clean.as", file_name);
 
     /* create clean file with no comment line or spaces*/
     first_copy = create_clean_file(file_name, clean_file_name);

@@ -6,6 +6,20 @@
 #include "code_image.h"
 
 
+/**
+ * @brief Converts an unsigned integer (0–1023) to a 5-digit base-4 string.
+ *
+ * Encodes the base-4 digits using 'a', 'b', 'c', 'd' for values 0–3.
+ * Returns a static string valid until next call.
+ *
+ * @param value The number to convert (expected ≤ 1023).
+ * @return Pointer to a null-terminated 5-character base-4 string.
+*/
+char *turn_line_to_base_4(unsigned int value);
+
+
+
+char *turn_address_to_base_4(unsigned int value);
 
 
 /**
@@ -43,7 +57,7 @@ int is_label_operand(char *operand);
  * @param symbol_name Name of the external symbol
  * @param address Address where the external symbol is referenced
  */
-void add_extern_reference(ExternList *extern_list, char *symbol_name, int address);
+void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address);
 
 /**
  * @brief Frees memory allocated for extern references list
@@ -51,6 +65,21 @@ void add_extern_reference(ExternList *extern_list, char *symbol_name, int addres
  * @param extern_list Pointer to the extern references list to free
  */
 void free_extern_list(ExternList *extern_list);
+
+
+/**
+ * @brief Writes the contents of the code image and data image to a .ob file.
+ *
+ * Creates the output file with ".ob" extension and writes the IC and DC sizes,
+ * followed by the code and data memory words in base-4 encoding.
+ *
+ * @param img Pointer to the CodeImage.
+ * @param ic_size Final instruction counter.
+ * @param dc_size Final data counter.
+ * @param data_image Pointer to the data image array.
+ * @param file_name Base name of the file (without extension).
+ */
+void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsigned int *data_image, char *file_name);
 
 /**
  * @brief Writes .ext file containing external symbol references

@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 
+/* Maximum length of a name of input file */
+#define MAX_FILE_NAME_LENGTH 70
+
 /* Maximum length of a line in the input file (including newline and null) */
 #define MAX_LINE_LENGTH 81
 
