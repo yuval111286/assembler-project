@@ -399,6 +399,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
 
         /* creating .ext file containing label name and their address only if exists*/
         write_ext_file(am_file, &extern_list);
+        write_code_image_to_ob_file(code_image, ic_final - IC_INIT_VALUE, dc_final, data_image, am_file);
     }
 
     free_extern_list(&extern_list);

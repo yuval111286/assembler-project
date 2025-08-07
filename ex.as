@@ -1,56 +1,19 @@
+; ===== LEGAL INSTRUCTIONS =====
 
-mov: .data 5, 6
+MAIN:   mov r3, r1          ; 2 words: base + registers in same word
+        cmp #5, r2          ; 3 words: base + immediate + reg
+        add LABEL1, LABEL2  ; 3 words: base + label1 + label2
+        lea MAT[1][2], r7   ; 3 words: base + matrix + reg
+        clr r4              ; 2 words: base + reg
+        stop                ; 1 word
 
+; ===== DIRECTIVES =====
 
-r1: .data 1, 2
+DATA1:  .data 5, -3, 99      ; 3 values
+STR1:   .string "Hello"    
+MAT1:   .mat [2][2] 1, 2, 3, 4 
 
-
-1Label: .data 3, 4
-
-
-GOOD_LABEL: .data 7, 8
-
-
-GOOD_LABEL: .string "duplicate"
-
-
-mov r1, r2, r3
-
-
-EMPTY_DATA: .data
-
-
-BAD_DATA: .data 1,,2
-
-
-BAD_STRING: .string "Unclosed string
-
-
-BAD_STRING2: .string missing closing"
-
-
-MAT1: .mat [2][2] 1, 2, 3
-
-
-MAT2: .mat [2,2] 1, 2, 3, 4
-
-
-MAT3: .mat [2][2], 1, 2, 3, 4
-
-
-MAT4: .mat [2][2] 1,,2,3,4
-
-
-MAT5: .mat [2][2] 1, 2, 3, 4,
-
-
-MAT6: .mat [1][3] 1, 2
-
-
-.extern
-
-
-.extern EXT1
-
-
-.extern EXT1
+; Dummy labels for testing direct addressing
+LABEL1: .data 10
+LABEL2: .data 20
+MAT:    .mat [2][2] 9,8,7,6

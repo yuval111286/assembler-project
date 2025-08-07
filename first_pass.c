@@ -96,6 +96,12 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     continue;
 }
 
+/* Skip empty lines and comments */
+if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
+    continue;
+}
+
+
 
         /* === LABEL HANDLING === */
         if (parsed.label[0] != '\0') {
@@ -251,6 +257,25 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     if (check_mcro_name_not_label(symbol_table, head, file_name)) {
         has_errors = 1;
     }
+
+    /* === DEBUG: CODE IMAGE OUTPUT === */
+printf("\n--- CODE IMAGE DUMP (First Pass) ---\n");
+
+for (i = 0; i < code_image->size; i++) {
+    printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
+           code_image->words[i].address,
+           code_image->words[i].value,
+           code_image->words[i].value,
+           code_image->words[i].ARE);
+}
+
+/* === DEBUG: DATA IMAGE OUTPUT === */
+printf("\n--- DATA IMAGE DUMP (First Pass) ---\n");
+
+for (i = 0; i < DC; i++) {
+    printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
+}
+
 
     return has_errors;
 }

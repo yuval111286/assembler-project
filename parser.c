@@ -306,10 +306,16 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     }
 
     token = strtok(buffer, " \t\n");
-    if (token == NULL || token[0] == ';') {
-        (*out).line_type = LINE_COMMENT;
-        return 1;
-    }
+    if (token == NULL) {
+    (*out).line_type = LINE_EMPTY;
+    return 1;
+}
+
+if (token[0] == ';') {
+    (*out).line_type = LINE_COMMENT;
+    return 1;
+}
+
 
     /* === LABEL === */
     if (token[strlen(token) - 1] == ':') {
@@ -368,7 +374,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     }
 
     /* Extract remaining line */
-    rest = strstr(line, token);
+     rest = strstr(line, token);
     if (rest == NULL) return 1;
     rest += strlen(token);
     rest = trim_spaces(rest);
@@ -476,6 +482,9 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         return 0;
     }
 
+    out->operand_count = i;
+
+     
         /* === Validate operand count for instructions === */
     if (out->line_type == LINE_INSTRUCTION) {
         int expected = expected_operands[out->opcode];
@@ -484,9 +493,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
             return 0;
         }
-    }
-
-
-       out->operand_count = i;
-    return 1;
+    
+}
+return 1;
 }
