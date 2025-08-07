@@ -73,9 +73,9 @@ typedef enum {
     OPCODE_DEC,
     OPCODE_JMP,
     OPCODE_BNE,
+    OPCODE_JSR,
     OPCODE_RED,
     OPCODE_PRN,
-    OPCODE_JSR,
     OPCODE_RTS,
     OPCODE_STOP,
     OPCODE_INVALID = -1

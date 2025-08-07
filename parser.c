@@ -281,7 +281,6 @@ int count_data_items(ParsedLine *parsed) {
  * @return 1 if the line is valid and parsed successfully, 0 otherwise
  */
 
-
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char buffer[MAX_LINE_LENGTH];
     char *token, *rest, *original_rest;

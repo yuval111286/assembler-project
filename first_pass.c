@@ -92,20 +92,20 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         line_number++;
 
         if (!parse_line(line, &parsed, file_name, line_number)) {
-    has_errors = 1;
-    continue;
-}
+            has_errors = 1;
+            continue;
+        }
 
 /* Skip empty lines and comments */
-if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
-    continue;
-}
+        if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
+            continue;
+        }
 
 
 
         /* === LABEL HANDLING === */
         if (parsed.label[0] != '\0') {
-            
+
 
             if (identify_opcode(parsed.label) != OPCODE_INVALID ||
                 identify_directive(parsed.label) != -1 ||
@@ -259,28 +259,28 @@ if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
     }
 
     /* === DEBUG: CODE IMAGE OUTPUT === */
-printf("\n--- CODE IMAGE DUMP (First Pass) ---\n");
+    printf("\n--- CODE IMAGE DUMP (First Pass) ---\n");
 
-for (i = 0; i < code_image->size; i++) {
-    printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
-           code_image->words[i].address,
-           code_image->words[i].value,
-           code_image->words[i].value,
-           code_image->words[i].ARE);
-}
+    for (i = 0; i < code_image->size; i++) {
+        printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
+               code_image->words[i].address,
+               code_image->words[i].value,
+               code_image->words[i].value,
+               code_image->words[i].ARE);
+    }
 
 /* === DEBUG: DATA IMAGE OUTPUT === */
-printf("\n--- DATA IMAGE DUMP (First Pass) ---\n");
+    printf("\n--- DATA IMAGE DUMP (First Pass) ---\n");
 
-for (i = 0; i < DC; i++) {
-    printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
-}
+    for (i = 0; i < DC; i++) {
+        printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
+    }
 
 /* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
-if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
-    error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
-    has_errors = 1;
-}
+    if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
+        error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
+        has_errors = 1;
+    }
 
     return has_errors;
 }

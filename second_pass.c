@@ -298,7 +298,7 @@ void encode_operand(CodeImage *code_image, int *code_index, char *operand,
 }
 
 void encode_instruction(CodeImage *code_image, ParsedLine *parsed, int current_address,
-                               SymbolTable *symbol_table, ExternList *extern_list) {
+                        SymbolTable *symbol_table, ExternList *extern_list) {
     unsigned int encoded_word = 0;
     int i,code_index = 0;
     int src_mode = -1, dst_mode = -1;
