@@ -1,4 +1,2 @@
-.entry LENGTH
 
-
-LENGTH: .data -9
+M1: .mat [2][2] 1,2,3,4

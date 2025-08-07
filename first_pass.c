@@ -10,7 +10,7 @@
 
 
 /* Global array to store data values from .data, .string, .mat */
-unsigned int data_image[MAX_DATA_SIZE];
+int data_image[MAX_DATA_SIZE];
 
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name) {
     node *current_macro;
@@ -64,6 +64,38 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
 }
 
 
+unsigned short parse_number_from_string(const char *str, int *error_flag) {
+    char *endptr;
+    long value;
+
+    if (str == NULL) {
+        *error_flag = 1;
+        return 0;
+    }
+
+    errno = 0;
+    value = strtol(str, &endptr, 10);
+
+    if (endptr == str || *endptr != '\0') {
+        *error_flag = 1;
+        return 0;
+    }
+
+    if ((value > MAX_NUM) || (value < MIN_NUM)) {
+        *error_flag = 1;
+        return 0;
+    }
+
+    *error_flag = 0;
+
+    /* Convert to 2's complement encoding in 12 bits */
+    if (value < 0) {
+        value = (1 << BITS_IN_WORD) + value;
+    }
+
+    return (unsigned short)value;
+}
+
 /**
  * Performs the first pass over a .am file and builds the symbol table,
  * encodes instructions, and processes data directives into the image arrays.
@@ -75,6 +107,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     int line_number = 0;
     int IC = IC_INIT_VALUE;
     int DC = 0;
+    int value,error;
     ParsedLine parsed;
     int i, words;
     unsigned int encoded_word;
@@ -188,7 +221,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         has_errors = 1;
                         continue;
                     }
-                    data_image[DC++] = atoi(parsed.operands[i]);
+
+                    value = parse_number_from_string(parsed.operands[i], &error);
+                    if (!error) {
+                        data_image[DC++] = (short)value;
+                    } else {
+                        printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
+                    }
+                    /*data_image[DC++] = atoi(parsed.operands[i]);*/
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
                 char *s = parsed.operands[0];
@@ -229,11 +269,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     continue;
                 }
 
-                data_image[DC++] = mat_rows;
-                data_image[DC++] = mat_cols;
-
                 for (i = 1; i < parsed.operand_count; i++) {
-                    data_image[DC++] = atoi(parsed.operands[i]);
+                    value = parse_number_from_string(parsed.operands[i], &error);
+                    if (!error) {
+                        data_image[DC++] = (short)value;
+                    } else {
+                        printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
+                    }
+                    /*data_image[DC++] = atoi(parsed.operands[i]);*/
                 }
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
                 if (parsed.operand_count != 1) {

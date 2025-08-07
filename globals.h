@@ -3,6 +3,14 @@
 
 #include <stdio.h>
 
+
+
+#define BITS_IN_WORD 10
+
+#define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1) /*511*/
+
+#define MIN_NUM (-(1 << (BITS_IN_WORD-1)))/*512*/
+
 /* Maximum length of a name of input file */
 #define MAX_FILE_NAME_LENGTH 70
 
@@ -32,7 +40,7 @@
 #define MAX_DATA_SIZE 255
 
 /* Global data image – stores encoded .data/.string/.mat values */
-extern unsigned int data_image[MAX_DATA_SIZE];
+extern int data_image[MAX_DATA_SIZE];
 
 /* ========== Enums ========== */
 

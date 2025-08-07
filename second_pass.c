@@ -9,7 +9,7 @@
 #include "code_image.h"
 
 /* External reference to data_image from first_pass.c */
-extern unsigned int data_image[MAX_DATA_SIZE];
+extern int data_image[MAX_DATA_SIZE];
 
 
 int is_label_operand(char *operand) {
