@@ -69,6 +69,8 @@ void error_log(char *file_name, int line, char *error_msg);
 #define MISSING_OPERANDS_DATA "Missing operands for .data directive"
 #define MATRIX_DIMENSION_FORMAT "[n][m] format is required for .mat dimensions"
 #define MULTIPLE_COMMAS "Multiple consecutive commas"
+#define TOTAL_MEMORY_OVERFLOW "Total memory exceeded: IC + DC > 255\n"
+
 
 
 

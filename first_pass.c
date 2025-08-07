@@ -276,6 +276,11 @@ for (i = 0; i < DC; i++) {
     printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
 }
 
+/* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
+if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
+    error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
+    has_errors = 1;
+}
 
     return has_errors;
 }
