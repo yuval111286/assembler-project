@@ -2,55 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "second_pass.h"
+#include "first_pass.h"
 #include "utils.h"
 #include "errors_handler.h"
 #include "parser.h"
 #include "code_image.h"
 
+/* External reference to data_image from first_pass.c */
+extern unsigned int data_image[MAX_DATA_SIZE];
 
-char *turn_line_to_base_4(unsigned int word) {
-    static char word_is_coded_in_base4[6] = {0};
-    char base4_options[4] = {'a', 'b', 'c', 'd'};
-    int i,remainder;
-
-    /*last char should be 0*/
-    word_is_coded_in_base4[5] = '\0';
-
-    /*loop is running from the end to the start*/
-    for (i = 4; i >= 0; i--) {
-        /*calculate the remainder by dividing by 4*/
-        remainder = word % 4;
-        /*build the word by placing the base4_options in remainder index in coded word*/
-        word_is_coded_in_base4[i] = base4_options[remainder];
-        /*divide address by 4 to move to the next digit*/
-        word = word / 4;
-    }
-
-    /*return coded address word*/
-    return word_is_coded_in_base4;
-}
-
-char *turn_address_to_base_4(unsigned int address) {
-    static char address_is_coded_in_base4[5] = {0};
-    char base4_options[4] = {'a', 'b', 'c', 'd'};
-    int i, remainder;
-
-    /*last char should be 0*/
-    address_is_coded_in_base4[4] = '\0';
-
-    /*loop is running from the end to the start*/
-    for (i = 3; i >= 0; i--) {
-        /*calculate the remainder by dividing by 4*/
-        remainder = address % 4;
-        /*build the word by placing the base4_options in remainder index in coded word*/
-        address_is_coded_in_base4[i] = base4_options[remainder];
-        /*divide address by 4 to move to the next digit*/
-        address = address / 4;
-    }
-
-    /*return coded address word*/
-    return address_is_coded_in_base4;
-}
 
 int is_label_operand(char *operand) {
     /*check if not num  */
@@ -221,14 +181,17 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
     int i;
     unsigned int final_value = value;
 
-    /* Add ARE field to the value */
+    /* Add ARE field to the value - value is already shifted to correct position if needed */
     if (are == 'A') {
-        final_value |= 0; /* 00 */
+        final_value = (final_value << 2) | 0; /* 00 */
     } else if (are == 'R') {
-        final_value |= 2; /* 10 */
+        final_value = (final_value << 2) | 2; /* 10 */
     } else if (are == 'E') {
-        final_value |= 1; /* 01 */
+        final_value = (final_value << 2) | 1; /* 01 */
     }
+
+    /* Ensure we stay within 10-bit limit */
+    final_value &= 0x3FF;
 
     for (i = 0; i < code_image->size; i++) {
         if (code_image->words[i].address == address) {
@@ -276,9 +239,9 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
         /* instruction lines */
         if (parsed.line_type == LINE_INSTRUCTION) {
             /* Complete encoding of operand words that need symbol resolution */
-            int i,word_offset = 1; /* Skip the first word which is already encoded */
+            int i, word_offset = 1; /* Skip the first word which is already encoded */
 
-            for ( i = 0; i < parsed.operand_count; i++) {
+            for (i = 0; i < parsed.operand_count; i++) {
                 char *operand = parsed.operands[i];
                 int addressing_mode = get_addressing_mode(operand);
 
@@ -309,12 +272,13 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                         /* First word: matrix address */
                         unsigned int encoded_value = 0;
                         char are_field = 'A';
-                        char matrix_name[MAX_LABEL_LEN];
+                        char matrix_name[MAX_LABEL_LEN + 1];
                         Symbol *sym;
+
+                        /* Extract matrix name before the first '[' */
                         sscanf(operand, "%[^[]", matrix_name);
 
                         sym = get_symbol(symbol_table, matrix_name);
-
 
                         if (sym != NULL) {
                             if (sym->type == SYMBOL_EXTERN) {

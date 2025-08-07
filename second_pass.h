@@ -1,26 +1,10 @@
-#ifndef ASSEMBLER_PROJECT_SECOND_PASS_H
-#define ASSEMBLER_PROJECT_SECOND_PASS_H
+
+#ifndef SECOND_PASS_H
+#define SECOND_PASS_H
 
 #include "globals.h"
 #include "symbol_table.h"
 #include "code_image.h"
-
-
-/**
- * @brief Converts an unsigned integer (0–1023) to a 5-digit base-4 string.
- *
- * Encodes the base-4 digits using 'a', 'b', 'c', 'd' for values 0–3.
- * Returns a static string valid until next call.
- *
- * @param value The number to convert (expected ≤ 1023).
- * @return Pointer to a null-terminated 5-character base-4 string.
-*/
-char *turn_line_to_base_4(unsigned int value);
-
-
-
-char *turn_address_to_base_4(unsigned int value);
-
 
 /**
  * @brief Performs the second pass of the assembler
@@ -66,7 +50,6 @@ void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address);
  */
 void free_extern_list(ExternList *extern_list);
 
-
 /**
  * @brief Writes the contents of the code image and data image to a .ob file.
  *
@@ -98,28 +81,13 @@ void write_ext_file(char *base_filename, ExternList *extern_list);
 void write_ent_file(char *base_filename, SymbolTable *symbol_table);
 
 /**
- * @brief Encodes a single operand and adds it to the code image
+ * @brief Updates a code word with a new value and ARE field
  *
  * @param code_image Pointer to the code image
- * @param code_index Pointer to current position in code image (will be updated)
- * @param operand The operand string to encode
- * @param symbol_table Pointer to the symbol table
- * @param extern_list Pointer to the extern references list
- * @param current_address Current memory address
+ * @param address Address of the word to update
+ * @param value New value for the word
+ * @param are ARE field ('A', 'R', or 'E')
  */
-void encode_operand(CodeImage *code_image, int *code_index, char *operand,
-                    SymbolTable *symbol_table, ExternList *extern_list, int current_address);
+void update_code_word(CodeImage *code_image, int address, unsigned int value, char are);
 
-/**
- * @brief Encodes a complete instruction and adds it to the code image
- *
- * @param code_image Pointer to the code image
- * @param parsed Pointer to the parsed instruction line
- * @param current_address Current memory address
- * @param symbol_table Pointer to the symbol table
- * @param extern_list Pointer to the extern references list
- */
-void encode_instruction(CodeImage *code_image, ParsedLine *parsed, int current_address,
-                        SymbolTable *symbol_table, ExternList *extern_list);
-
-#endif /*ASSEMBLER_PROJECT_SECOND_PASS_H*/
+#endif

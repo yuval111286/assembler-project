@@ -187,7 +187,7 @@ int get_addressing_mode( char *operand) {
     return ADDRESS_DIRECT;
 }
 
-/* Calculates the number of memory words needed to encode an instruction line */
+/* Fixed instruction_word_count function */
 int instruction_word_count(ParsedLine *parsed) {
     int count;
     int i;
@@ -199,27 +199,25 @@ int instruction_word_count(ParsedLine *parsed) {
 
     count = 1; /* Every instruction has at least one base word */
 
-    for (i = 0; i < (*parsed).operand_count; i++) {
-        mode = get_addressing_mode((*parsed).operands[i]);
+    /* Handle case where both operands are registers - they share one word */
+    if (parsed->operand_count == 2 &&
+        get_addressing_mode(parsed->operands[0]) == ADDRESS_REGISTER &&
+        get_addressing_mode(parsed->operands[1]) == ADDRESS_REGISTER) {
+        return 2; /* Base word + 1 shared register word */
+    }
+
+    for (i = 0; i < parsed->operand_count; i++) {
+        mode = get_addressing_mode(parsed->operands[i]);
 
         switch (mode) {
             case ADDRESS_IMMEDIATE:
             case ADDRESS_DIRECT:
+            case ADDRESS_REGISTER:
                 count += 1; /* Needs one additional word */
                 break;
 
             case ADDRESS_MATRIX:
                 count += 2; /* Matrix operands require two words */
-                break;
-
-            case ADDRESS_REGISTER:
-                /* If both operands are registers, they share one word */
-                if ((*parsed).operand_count == 2 &&
-                    get_addressing_mode((*parsed).operands[0]) == ADDRESS_REGISTER &&
-                    get_addressing_mode((*parsed).operands[1]) == ADDRESS_REGISTER) {
-                    return 2; /* Base + 1 shared word */
-                }
-                count += 1;
                 break;
 
             default:
