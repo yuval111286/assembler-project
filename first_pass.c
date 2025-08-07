@@ -96,6 +96,33 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
     return (unsigned short)value;
 }
 
+char *strip_quotes(char *str) {
+    size_t len;
+
+    if (str == NULL) return str;
+
+    len = strlen(str);
+
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
+        str[len - 1] = '\0';
+        safe_shift_left(str);
+        return str;
+    }
+    /*for LIHI add check for quetes exists*/
+    return str;
+}
+
+void safe_shift_left(char *str) {
+    int i = 0;
+    if (str == NULL) return;
+
+    while (str[i] != '\0') {
+        str[i] = str[i + 1];
+        i++;
+    }
+}
+
+
 /**
  * Performs the first pass over a .am file and builds the symbol table,
  * encodes instructions, and processes data directives into the image arrays.
@@ -231,7 +258,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     /*data_image[DC++] = atoi(parsed.operands[i]);*/
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
-                char *s = parsed.operands[0];
+                char *s;
+                strip_quotes(parsed.operands[0]);
+                s = parsed.operands[0];
                 for (i = 0; s[i] != '\0'; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
