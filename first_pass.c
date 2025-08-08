@@ -10,9 +10,6 @@
 #include "code_image.h"
 
 
-/* Global array to store data values from .data, .string, .mat */
-unsigned int data_image[MAX_DATA_SIZE];
-
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name) {
     node *current_macro;
     Symbol *current_symbol;
@@ -103,7 +100,7 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
  * Performs the first pass over a .am file and builds the symbol table,
  * encodes instructions, and processes data directives into the image arrays.
  */
-int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image, node **head)
+int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image, node **head,unsigned int *data_image)
 {
     FILE *fp;
     char line[MAX_LINE_LENGTH];

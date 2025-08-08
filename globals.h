@@ -37,8 +37,6 @@
 #define MAX_CODE_SIZE 255
 #define MAX_DATA_SIZE 255
 
-/* Global data image – stores encoded .data/.string/.mat values */
-extern unsigned int data_image[MAX_DATA_SIZE];
 
 /* ========== Enums ========== */
 

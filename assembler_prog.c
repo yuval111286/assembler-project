@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     node *mcro_head;
     SymbolTable symbol_table;
     CodeImage code_image;
+    unsigned int data_image[MAX_DATA_SIZE];
     int IC_final, DC_final, file_name_len;
 
     while (--argc > 0) {
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
         am_file = change_ending_of_file(argv[argc], ".am");
 
         printf("-- FIRST PASS --\n");
-        if (first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head)) {
+        if (first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image)) {
             free_symbol_table(&symbol_table);
             if (mcro_head) {
                 free_linked_list(mcro_head);
