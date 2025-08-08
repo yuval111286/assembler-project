@@ -78,10 +78,12 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
         fprintf(fp, "%s %s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
     }
 
+
     /* go over data image section code address and word*/
     for (i = 0; i < dc_size; i++) {
         fprintf(fp, "%s %s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
     }
+
 
     fclose(fp);
     free(obj_file_name);
@@ -211,6 +213,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     int line_number = 0, discover_errors = 0, current_address = IC_INIT_VALUE;
     ParsedLine parsed;
     ExternList extern_list;
+    int i;
 
     /* initialize extern linked list */
     extern_list.head = NULL;
@@ -231,10 +234,6 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
             continue;
         }
 
-        /* Skip empty lines and comments */
-        if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
-            continue;
-        }
 
         /* instruction lines */
         if (parsed.line_type == LINE_INSTRUCTION) {
@@ -347,6 +346,24 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     }
 
     fclose(fp);
+
+    /* === DEBUG: CODE IMAGE OUTPUT === */
+    printf("\n--- CODE IMAGE DUMP (SECOND Pass) ---\n");
+
+    for (i = 0; i < code_image->size; i++) {
+        printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
+               code_image->words[i].address,
+               code_image->words[i].value,
+               code_image->words[i].value,
+               code_image->words[i].ARE);
+    }
+
+    /* === DEBUG: DATA IMAGE OUTPUT === */
+    printf("\n--- DATA IMAGE DUMP (SECOND Pass) ---\n");
+
+    for (i = 0; i < dc_final; i++) {
+        printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
+    }
 
     /* Generate output files if no errors */
     if (!discover_errors) {

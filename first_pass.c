@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "first_pass.h"
 #include "parser.h"
 #include "utils.h"
@@ -8,6 +9,10 @@
 #include "analyze_text.h"
 #include "code_image.h"
 
+/* Define constants for number limits */
+#define MAX_NUM 511
+#define MIN_NUM -512
+#define BITS_IN_WORD 10
 
 /* Global array to store data values from .data, .string, .mat */
 int data_image[MAX_DATA_SIZE];
@@ -88,7 +93,7 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
 
     *error_flag = 0;
 
-    /* Convert to 2's complement encoding in 12 bits */
+    /* Convert to 2's complement encoding in 10 bits */
     if (value < 0) {
         value = (1 << BITS_IN_WORD) + value;
     }
@@ -156,16 +161,13 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             continue;
         }
 
-/* Skip empty lines and comments */
+        /* Skip empty lines and comments */
         if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
             continue;
         }
 
-
-
         /* === LABEL HANDLING === */
         if (parsed.label[0] != '\0') {
-
 
             if (identify_opcode(parsed.label) != OPCODE_INVALID ||
                 identify_directive(parsed.label) != -1 ||
@@ -210,31 +212,156 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
 
             /* Encode base word of instruction */
-            {
-                int opcode = parsed.opcode;
-                int src_mode = 0, dest_mode = 0;
-                int ARE = 0; /* Absolute */
+            int opcode = parsed.opcode;
+            int src_mode = 0, dest_mode = 0;
+            int ARE = 0; /* Absolute */
 
-                if (parsed.operand_count == 2) {
-                    src_mode = get_addressing_mode(parsed.operands[0]);
-                    dest_mode = get_addressing_mode(parsed.operands[1]);
-                } else if (parsed.operand_count == 1) {
-                    dest_mode = get_addressing_mode(parsed.operands[0]);
-                }
+            if (parsed.operand_count == 2) {
+                src_mode = get_addressing_mode(parsed.operands[0]);
+                dest_mode = get_addressing_mode(parsed.operands[1]);
+            } else if (parsed.operand_count == 1) {
+                dest_mode = get_addressing_mode(parsed.operands[0]);
+            }
 
-                encoded_word = 0;
-                encoded_word |= (opcode & 0xF) << 6;
-                encoded_word |= (src_mode & 0x3) << 4;
-                encoded_word |= (dest_mode & 0x3) << 2;
-                encoded_word |= (ARE & 0x3);
+            encoded_word = 0;
+            encoded_word |= (opcode & 0xF) << 6;
+            encoded_word |= (src_mode & 0x3) << 4;
+            encoded_word |= (dest_mode & 0x3) << 2;
+            encoded_word |= (ARE & 0x3);
 
-                add_code_word(code_image, IC, encoded_word, 'A');
-                IC++;
+            add_code_word(code_image, IC, encoded_word, 'A');
+            IC++;
 
-                while (words > 1) {
-                    add_code_word(code_image, IC, 0, 'A');
-                    IC++;
-                    words--;
+            /* Now encode additional words that can be encoded in first pass */
+            int current_word = 1;
+
+            /* Handle operands */
+            for (i = 0; i < parsed.operand_count; i++) {
+                int addressing_mode = get_addressing_mode(parsed.operands[i]);
+
+                switch (addressing_mode) {
+                    case ADDRESS_IMMEDIATE: {
+                        /* Parse and encode immediate value */
+                        int error_flag = 0;
+                        int immediate_value = parse_number_from_string(parsed.operands[i] + 1, &error_flag); /* Skip '#' */
+
+                        if (!error_flag) {
+                            encoded_word = encode_signed_value(immediate_value);
+                            encoded_word = (encoded_word << 2) | 0; /* ARE = 00 (Absolute) */
+                            add_code_word(code_image, IC, encoded_word, 'A');
+                        } else {
+                            add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                        }
+                        IC++;
+                        current_word++;
+                        break;
+                    }
+
+                    case ADDRESS_DIRECT: {
+                        /* Direct addressing - will be filled in second pass */
+                        add_code_word(code_image, IC, 0, 'A'); /* Placeholder */
+                        IC++;
+                        current_word++;
+                        break;
+                    }
+
+                    case ADDRESS_MATRIX: {
+                        /* Matrix addressing - first word (address) will be filled in second pass */
+                        add_code_word(code_image, IC, 0, 'A'); /* Placeholder for matrix address */
+                        IC++;
+                        current_word++;
+
+                        /* Second word - encode register indices */
+                        char matrix_operand[MAX_LINE_LENGTH];
+                        char *bracket1, *bracket2, *bracket3, *bracket4;
+                        int reg1 = -1, reg2 = -1;
+
+                        strcpy(matrix_operand, parsed.operands[i]);
+
+                        /* Find register names between brackets */
+                        bracket1 = strchr(matrix_operand, '[');
+                        if (bracket1) {
+                            bracket2 = strchr(bracket1 + 1, ']');
+                            if (bracket2) {
+                                *bracket2 = '\0';
+                                reg1 = identify_register(bracket1 + 1);
+
+                                bracket3 = strchr(bracket2 + 1, '[');
+                                if (bracket3) {
+                                    bracket4 = strchr(bracket3 + 1, ']');
+                                    if (bracket4) {
+                                        *bracket4 = '\0';
+                                        reg2 = identify_register(bracket3 + 1);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (reg1 != -1 && reg2 != -1) {
+                            encoded_word = 0;
+                            encoded_word |= (reg1 & 0xF) << 6;  /* Bits 9-6: first register */
+                            encoded_word |= (reg2 & 0xF) << 2;  /* Bits 5-2: second register */
+                            encoded_word |= 0;                   /* Bits 1-0: ARE = 00 (Absolute) */
+                            add_code_word(code_image, IC, encoded_word, 'A');
+                        } else {
+                            add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                        }
+                        IC++;
+                        current_word++;
+                        break;
+                    }
+
+                    case ADDRESS_REGISTER: {
+                        /* Check if both operands are registers - they share one word */
+                        if (parsed.operand_count == 2 &&
+                            get_addressing_mode(parsed.operands[0]) == ADDRESS_REGISTER &&
+                            get_addressing_mode(parsed.operands[1]) == ADDRESS_REGISTER) {
+
+                            if (i == 0) { /* First register operand */
+                                int src_reg = identify_register(parsed.operands[0]);
+                                int dest_reg = identify_register(parsed.operands[1]);
+
+                                if (src_reg != -1 && dest_reg != -1) {
+                                    encoded_word = 0;
+                                    encoded_word |= (src_reg & 0xF) << 6;   /* Bits 9-6: source register */
+                                    encoded_word |= (dest_reg & 0xF) << 2; /* Bits 5-2: destination register */
+                                    encoded_word |= 0;                     /* Bits 1-0: ARE = 00 (Absolute) */
+                                    add_code_word(code_image, IC, encoded_word, 'A');
+                                } else {
+                                    add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                                }
+                                IC++;
+                                current_word++;
+                            }
+                            /* Skip second register as it's already encoded */
+                        } else {
+                            /* Single register operand */
+                            int reg_num = identify_register(parsed.operands[i]);
+
+                            if (reg_num != -1) {
+                                encoded_word = 0;
+                                if (i == 0) { /* Source operand */
+                                    encoded_word |= (reg_num & 0xF) << 6; /* Bits 9-6 */
+                                } else { /* Destination operand */
+                                    encoded_word |= (reg_num & 0xF) << 2; /* Bits 5-2 */
+                                }
+                                encoded_word |= 0; /* ARE = 00 (Absolute) */
+                                add_code_word(code_image, IC, encoded_word, 'A');
+                            } else {
+                                add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                            }
+                            IC++;
+                            current_word++;
+                        }
+                        break;
+                    }
+
+                    default:
+                        /* Unknown addressing mode */
+                        add_code_word(code_image, IC, 0, 'A');
+                        IC++;
+                        current_word++;
+                        break;
                 }
             }
         }
@@ -255,7 +382,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     } else {
                         printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
                     }
-                    /*data_image[DC++] = atoi(parsed.operands[i]);*/
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
                 char *s;
@@ -305,7 +431,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     } else {
                         printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
                     }
-                    /*data_image[DC++] = atoi(parsed.operands[i]);*/
                 }
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
                 if (parsed.operand_count != 1) {
@@ -331,7 +456,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     }
 
     /* === DEBUG: CODE IMAGE OUTPUT === */
-    printf("\n--- CODE IMAGE DUMP (First Pass) ---\n");
+    printf("\n--- CODE IMAGE DUMP (FIRST Pass) ---\n");
 
     for (i = 0; i < code_image->size; i++) {
         printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
@@ -341,14 +466,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                code_image->words[i].ARE);
     }
 
-/* === DEBUG: DATA IMAGE OUTPUT === */
-    printf("\n--- DATA IMAGE DUMP (First Pass) ---\n");
+    /* === DEBUG: DATA IMAGE OUTPUT === */
+    printf("\n--- DATA IMAGE DUMP (FIRST Pass) ---\n");
 
     for (i = 0; i < DC; i++) {
         printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
     }
 
-/* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
+    /* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
     if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
         has_errors = 1;
