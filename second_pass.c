@@ -9,7 +9,7 @@
 #include "code_image.h"
 
 /* External reference to data_image from first_pass.c */
-extern int data_image[MAX_DATA_SIZE];
+extern unsigned int data_image[MAX_DATA_SIZE];
 
 
 int is_label_operand(char *operand) {
@@ -75,28 +75,22 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
 
     /* go over code image section and code address and word*/
     for (i = 0; i < (*img).size; i++) {
-        if (i==(*img).size-1&&dc_size==0)
-        {
-            fprintf(fp, "%s %s", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
-
+        if (i==(*img).size-1&&dc_size==0){
+            fprintf(fp, "%s\t%s", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
         }
-        else
-        {
-            fprintf(fp, "%s %s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
+        else{
+            fprintf(fp, "%s\t%s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
         }
     }
 
 
     /* go over data image section code address and word*/
     for (i = 0; i < dc_size; i++) {
-        if (i==dc_size-1)
-        {
-            fprintf(fp, "%s %s", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
+        if (i==dc_size-1){
+            fprintf(fp, "%s\t%s", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
         }
-        else
-        {
-            fprintf(fp, "%s %s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
-
+        else{
+            fprintf(fp, "%s\t%s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
         }
     }
 
@@ -148,13 +142,13 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
             /*calculate address in base4*/
             base4_address = turn_address_to_base_4(current->address);
             /*write to extern file extern label name and address */
-            fprintf(fp, "%s %s", current->symbol_name, base4_address);
+            fprintf(fp, "%s\t%s", current->symbol_name, base4_address);
         }
         else {
             /*calculate address in base4*/
             base4_address = turn_address_to_base_4(current->address);
             /*write to extern file extern label name and address */
-            fprintf(fp, "%s %s\n", current->symbol_name, base4_address);
+            fprintf(fp, "%s\t%s\n", current->symbol_name, base4_address);
             count_extern_labels_during_print++;
 
         }
@@ -210,13 +204,13 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
                 /*calculate address in base 4*/
                 base4_address = turn_address_to_base_4(current->address);
                 /*write to file entry label name and address*/
-                fprintf(fp, "%s %s", current->name, base4_address);
+                fprintf(fp, "%s\t%s", current->name, base4_address);
 
             } else{
                 /*calculate address in base 4*/
                 base4_address = turn_address_to_base_4(current->address);
                 /*write to file entry label name and address*/
-                fprintf(fp, "%s %s\n", current->name, base4_address);
+                fprintf(fp, "%s\t%s\n", current->name, base4_address);
                 count_entry_labels_during_print++;
             }
 

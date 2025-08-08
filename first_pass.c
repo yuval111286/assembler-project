@@ -11,7 +11,7 @@
 
 
 /* Global array to store data values from .data, .string, .mat */
-int data_image[MAX_DATA_SIZE];
+unsigned int data_image[MAX_DATA_SIZE];
 
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name) {
     node *current_macro;
