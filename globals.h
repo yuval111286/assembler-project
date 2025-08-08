@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 
-
 #define BITS_IN_WORD 10
 
 #define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1) /*511*/

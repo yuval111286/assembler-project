@@ -9,10 +9,6 @@
 #include "analyze_text.h"
 #include "code_image.h"
 
-/* Define constants for number limits */
-#define MAX_NUM 511
-#define MIN_NUM -512
-#define BITS_IN_WORD 10
 
 /* Global array to store data values from .data, .string, .mat */
 int data_image[MAX_DATA_SIZE];
@@ -179,6 +175,12 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
         /* === INSTRUCTION HANDLING === */
         if (parsed.line_type == LINE_INSTRUCTION) {
+            /* Encode base word of instruction */
+            int opcode;
+            int src_mode = 0, dest_mode = 0;
+            int ARE = 0;
+            int current_word;/* Absolute */
+
             words = instruction_word_count(&parsed);
             if (words <= 0) {
                 error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
@@ -186,11 +188,8 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 continue;
             }
 
-            /* Encode base word of instruction */
-            int opcode = parsed.opcode;
-            int src_mode = 0, dest_mode = 0;
-            int ARE = 0; /* Absolute */
 
+            opcode = parsed.opcode;
             if (parsed.operand_count == 2) {
                 src_mode = get_addressing_mode(parsed.operands[0]);
                 dest_mode = get_addressing_mode(parsed.operands[1]);
@@ -208,7 +207,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             IC++;
 
             /* Now encode additional words that can be encoded in first pass */
-            int current_word = 1;
+            current_word = 1;
 
             /* Handle operands */
             for (i = 0; i < parsed.operand_count; i++) {
@@ -241,15 +240,16 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
 
                     case ADDRESS_MATRIX: {
+                        /* Second word - encode register indices */
+                        char matrix_operand[MAX_LINE_LENGTH];
+                        char *bracket1, *bracket2, *bracket3, *bracket4;
+                        int reg1 = -1, reg2 = -1;
+
                         /* Matrix addressing - first word (address) will be filled in second pass */
                         add_code_word(code_image, IC, 0, 'A'); /* Placeholder for matrix address */
                         IC++;
                         current_word++;
 
-                        /* Second word - encode register indices */
-                        char matrix_operand[MAX_LINE_LENGTH];
-                        char *bracket1, *bracket2, *bracket3, *bracket4;
-                        int reg1 = -1, reg2 = -1;
 
                         strcpy(matrix_operand, parsed.operands[i]);
 
