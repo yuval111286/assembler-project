@@ -143,7 +143,7 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     current = extern_list->head;
     while (current != NULL) {
 
-        if (count_extern_labels_during_print==num_of_extern_labels)
+        if (count_extern_labels_during_print==num_of_extern_labels-1)
         {
             /*calculate address in base4*/
             base4_address = turn_address_to_base_4(current->address);
@@ -159,7 +159,6 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
 
         }
         current = current->next;
-
 
     }
 
