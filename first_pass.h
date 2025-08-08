@@ -15,9 +15,6 @@
  */
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name);
 
-char *strip_quotes(char *str);
-
-void safe_shift_left(char *str);
 /*
  * Runs the first pass on the given source file.
  *

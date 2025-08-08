@@ -76,6 +76,10 @@ int instruction_word_count(ParsedLine *parsed);
  */
 int count_data_items(ParsedLine *parsed);
 
+char *strip_quotes(char *str);
+
+void safe_shift_left(char *str);
+
 
 
 #endif /* PARSER_H */

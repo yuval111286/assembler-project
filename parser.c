@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "analyze_text.h"
 #include "errors_handler.h"
+#include "globals.h"
 
 
 
@@ -281,7 +282,7 @@ int count_data_items(ParsedLine *parsed) {
 
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char buffer[MAX_LINE_LENGTH];
-    char *token, *rest, *original_rest;
+    char *string_without_quotes,*token, *rest, *original_rest;
     int i;
 
     /* Reset output */
@@ -384,6 +385,9 @@ if (token[0] == ';') {
             return 0;
         }
         strncpy(out->operands[0], rest, MAX_LINE_LENGTH - 1);
+        string_without_quotes=strip_quotes(out->operands[0]);
+        strncpy(out->operands[0], string_without_quotes, MAX_LINE_LENGTH - 1);
+
         out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
         out->operand_count = 1;
         return 1;
@@ -493,4 +497,29 @@ if (token[0] == ';') {
     
 }
 return 1;
+}
+
+char *strip_quotes(char *str) {
+    size_t len;
+
+    if (str == NULL) return str;
+
+    len = strlen(str);
+
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
+        str[len - 1] = '\0';
+        safe_shift_left(str);
+        return str;
+    }
+    return str;
+}
+
+void safe_shift_left(char *str) {
+    int i = 0;
+    if (str == NULL) return;
+
+    while (str[i] != '\0') {
+        str[i] = str[i + 1];
+        i++;
+    }
 }
