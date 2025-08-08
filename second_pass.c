@@ -75,14 +75,31 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
 
     /* go over code image section and code address and word*/
     for (i = 0; i < (*img).size; i++) {
-        fprintf(fp, "%s %s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
+        if (i==(*img).size-1&&dc_size==0)
+        {
+            fprintf(fp, "%s %s", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
+
+        }
+        else
+        {
+            fprintf(fp, "%s %s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
+        }
     }
 
 
     /* go over data image section code address and word*/
     for (i = 0; i < dc_size; i++) {
-        fprintf(fp, "%s %s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
+        if (i==dc_size-1)
+        {
+            fprintf(fp, "%s %s", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
+        }
+        else
+        {
+            fprintf(fp, "%s %s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
+
+        }
     }
+
 
 
     fclose(fp);
@@ -367,9 +384,11 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
 
     /* Generate output files if no errors */
     if (!discover_errors) {
-        write_ent_file(am_file, symbol_table);
-        write_ext_file(am_file, &extern_list);
         write_code_image_to_ob_file(code_image, ic_final - IC_INIT_VALUE, dc_final, data_image, am_file);
+
+        write_ent_file(am_file, symbol_table);
+
+        write_ext_file(am_file, &extern_list);
     }
 
     free_extern_list(&extern_list);
