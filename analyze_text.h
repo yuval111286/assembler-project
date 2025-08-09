@@ -7,7 +7,7 @@
  * @param str line from file
  * @returns clean string without space in the start and the end of the string.
  */
-char *trim_spaces(char *str);
+char *cut_spaces_before_and_after_string(char *str);
 
 /**
  *@brief Checks if the line is a comment or empty
@@ -24,14 +24,6 @@ int check_line_comment_or_empty(char *line);
  * @return output file containing input file content without comment or empty line
  */
 FILE* create_clean_file(char* input_file_name, char* output_file_name);
-
-/**
- * @brief Skip spaces before string
- *
- * @param str string with spaces before
- * @return NULL if new string is empty, otherwise returns the string with no space before
- */
-char *skip_spaces(char *str);
 
 /**
  * @brief Skip the first word str points

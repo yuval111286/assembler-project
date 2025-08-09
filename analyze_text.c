@@ -4,30 +4,21 @@
 #include "utils.h"
 #include "errors_handler.h"
 
-char *trim_spaces(char *str) {
-    char *end;
+char *cut_spaces_before_and_after_string(char *str) {
+    char *end_pointer_of_string;
     /* skip leading whitespace */
     while (isspace(*str)) str++;
 
+    /*empty string*/
     if (*str == '\0') return str;
 
-    /* find end of string and trim trailing whitespace */
-    end = str + strlen(str) - 1;
-    while (end > str && isspace(*end)) {
-        *end = '\0';
-        end--;
+    /* find end of string and cut trailing whitespace */
+    end_pointer_of_string = str + strlen(str) - 1;
+    while (end_pointer_of_string > str && isspace(*end_pointer_of_string)) {
+        /*short the end of string from empty chars*/
+        *end_pointer_of_string = '\0';
+        end_pointer_of_string--;
     }
-
-    return str;
-}
-
-char *skip_spaces(char *str){
-
-    /* skip leading whitespace */
-    while (isspace(*str)) str++;
-
-    if (*str == '\0') return NULL;
-
     return str;
 }
 
@@ -81,7 +72,7 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
         if (!check_line_comment_or_empty(line)) {
             /* create copy string for trimming space */
             strcpy(line_copy, line);
-            clean = trim_spaces(line_copy);
+            clean = cut_spaces_before_and_after_string(line_copy);
 
             /* write clean line to output file */
             fputs(clean, output_file);
