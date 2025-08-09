@@ -66,7 +66,7 @@ int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , n
             /*mcroend after mcro, needs to ignore*/
 
             if (strncmp(line, MCROEND, 7) != 0) {
-                mcro_name = skip_spaces(line);
+                mcro_name = cut_spaces_before_and_after_string(line);
                 if (mcro_name == NULL) {
                     error_log(org_file_name, *line_counter, MACRO_WITHOUT_NAME);
                     return -1;

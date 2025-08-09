@@ -361,7 +361,7 @@ if (token[0] == ';') {
         if (op == OPCODE_STOP || op == OPCODE_RTS) {
             token = strtok(NULL, "\n");
             if (token != NULL) {
-                token = trim_spaces(token);
+                token = cut_spaces_before_and_after_string(token);
                 if (token[0] != '\0' && token[0] != ';') {
                     error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
                     return 0;
@@ -375,7 +375,7 @@ if (token[0] == ';') {
      rest = strstr(line, token);
     if (rest == NULL) return 1;
     rest += strlen(token);
-    rest = trim_spaces(rest);
+    rest = cut_spaces_before_and_after_string(rest);
     original_rest = rest;
 
         /* === SPECIAL DIRECTIVE CHECKS === */
@@ -419,7 +419,7 @@ if (token[0] == ';') {
         out->operand_count = 1;
 
         after_dims = rest + i;
-        after_dims = trim_spaces(after_dims);
+        after_dims = cut_spaces_before_and_after_string(after_dims);
 
         if (after_dims[0] == ',') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
@@ -429,7 +429,7 @@ if (token[0] == ';') {
         /* Now parse the remaining values */
         token = strtok(after_dims, ",");
         while (token != NULL) {
-            token = trim_spaces(token);
+            token = cut_spaces_before_and_after_string(token);
             if (token[0] == '\0') {
                 error_log(file_name, line_number, MULTIPLE_COMMAS);
                 return 0;
@@ -462,7 +462,7 @@ if (token[0] == ';') {
     /* === Default operand parsing === */
     i = 0;
     while ((token = strtok((i == 0) ? rest : NULL, ",")) != NULL) {
-        token = trim_spaces(token);
+        token = cut_spaces_before_and_after_string(token);
         if (token[0] == '\0') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
             return 0;
