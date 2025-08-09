@@ -9,6 +9,53 @@
 #include "code_image.h"
 
 
+char *turn_line_to_base_4(unsigned int word) {
+    static char word_is_coded_in_base4[6] = {0};
+    char base4_options[4] = {'a', 'b', 'c', 'd'};
+    int i, remainder;
+
+    /* Mask to 10 bits to ensure we only work with valid range */
+    word &= 0x3FF;
+
+    /*last char should be 0*/
+    word_is_coded_in_base4[5] = '\0';
+
+    /*loop is running from the end to the start*/
+    for (i = 4; i >= 0; i--) {
+        /*calculate the remainder by dividing by 4*/
+        remainder = word % 4;
+        /*build the word by placing the base4_options in remainder index in coded word*/
+        word_is_coded_in_base4[i] = base4_options[remainder];
+        /*divide address by 4 to move to the next digit*/
+        word = word / 4;
+    }
+
+    /*return coded address word*/
+    return word_is_coded_in_base4;
+}
+
+char *turn_address_to_base_4(unsigned int address) {
+    static char address_is_coded_in_base4[5] = {0};
+    char base4_options[4] = {'a', 'b', 'c', 'd'};
+    int i, remainder;
+
+    /*last char should be 0*/
+    address_is_coded_in_base4[4] = '\0';
+
+    /*loop is running from the end to the start*/
+    for (i = 3; i >= 0; i--) {
+        /*calculate the remainder by dividing by 4*/
+        remainder = address % 4;
+        /*build the word by placing the base4_options in remainder index in coded word*/
+        address_is_coded_in_base4[i] = base4_options[remainder];
+        /*divide address by 4 to move to the next digit*/
+        address = address / 4;
+    }
+
+    /*return coded address word*/
+    return address_is_coded_in_base4;
+}
+
 int is_label_operand(char *operand) {
     /*check if not num  */
     if (operand[0] == '#') return 0;

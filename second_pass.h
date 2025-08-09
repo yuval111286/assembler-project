@@ -7,6 +7,17 @@
 #include "code_image.h"
 
 /**
+ * Converts an unsigned integer to a 5-digit base-4 string
+ */
+char *turn_line_to_base_4(unsigned int word);
+
+/**
+ * Converts an address to a 4-digit base-4 string
+ */
+char *turn_address_to_base_4(unsigned int address);
+
+
+/**
  * @brief Performs the second pass of the assembler
  *
  * Completes the encoding of instructions by:

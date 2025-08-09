@@ -6,6 +6,17 @@
 #include "linked_list.h"
 #include <stdio.h>
 
+
+int parse_matrix_dimensions(const char *token, int *rows, int *cols);
+
+/**
+ *
+ * @param num the num to encode
+ * @return for positive num return the num
+ * for negative num return two's complement representation
+ */
+unsigned int encode_signed_num(int num);
+
 /**
  *
  * @param symbol_table

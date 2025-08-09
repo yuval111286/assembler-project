@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include "first_pass.h"
 #include "parser.h"
@@ -9,6 +10,42 @@
 #include "analyze_text.h"
 #include "code_image.h"
 
+int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
+    char cleaned[MAX_LINE_LENGTH];
+    int len, read_len;
+
+    if (token == NULL || rows == NULL || cols == NULL) {
+        return 0;
+    }
+
+    strncpy(cleaned, token, MAX_LINE_LENGTH - 1);
+    cleaned[MAX_LINE_LENGTH - 1] = '\0';
+
+    len = strlen(cleaned);
+    while (len > 0 && (cleaned[len - 1] == ',' || isspace((unsigned char)cleaned[len - 1]))) {
+        cleaned[len - 1] = '\0';
+        len--;
+    }
+
+    if (sscanf(cleaned, "[%d][%d]%n", rows, cols, &read_len) == 2) {
+        if (cleaned[read_len] != '\0') {
+            return 0; /* extra characters after matrix dimension */
+        }
+
+        if (*rows > 0 && *cols > 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/* encode signed integer in 10-bit two's complement */
+unsigned int encode_signed_num(int num) {
+    /*for positive num return the num
+     *for negative num return two's complement representation*/
+    return (unsigned int)num & 0x3FF;
+}
 
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name) {
     node *current_macro;
@@ -217,7 +254,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         int immediate_value = parse_number_from_string(parsed.operands[i] + 1, &error_flag); /* Skip '#' */
 
                         if (!error_flag) {
-                            encoded_word = encode_signed_value(immediate_value);
+                            encoded_word = encode_signed_num(immediate_value);
                             encoded_word = (encoded_word << 2) | 0; /* ARE = 00 (Absolute) */
                             add_code_word(code_image, IC, encoded_word, 'A');
                         } else {
