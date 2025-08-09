@@ -128,7 +128,7 @@ char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
     char *mcro_name, *extra_text_after_mcro_name;
 
     /* skip mcro word to reach mcro name*/
-    mcro_name = skip_word(line);
+    mcro_name = skip_one_word(line);
 
     /* no mcro name exist*/
     if(mcro_name == NULL)
@@ -137,7 +137,7 @@ char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
         return NULL;
     }
     /* check for extra text after mcro name*/
-    extra_text_after_mcro_name= skip_word(mcro_name);
+    extra_text_after_mcro_name= skip_one_word(mcro_name);
     if(extra_text_after_mcro_name !=NULL)
     {
         error_log(org_file_name,*line_counter,EXTRA_TEXT_AFTER_MCRO_START);
