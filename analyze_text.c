@@ -22,20 +22,24 @@ char *cut_spaces_before_and_after_string(char *str) {
     return str;
 }
 
-char *skip_word(char *str) {
+char *skip_one_word(char *word) {
+
+    if (word == NULL) return NULL;
+
     /* skip current word */
-    while (*str != '\0' && !isspace(*str)) {
-        str++;
+    while (*word != '\0' && !isspace(*word)) {
+        word++;
     }
 
     /* skip spaces after the word */
-    while (isspace(*str)) {
-        str++;
+    while (isspace(*word)) {
+        word++;
     }
 
-    if (*str == '\0') return NULL;
+    /*no more text after this word*/
+    if (*word == '\0') return NULL;
 
-    return str;
+    return word;
 }
 
 int check_line_comment_or_empty(char *line) {
@@ -45,7 +49,6 @@ int check_line_comment_or_empty(char *line) {
     }
     return 0;
 }
-
 
 
 FILE* create_clean_file(char* input_file_name, char* output_file_name) {
@@ -93,23 +96,45 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
 }
 
 
-char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len) {
-    int i;
+char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len_of_chars_to_copy) {
+    int i,current_char;
     char *str;
 
+    /* check input parameters are not empty*/
+    if (fp == NULL || pos == NULL || len_of_chars_to_copy <= 0) {
+        return NULL;
+    }
+
+    /* set the file position to the given saved position*/
     if (fsetpos(fp, pos) != 0) {
         printf(FAIL_TO_SET_POSITION_IN_FILE);
         return NULL;
     }
-    str = malloc_allocation((len + 1));
+
+    /* allocate memory for the string (+1 for the null terminator)*/
+    str = malloc_allocation(len_of_chars_to_copy + 1);
     if (str == NULL) {
         return NULL;
     }
 
-    for (i = 0; i < len; i++) {
-        str[i] = getc(fp);
+    /* read up to 'len_of_chars_to_copy' characters from the file*/
+    for (i = 0; i < len_of_chars_to_copy; i++) {
+        current_char = getc(fp);
+
+        /* stop if end-of-file is reached early*/
+        if (current_char == EOF) {
+            break;
+        }
+
+        /*placing current char in the string*/
+        str[i] = (char)current_char;
     }
-    str[len] = '\0';
+
+    /* putting null-terminate in the end of the string*/
+    str[i] = '\0';
+
+    /* save the current file position after reading*/
     fgetpos(fp, pos);
+
     return str;
 }
