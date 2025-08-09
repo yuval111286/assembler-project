@@ -46,6 +46,7 @@ void error_log(char *file_name, int line, char *error_msg);
 
 /* First Pass Parsing Errors */
 #define SYNTAX_ERROR "Syntax error"
+#define FAIL_CONVERT_STRING_TO_NUM "Can not convert string to num"
 #define INVALID_LABEL_NAME "Invalid label name \n"
 #define DUPLICATE_LABEL "Label already defined \n"
 #define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label \n"

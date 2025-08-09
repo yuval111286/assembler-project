@@ -1,5 +1,4 @@
 #include "linked_list.h"
-#include "errors_handler.h"
 #include "utils.h"
 
 

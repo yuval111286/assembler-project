@@ -7,7 +7,6 @@
 #include "parser.h"
 #include "utils.h"
 #include "errors_handler.h"
-#include "analyze_text.h"
 #include "code_image.h"
 
 int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
@@ -123,14 +122,13 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
 
     *error_flag = 0;
 
-    /* Convert to 2's complement encoding in 10 bits */
+    /* Convert to 2's complement encoding in 10 bits*/
     if (value < 0) {
         value = (1 << BITS_IN_WORD) + value;
     }
 
     return (unsigned short)value;
 }
-
 
 
 /**
@@ -389,7 +387,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     if (!error) {
                         data_image[DC++] = (short)value;
                     } else {
-                        printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
+                        error_log(file_name,parsed.line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
@@ -437,7 +435,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     if (!error) {
                         data_image[DC++] = (short)value;
                     } else {
-                        printf("שגיאה בשורה %d: לא ניתן להמיר את %s למספר.\n", parsed.line_number, parsed.operands[i]);
+                        error_log(file_name,parsed.line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
