@@ -19,7 +19,7 @@
 void error_log(char *file_name, int line, char *error_msg);
 
 
-/*Macro Errors*/
+/*Preprocessor errors*/
 #define LONG_LINE "Line too long more than 80 characters \n"
 #define MACRO_MULTI_DEF "Multi definitions for the same MACRO \n"
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
@@ -36,7 +36,6 @@ void error_log(char *file_name, int line, char *error_msg);
 
 
 /*Internal errors*/
-
 #define FILE_NOT_OPEN_READING "Can not open file for reading \n"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing \n"
 #define MEMORY_FAIL "Fail to allocate memory \n"
@@ -76,10 +75,7 @@ void error_log(char *file_name, int line, char *error_msg);
 
 
 
-
-
 /* Second Pass Parsing Errors */
-
 #define ENTRY_LABEL_NO_DEF "Entry label was not defined"
 #define SAME_NAME_ENTRY_AND_EXTERNAL_LABEL "Same label is external and entry"
 
