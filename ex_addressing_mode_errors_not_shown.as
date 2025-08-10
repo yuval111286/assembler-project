@@ -1,13 +1,1 @@
-LABEL1:
-MAIN:
-LOOP:
-
-
-
-
-
-
-
-
-
-
+K: .data

@@ -164,7 +164,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             continue;
         }
 
-        /* === LABEL HANDLING === */
+        /* label handling */
         if (parsed.label[0] != '\0') {
 
             if (identify_opcode(parsed.label) != OPCODE_INVALID ||
@@ -200,7 +200,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
         }
 
-        /* === INSTRUCTION HANDLING === */
+        /* instruction line handling */
         if (parsed.line_type == LINE_INSTRUCTION) {
             /* Encode base word of instruction */
             int opcode,src_mode = 0, dest_mode = 0, ARE = 0,current_word;/* Absolute */
@@ -364,7 +364,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
         }
 
-        /* === DIRECTIVE HANDLING === */
+        /* directive line handling */
         if (parsed.line_type == LINE_DIRECTIVE) {
             if (strcmp(parsed.directive_name, "data") == 0) {
                 for (i = 0; i < parsed.operand_count; i++) {
@@ -470,7 +470,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
     }
 
-    /* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
+    /* make sure IC + DC doesn't exceed allowed memory*/
     if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
         discover_errors = 1;

@@ -259,7 +259,7 @@ int get_addressing_mode( char *operand) {
  * @param line_number Line number for error reporting
  * @return 1 if valid, 0 if invalid addressing mode detected
  */
-int validate_addressing_modes(ParsedLine *parsed, char *file_name, int line_number) {
+int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int line_number) {
     int opcode = parsed->opcode;
 
 
@@ -311,9 +311,9 @@ int validate_addressing_modes(ParsedLine *parsed, char *file_name, int line_numb
  * @param line_number Line number for error reporting
  * @return 1 if valid, 0 if invalid register names
  */
-int validate_matrix_registers(char *operand, char *file_name, int line_number) {
+int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_number) {
     char *open_bracket_first_reg, *closed_bracket_first_reg, *open_bracket_second_reg, *closed_bracket_second_reg;
-    char temp_operand[MAX_LINE_LENGTH],*ptr;
+    char temp_operand[MAX_LINE_LENGTH],*point_after_first_reg;
 
     /* Make a copy to avoid modifying original */
     strncpy(temp_operand, operand, MAX_LINE_LENGTH - 1);
@@ -339,13 +339,13 @@ int validate_matrix_registers(char *operand, char *file_name, int line_number) {
     }
 
     /* Check for illegal whitespace between ']' and '[' */
-    ptr = closed_bracket_first_reg + 1;
-    while (*ptr != '\0' && *ptr != '[') {
-        if (isspace((unsigned char)*ptr)) {
+    point_after_first_reg = closed_bracket_first_reg + 1;
+    while (*point_after_first_reg != '\0' && *point_after_first_reg != '[') {
+        if (isspace((unsigned char)*point_after_first_reg)) {
             error_log(file_name, line_number, MATRIX_INVALID_WHITESPACE);
             return 0;
         }
-        ptr++;
+        point_after_first_reg++;
     }
 
     open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
@@ -371,15 +371,13 @@ int validate_matrix_registers(char *operand, char *file_name, int line_number) {
 
 /* Fixed instruction_word_count function */
 int instruction_word_count(ParsedLine *parsed) {
-    int count;
-    int i;
-    int mode;
+    int word_counter,i,mode;
 
     if (parsed == NULL) {
         return 0; /* Defensive check */
     }
 
-    count = 1; /* Every instruction has at least one base word */
+    word_counter = 1; /* Every instruction has at least one base word */
 
     /* Handle case where both operands are registers - they share one word */
     if (parsed->operand_count == 2 &&
@@ -395,11 +393,11 @@ int instruction_word_count(ParsedLine *parsed) {
             case ADDRESS_IMMEDIATE:
             case ADDRESS_DIRECT:
             case ADDRESS_REGISTER:
-                count += 1; /* Needs one additional word */
+                word_counter += 1; /* Needs one additional word */
                 break;
 
             case ADDRESS_MATRIX:
-                count += 2; /* Matrix operands require two words */
+                word_counter += 2; /* Matrix operands require two words */
                 break;
 
             default:
@@ -407,13 +405,11 @@ int instruction_word_count(ParsedLine *parsed) {
         }
     }
 
-    return count;
+    return word_counter;
 }
 
 /* Returns the number of memory words required for .data, .string or .mat directives */
 int count_data_items(ParsedLine *parsed) {
-    /*int count;*/
-    /*int i;*/
 
     if (parsed == NULL) {
         return 0;
@@ -462,7 +458,7 @@ int count_data_items(ParsedLine *parsed) {
 
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char buffer[MAX_LINE_LENGTH];
-    char *string_without_quotes,*token, *rest, *original_rest;
+    char *string_without_quotes,*token, *starts_operands_pointer, *dynamic_operands_pointer;
     int i;
 
     /* Reset output */
@@ -495,10 +491,11 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     }
 
 
-    /* === LABEL === */
+    /* Handle Label */
     if (token[strlen(token) - 1] == ':') {
         token[strlen(token) - 1] = '\0';
 
+        /*check if label name is valid, containing only allowed char and the name is not saved word*/
         if (!is_valid_label(token)) {
             if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
                 error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
@@ -510,6 +507,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             return 0;
         }
 
+        /*placing label name in parser structure */
         strncpy(out->label, token, MAX_LABEL_LEN);
         out->label[MAX_LABEL_LEN] = '\0';
 
@@ -520,7 +518,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         }
     }
 
-    /* === DIRECTIVE or OPCODE === */
+    /* DIRECTIVE or OPCODE */
     if (token[0] == '.') {
         int d = identify_directive(token);
         if (d == -1) {
@@ -551,20 +549,20 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         }
     }
 
-    /* Extract remaining line */
-    rest = strstr(line, token);
-    if (rest == NULL) return 1;
-    rest += strlen(token);
-    rest = cut_spaces_before_and_after_string(rest);
-    original_rest = rest;
+    /* process remaining line */
+    dynamic_operands_pointer = strstr(line, token);
+    if (dynamic_operands_pointer == NULL) return 1;
+    dynamic_operands_pointer += strlen(token);
+    dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
+    starts_operands_pointer = dynamic_operands_pointer;
 
-    /* === SPECIAL DIRECTIVE CHECKS === */
+
     if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "string") == 0) {
-        if (rest[0] != '"' || rest[strlen(rest) - 1] != '"') {
+        if (dynamic_operands_pointer[0] != '"' || dynamic_operands_pointer[strlen(dynamic_operands_pointer) - 1] != '"') {
             error_log(file_name, line_number, STRING_MISSING_QUOTES);
             return 0;
         }
-        strncpy(out->operands[0], rest, MAX_LINE_LENGTH - 1);
+        strncpy(out->operands[0], dynamic_operands_pointer, MAX_LINE_LENGTH - 1);
         string_without_quotes=strip_quotes(out->operands[0]);
         strncpy(out->operands[0], string_without_quotes, MAX_LINE_LENGTH - 1);
 
@@ -574,31 +572,32 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     }
 
     if (out->line_type == LINE_DIRECTIVE &&
-        strcmp(out->directive_name, "data") == 0 && rest[0] == '\0') {
+        strcmp(out->directive_name, "data") == 0 && dynamic_operands_pointer[0] == '\0') {
         error_log(file_name, line_number, MISSING_OPERANDS_DATA);
         return 0;
     }
 
     if (out->line_type == LINE_DIRECTIVE &&
-        strcmp(out->directive_name, "extern") == 0 && rest[0] == '\0') {
+        strcmp(out->directive_name, "extern") == 0 && dynamic_operands_pointer[0] == '\0') {
         error_log(file_name, line_number, MISSING_OPERAND_EXTERN);
         return 0;
     }
 
+    /*parse matrix part*/
     if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "mat") == 0) {
         int n, m;
         char *mat_values;
-        if (sscanf(rest, " [%d][%d]%n", &n, &m, &i) != 2) {
+        if (sscanf(dynamic_operands_pointer, " [%d][%d]%n", &n, &m, &i) != 2) {
             error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
             return 0;
         }
 
         /* Add the matrix dimensions string as first operand */
-        strncpy(out->operands[0], rest, i);
+        strncpy(out->operands[0], dynamic_operands_pointer, i);
         out->operands[0][i] = '\0';
         out->operand_count = 1;
 
-        mat_values = rest + i;
+        mat_values = dynamic_operands_pointer + i;
         mat_values = cut_spaces_before_and_after_string(mat_values);
 
         if (mat_values[0] == ',') {
@@ -606,7 +605,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             return 0;
         }
 
-        /* Now parse the remaining values */
+        /* parse the remaining values of matrix */
         token = strtok(mat_values, ",");
         while (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
@@ -626,7 +625,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             token = strtok(NULL, ",");
         }
 
-        if (original_rest[strlen(original_rest) - 1] == ',') {
+        if (starts_operands_pointer[strlen(starts_operands_pointer) - 1] == ',') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
             return 0;
         }
@@ -634,14 +633,14 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         return 1;
     }
 
-    if (rest[0] == ',') {
+    if (dynamic_operands_pointer[0] == ',') {
         error_log(file_name, line_number, MULTIPLE_COMMAS);
         return 0;
     }
 
-    /* === Default operand parsing === */
+    /* decompose operands by commas and process each operand*/
     i = 0;
-    while ((token = strtok((i == 0) ? rest : NULL, ",")) != NULL) {
+    while ((token = strtok((i == 0) ? dynamic_operands_pointer : NULL, ",")) != NULL) {
         token = cut_spaces_before_and_after_string(token);
         if (token[0] == '\0') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
@@ -658,7 +657,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         i++;
     }
 
-    if (original_rest[strlen(original_rest) - 1] == ',') {
+    if (starts_operands_pointer[strlen(starts_operands_pointer) - 1] == ',') {
         error_log(file_name, line_number, MULTIPLE_COMMAS);
         return 0;
     }
@@ -666,7 +665,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     out->operand_count = i;
 
 
-    /* === Validate operand count for instructions === */
+    /* verify operand count match the instructions */
     if (out->line_type == LINE_INSTRUCTION) {
         int expected = expected_operands_for_each_opcode[out->opcode];
 
@@ -675,22 +674,22 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             return 0;
         }
 
-        /* === NEW: Validate addressing modes for instructions === */
-        if (!validate_addressing_modes(out, file_name, line_number)) {
+        /* verify addressing modes are valid for instructions === */
+        if (!verify_addressing_modes_are_valid(out, file_name, line_number)) {
             return 0;
         }
 
-        /* === NEW: Validate matrix operands === */
+        /* verify matrix operands are valid according to matrix roles */
         for (i = 0; i < out->operand_count; i++) {
             if (get_addressing_mode(out->operands[i]) == ADDRESS_MATRIX) {
-                if (!validate_matrix_registers(out->operands[i], file_name, line_number)) {
+                if (!verify_matrix_registers_are_valid(out->operands[i], file_name, line_number)) {
                     return 0;
                 }
             }
         }
     }
 
-    /* === Check immediate operands range === */
+    /*check immediate operands range is between -512 to +511*/
     for (i = 0; i < out->operand_count; i++) {
         if (out->operands[i][0] == '#') {
             long val = strtol(out->operands[i] + 1, NULL, 10);
