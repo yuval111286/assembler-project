@@ -485,7 +485,7 @@ if (token[0] == ';') {
 
     out->operand_count = i;
 
-     
+
         /* === Validate operand count for instructions === */
     if (out->line_type == LINE_INSTRUCTION) {
         int expected = expected_operands[out->opcode];
@@ -496,6 +496,19 @@ if (token[0] == ';') {
         }
     
    }
+
+     /* === Check immediate operands range === */
+for (i = 0; i < out->operand_count; i++) {
+    if (out->operands[i][0] == '#') {
+        long val = strtol(out->operands[i] + 1, NULL, 10);
+        if (val < MIN_NUM || val > MAX_NUM) {
+            error_log(file_name, line_number, IMMEDIATE_OUT_OF_RANGE);
+            return 0;
+        }
+    }
+}
+
+
 return 1;
 }
 
