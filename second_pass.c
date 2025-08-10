@@ -271,11 +271,11 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
     unsigned int final_value = value;
 
     /* Add ARE field to the value - value is already shifted to correct position if needed */
-    if (are == 'A') {
+    if (are == ARE_ABSOLUTE) {
         final_value = (final_value << 2) | 0; /* 00 */
-    } else if (are == 'R') {
+    } else if (are == ARE_RELOCATABLE) {
         final_value = (final_value << 2) | 2; /* 10 */
-    } else if (are == 'E') {
+    } else if (are == ARE_EXTERNAL) {
         final_value = (final_value << 2) | 1; /* 01 */
     }
 
@@ -336,16 +336,16 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                         if (is_label_operand(operand)) {
                             Symbol *sym = get_symbol(symbol_table, operand);
                             unsigned int encoded_value = 0;
-                            char are_field = 'A';
+                            char are_field = ARE_ABSOLUTE;
 
                             if (sym != NULL) {
                                 if (sym->type == SYMBOL_EXTERN) {
                                     encoded_value = 0;
-                                    are_field = 'E';
+                                    are_field = ARE_EXTERNAL;
                                     add_extern_symbol(&extern_list, operand, current_address + word_offset);
                                 } else {
                                     encoded_value = sym->address;
-                                    are_field = 'R';
+                                    are_field = ARE_RELOCATABLE;
                                 }
                             }
 
@@ -357,7 +357,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                     case ADDRESS_MATRIX: {
                         /* First word: matrix address */
                         unsigned int encoded_value = 0;
-                        char are_field = 'A';
+                        char are_field = ARE_ABSOLUTE;
                         char matrix_name[MAX_LABEL_LEN + 1];
                         Symbol *sym;
 
@@ -369,11 +369,11 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                         if (sym != NULL) {
                             if (sym->type == SYMBOL_EXTERN) {
                                 encoded_value = 0;
-                                are_field = 'E';
+                                are_field = ARE_EXTERNAL;
                                 add_extern_symbol(&extern_list, matrix_name, current_address + word_offset);
                             } else {
                                 encoded_value = sym->address;
-                                are_field = 'R';
+                                are_field = ARE_RELOCATABLE;
                             }
                         }
 
@@ -404,18 +404,26 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
             current_address += instruction_word_count(&parsed);
         }
 
-        /* Skip data directives */
+        if (parsed.line_type == LINE_DIRECTIVE){
+            int directive_rep;
+            directive_rep = identify_directive_without_dots(parsed.directive_name);
+            if(directive_rep == 0 || directive_rep == 1 || directive_rep == 2 || directive_rep == 4){
+                continue;
+            }
+        }
+
+            /* Skip data directives
         if (parsed.line_type == LINE_DIRECTIVE &&
             (strcmp(parsed.directive_name, "data") == 0 ||
              strcmp(parsed.directive_name, "string") == 0 ||
              strcmp(parsed.directive_name, "mat") == 0 ||
              strcmp(parsed.directive_name, "extern") == 0)) {
             continue;
-        }
+        }*/
 
         /*.entry directive */
         if (parsed.line_type == LINE_DIRECTIVE &&
-            strcmp(parsed.directive_name, "entry") == 0) {
+                identify_directive_without_dots(parsed.directive_name) == 3) {
 
             /* validate that the symbol exists */
             Symbol *sym = get_symbol(symbol_table, parsed.operands[0]);

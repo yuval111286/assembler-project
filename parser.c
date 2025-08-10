@@ -36,6 +36,14 @@ Directive_Mode directive_table[] = {
         {".extern", EXTERN}
 };
 
+Directive_Mode directive_table_without_dots[] = {
+        {"data", DATA},
+        {"string", STRING},
+        {"mat", MAT},
+        {"entry", ENTRY},
+        {"extern", EXTERN}
+};
+
 
 Register_Type register_table[] = {
         {"r0", R0},
@@ -157,6 +165,18 @@ int identify_directive(char *directive){
     for (i = 0; i<NUM_DIRECTIVE; i++) {
         if (strcmp(directive, directive_table[i].name) == 0) {
             return directive_table[i].directive;
+        }
+    }
+
+    return -1;
+}
+
+int identify_directive_without_dots(char *directive){
+
+    int i;
+    for (i = 0; i<NUM_DIRECTIVE; i++) {
+        if (strcmp(directive, directive_table_without_dots[i].name) == 0) {
+            return directive_table_without_dots[i].directive;
         }
     }
 

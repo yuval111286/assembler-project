@@ -42,11 +42,7 @@ int identify_opcode(char *str);
  */
 int identify_directive(char *str);
 
-/* Tables for opcode, directive, and register recognition
-extern const OpcodeEntry opcode_table[];
-extern const Directive_Mode directive_table[];
-extern const Register_Type register_table[];
- */
+int identify_directive_without_dots(char *directive);
 
 
 /*
