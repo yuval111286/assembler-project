@@ -185,15 +185,15 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     discover_errors = 1;
                     continue;
                 }
-            } else if (strcmp(parsed.directive_name, "data") == 0 ||
-                       strcmp(parsed.directive_name, "string") == 0 ||
-                       strcmp(parsed.directive_name, "mat") == 0) {
+            } else if (identify_directive_without_dots(parsed.directive_name) == 0 ||
+                    identify_directive_without_dots(parsed.directive_name) == 1 ||
+                    identify_directive_without_dots(parsed.directive_name) == 2) {
                 if (!add_symbol(symbol_table, parsed.label, DC, SYMBOL_DATA)) {
                     error_log(file_name, line_number, FAILED_ADD_DATA_LABEL);
                     discover_errors = 1;
                     continue;
                 }
-            } else if (strcmp(parsed.directive_name, "extern") == 0) {
+            } else if (identify_directive_without_dots(parsed.directive_name) == 4) {
                 error_log(file_name, line_number, ILLEGAL_EXTERN_LABEL);
                 discover_errors = 1;
                 continue;
@@ -226,7 +226,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             encoded_word |= (dest_mode & 0x3) << 2;
             encoded_word |= (ARE & 0x3);
 
-            add_code_word(code_image, IC, encoded_word, 'A');
+            add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
             IC++;
 
             /* Now encode additional words that can be encoded in first pass */
@@ -245,9 +245,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         if (!local_error_flag) {
                             encoded_word = encode_signed_num(immediate_value);
                             encoded_word = (encoded_word << 2) | 0; /* ARE = 00 (Absolute) */
-                            add_code_word(code_image, IC, encoded_word, 'A');
+                            add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
-                            add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
                         }
                         IC++;
                         current_word++;
@@ -256,7 +256,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                     case ADDRESS_DIRECT: {
                         /* Direct addressing - will be filled in second pass */
-                        add_code_word(code_image, IC, 0, 'A'); /* Placeholder */
+                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Placeholder */
                         IC++;
                         current_word++;
                         break;
@@ -264,12 +264,11 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                     case ADDRESS_MATRIX: {
                         /* Second word - encode register indices */
-                        char matrix_operand[MAX_LINE_LENGTH];
-                        char *bracket1, *bracket2, *bracket3, *bracket4;
-                        int reg1 = -1, reg2 = -1;
+                        char matrix_operand[MAX_LINE_LENGTH],*bracket1, *bracket2, *bracket3, *bracket4;
+                        int first_reg = -1, second_reg = -1;
 
                         /* Matrix addressing - first word (address) will be filled in second pass */
-                        add_code_word(code_image, IC, 0, 'A'); /* Placeholder for matrix address */
+                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Placeholder for matrix address */
                         IC++;
                         current_word++;
 
@@ -282,27 +281,27 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                             bracket2 = strchr(bracket1 + 1, ']');
                             if (bracket2) {
                                 *bracket2 = '\0';
-                                reg1 = identify_register(bracket1 + 1);
+                                first_reg = identify_register(bracket1 + 1);
 
                                 bracket3 = strchr(bracket2 + 1, '[');
                                 if (bracket3) {
                                     bracket4 = strchr(bracket3 + 1, ']');
                                     if (bracket4) {
                                         *bracket4 = '\0';
-                                        reg2 = identify_register(bracket3 + 1);
+                                        second_reg = identify_register(bracket3 + 1);
                                     }
                                 }
                             }
                         }
 
-                        if (reg1 != -1 && reg2 != -1) {
+                        if (first_reg != -1 && second_reg != -1) {
                             encoded_word = 0;
-                            encoded_word |= (reg1 & 0xF) << 6;  /* Bits 9-6: first register */
-                            encoded_word |= (reg2 & 0xF) << 2;  /* Bits 5-2: second register */
+                            encoded_word |= (first_reg & 0xF) << 6;  /* Bits 9-6: first register */
+                            encoded_word |= (second_reg & 0xF) << 2;  /* Bits 5-2: second register */
                             encoded_word |= 0;                   /* Bits 1-0: ARE = 00 (Absolute) */
-                            add_code_word(code_image, IC, encoded_word, 'A');
+                            add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
-                            add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
                         }
                         IC++;
                         current_word++;
@@ -324,9 +323,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                                     encoded_word |= (src_reg & 0xF) << 6;   /* Bits 9-6: source register */
                                     encoded_word |= (dest_reg & 0xF) << 2; /* Bits 5-2: destination register */
                                     encoded_word |= 0;                     /* Bits 1-0: ARE = 00 (Absolute) */
-                                    add_code_word(code_image, IC, encoded_word, 'A');
+                                    add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                                 } else {
-                                    add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                                    add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
                                 }
                                 IC++;
                                 current_word++;
@@ -344,9 +343,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                                     encoded_word |= (reg_num & 0xF) << 2; /* Bits 5-2 */
                                 }
                                 encoded_word |= 0; /* ARE = 00 (Absolute) */
-                                add_code_word(code_image, IC, encoded_word, 'A');
+                                add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                             } else {
-                                add_code_word(code_image, IC, 0, 'A'); /* Error case */
+                                add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
                             }
                             IC++;
                             current_word++;
@@ -356,7 +355,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                     default:
                         /* Unknown addressing mode */
-                        add_code_word(code_image, IC, 0, 'A');
+                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                         IC++;
                         current_word++;
                         break;

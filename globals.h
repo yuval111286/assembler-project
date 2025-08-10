@@ -37,6 +37,12 @@
 #define MAX_CODE_SIZE 255
 #define MAX_DATA_SIZE 255
 
+/*directive options*/
+#define DIRECTIVE_DATA    "data"
+#define DIRECTIVE_STRING  "string"
+#define DIRECTIVE_MAT     "mat"
+#define DIRECTIVE_ENTRY   "entry"
+#define DIRECTIVE_EXTERN  "extern"
 
 /* Type of line in source file */
 typedef enum {
@@ -120,6 +126,11 @@ typedef struct {
     Register reg;
 } Register_Type;
 
+typedef enum {
+    ARE_ABSOLUTE = 'A', /* 00 */
+    ARE_RELOCATABLE = 'R', /* 10 */
+    ARE_EXTERNAL = 'E' /* 01 */
+} AREType;
 
 /* setting code word and code image struct */
 
