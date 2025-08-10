@@ -387,7 +387,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     if (!error) {
                         data_image[DC++] = (short)value;
                     } else {
-                        error_log(file_name,parsed.line_number,FAIL_CONVERT_STRING_TO_NUM);
+                        error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
             } else if (strcmp(parsed.directive_name, "string") == 0) {
@@ -435,7 +435,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     if (!error) {
                         data_image[DC++] = (short)value;
                     } else {
-                        error_log(file_name,parsed.line_number,FAIL_CONVERT_STRING_TO_NUM);
+                        error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
