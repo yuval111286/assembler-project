@@ -1,4 +1,3 @@
-
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -76,8 +75,14 @@ int instruction_word_count(ParsedLine *parsed);
  */
 int count_data_items(ParsedLine *parsed);
 
+/*
+ * Removes quotes from a string and returns the string without quotes.
+ */
 char *strip_quotes(char *str);
 
+/*
+ * Shifts all characters in a string one position to the left.
+ */
 void safe_shift_left(char *str);
 
 

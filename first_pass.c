@@ -139,14 +139,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 {
     FILE *fp;
     char line[MAX_LINE_LENGTH];
-    int line_number = 0;
-    int IC = IC_INIT_VALUE;
-    int DC = 0;
-    int value,error;
+    int line_number = 0,IC = IC_INIT_VALUE, DC = 0,value,error,i, words, discover_errors = 0;
     ParsedLine parsed;
-    int i, words;
     unsigned int encoded_word;
-    int has_errors = 0;
 
     fp = fopen(file_name, "r");
     if (fp == NULL) {
@@ -160,7 +155,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         line_number++;
 
         if (!parse_line(line, &parsed, file_name, line_number)) {
-            has_errors = 1;
+            discover_errors = 1;
             continue;
         }
 
@@ -176,18 +171,18 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 identify_directive(parsed.label) != -1 ||
                 identify_register(parsed.label) != -1) {
                 error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
-                has_errors = 1;
+                discover_errors = 1;
                 continue;
             }
             if (symbol_exists(symbol_table, parsed.label)) {
                 error_log(file_name, line_number, DUPLICATE_LABEL);
-                has_errors = 1;
+                discover_errors = 1;
                 continue;
             }
             if (parsed.line_type == LINE_INSTRUCTION) {
                 if (!add_symbol(symbol_table, parsed.label, IC, SYMBOL_CODE)) {
                     error_log(file_name, line_number, FAILED_ADD_INSTRUCTION_LABEL);
-                    has_errors = 1;
+                    discover_errors = 1;
                     continue;
                 }
             } else if (strcmp(parsed.directive_name, "data") == 0 ||
@@ -195,12 +190,12 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                        strcmp(parsed.directive_name, "mat") == 0) {
                 if (!add_symbol(symbol_table, parsed.label, DC, SYMBOL_DATA)) {
                     error_log(file_name, line_number, FAILED_ADD_DATA_LABEL);
-                    has_errors = 1;
+                    discover_errors = 1;
                     continue;
                 }
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
                 error_log(file_name, line_number, ILLEGAL_EXTERN_LABEL);
-                has_errors = 1;
+                discover_errors = 1;
                 continue;
             }
         }
@@ -208,18 +203,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         /* === INSTRUCTION HANDLING === */
         if (parsed.line_type == LINE_INSTRUCTION) {
             /* Encode base word of instruction */
-            int opcode;
-            int src_mode = 0, dest_mode = 0;
-            int ARE = 0;
-            int current_word;/* Absolute */
+            int opcode,src_mode = 0, dest_mode = 0, ARE = 0,current_word;/* Absolute */
 
             words = instruction_word_count(&parsed);
             if (words <= 0) {
                 error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
-                has_errors = 1;
+                discover_errors = 1;
                 continue;
             }
-
 
             opcode = parsed.opcode;
             if (parsed.operand_count == 2) {
@@ -248,10 +239,10 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 switch (addressing_mode) {
                     case ADDRESS_IMMEDIATE: {
                         /* Parse and encode immediate value */
-                        int error_flag = 0;
-                        int immediate_value = parse_number_from_string(parsed.operands[i] + 1, &error_flag); /* Skip '#' */
+                        int local_error_flag = 0;
+                        int immediate_value = parse_number_from_string(parsed.operands[i] + 1, &local_error_flag); /* Skip '#' */
 
-                        if (!error_flag) {
+                        if (!local_error_flag) {
                             encoded_word = encode_signed_num(immediate_value);
                             encoded_word = (encoded_word << 2) | 0; /* ARE = 00 (Absolute) */
                             add_code_word(code_image, IC, encoded_word, 'A');
@@ -379,7 +370,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 for (i = 0; i < parsed.operand_count; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
-                        has_errors = 1;
+                        discover_errors = 1;
                         continue;
                     }
 
@@ -396,7 +387,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 for (i = 0; s[i] != '\0'; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
-                        has_errors = 1;
+                        discover_errors = 1;
                         break;
                     }
                     data_image[DC++] = (unsigned int)s[i];
@@ -405,14 +396,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     data_image[DC++] = 0;
                 } else {
                     error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
-                    has_errors = 1;
+                    discover_errors = 1;
                 }
             } else if (strcmp(parsed.directive_name, "mat") == 0) {
                 int mat_rows, mat_cols, expected_values;
 
                 if (!parse_matrix_dimensions(parsed.operands[0], &mat_rows, &mat_cols)) {
                     error_log(file_name, line_number, INVALID_MATRIX_DIMENSIONS);
-                    has_errors = 1;
+                    discover_errors = 1;
                     continue;
                 }
 
@@ -420,13 +411,13 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                 if (parsed.operand_count != 1 + expected_values) {
                     error_log(file_name, line_number, MATRIX_VALUE_COUNT_MISMATCH);
-                    has_errors = 1;
+                    discover_errors = 1;
                     continue;
                 }
 
                 if (DC + 2 + expected_values > MAX_DATA_SIZE) {
                     error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
-                    has_errors = 1;
+                    discover_errors = 1;
                     continue;
                 }
 
@@ -441,10 +432,10 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             } else if (strcmp(parsed.directive_name, "extern") == 0) {
                 if (parsed.operand_count != 1) {
                     error_log(file_name, line_number, EXTERN_SYNTAX_ERROR);
-                    has_errors = 1;
+                    discover_errors = 1;
                 } else if (!add_symbol(symbol_table, parsed.operands[0], 0, SYMBOL_EXTERN)) {
                     error_log(file_name, line_number, DUPLICATE_EXTERN);
-                    has_errors = 1;
+                    discover_errors = 1;
                 }
             }
         }
@@ -458,7 +449,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     update_data_symbols_base_address(symbol_table, IC);
 
     if (check_mcro_name_not_label(symbol_table, head, file_name)) {
-        has_errors = 1;
+        discover_errors = 1;
     }
 
     /* === DEBUG: CODE IMAGE OUTPUT === */
@@ -482,8 +473,8 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     /* === FINAL CHECK: Ensure IC + DC doesn't exceed allowed memory === */
     if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
-        has_errors = 1;
+        discover_errors = 1;
     }
 
-    return has_errors;
+    return discover_errors;
 }
