@@ -38,8 +38,6 @@
 #define MAX_DATA_SIZE 255
 
 
-/* ========== Enums ========== */
-
 /* Type of line in source file */
 typedef enum {
     LINE_EMPTY,
@@ -123,10 +121,10 @@ typedef struct {
 } Register_Type;
 
 
-/* ========== Code Word / Code Image ========== */
+/* setting code word and code image struct */
 
 typedef struct {
-    int address;            /* Memory address (starts at 100) */
+    int address;            /* Memory address (starts at 100 address) */
     unsigned int value;     /* Encoded machine word (10-bit integer) */
     char ARE;               /* 'A', 'R', or 'E' */
 } CodeWord;
@@ -137,7 +135,7 @@ typedef struct {
 } CodeImage;
 
 
-/* ========== Parsed Line Struct ========== */
+/* Parsed Line Struct */
 
 typedef struct {
     char label[MAX_LABEL_LEN + 1];
