@@ -7,8 +7,6 @@
 #include "errors_handler.h"
 #include "globals.h"
 
-
-
 OpcodeEntry opcode_table[] = {
         {"mov", OPCODE_MOV},
         {"cmp", OPCODE_CMP},
@@ -49,27 +47,92 @@ Register_Type register_table[] = {
         {"r6", R6},
         {"r7", R7}
 };
+
 /* Expected number of operands for each opcode */
-static const int expected_operands[16] = {
-    2, /* mov */
-    2, /* cmp */
-    2, /* add */
-    2, /* sub */
-    2, /* lea */
-    1, /* clr */
-    1, /* not */
-    1, /* inc */
-    1, /* dec */
-    1, /* jmp */
-    1, /* bne */
-    1, /* red */
-    1, /* prn */
-    1, /* jsr */
-    0, /* rts */
-    0  /* stop */
+const int expected_operands_for_each_opcode[16] = {
+        2, /* mov */
+        2, /* cmp */
+        2, /* add */
+        2, /* sub */
+        2, /* lea */
+        1, /* clr */
+        1, /* not */
+        1, /* inc */
+        1, /* dec */
+        1, /* jmp */
+        1, /* bne */
+        1, /* red */
+        1, /* prn */
+        1, /* jsr */
+        0, /* rts */
+        0  /* stop */
+};
+
+/* Table of allowed addressing modes for each opcode*/
+/* 0=immediate, 1=direct, 2=matrix, 3=register */
+const int allowed_source_modes[16][4] = {
+        /* mov  */ {1, 1, 1, 1},
+        /* cmp  */ {1, 1, 1, 1},
+        /* add  */ {0, 1, 1, 1},
+        /* sub  */ {0, 1, 1, 1},
+        /* lea  */ {0, 1, 1, 0},
+        /* clr  */ {0, 0, 0, 0},
+        /* not  */ {0, 0, 0, 0},
+        /* inc  */ {0, 0, 0, 0},
+        /* dec  */ {0, 0, 0, 0},
+        /* jmp  */ {0, 0, 0, 0},
+        /* bne  */ {0, 0, 0, 0},
+        /* red  */ {0, 0, 0, 0},
+        /* prn  */ {0, 0, 0, 0},
+        /* jsr  */ {0, 0, 0, 0},
+        /* rts  */ {0, 0, 0, 0},
+        /* stop */ {0, 0, 0, 0}
+};
+
+const int allowed_dest_modes[16][4] = {
+        /* mov  */ {0, 1, 1, 1},
+        /* cmp  */ {1, 1, 1, 1},
+        /* add  */ {1, 1, 1, 1},
+        /* sub  */ {1, 1, 1, 1},
+        /* lea  */ {0, 1, 1, 0},
+        /* clr  */ {0, 1, 1, 1},
+        /* not  */ {0, 1, 1, 1},
+        /* inc  */ {0, 1, 1, 1},
+        /* dec  */ {0, 1, 1, 1},
+        /* jmp  */ {0, 1, 1, 1},
+        /* bne  */ {0, 1, 1, 1},
+        /* jsr  */ {0, 1, 1, 1},
+        /* red  */ {0, 1, 1, 1},
+        /* prn  */ {1, 1, 1, 1},
+        /* rts  */ {0, 0, 0, 0},
+        /* stop */ {0, 0, 0, 0}
 };
 
 
+char *strip_quotes(char *str) {
+    size_t len;
+
+    if (str == NULL) return str;
+
+    len = strlen(str);
+
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
+        str[len - 1] = '\0';
+        safe_shift_left(str);
+        return str;
+    }
+    return str;
+}
+
+void safe_shift_left(char *str) {
+    int i = 0;
+    if (str == NULL) return;
+
+    while (str[i] != '\0') {
+        str[i] = str[i + 1];
+        i++;
+    }
+}
 
 int identify_opcode(char* op_code) {
 
@@ -188,6 +251,124 @@ int get_addressing_mode( char *operand) {
     return ADDRESS_DIRECT;
 }
 
+/**
+ * @brief Validates that operands use allowed addressing modes for the specific instruction
+ *
+ * @param parsed Pointer to parsed line structure
+ * @param file_name Filename for error reporting
+ * @param line_number Line number for error reporting
+ * @return 1 if valid, 0 if invalid addressing mode detected
+ */
+int validate_addressing_modes(ParsedLine *parsed, char *file_name, int line_number) {
+    int opcode = parsed->opcode;
+
+
+    /* Validate source operand (if exists) */
+    if (parsed->operand_count >= 1) {
+        int src_mode = get_addressing_mode(parsed->operands[0]);
+
+        /* For two-operand instructions, first operand is source */
+        if (parsed->operand_count == 2) {
+            if (src_mode >= 0 && src_mode <= 3) {
+                if (!allowed_source_modes[opcode][src_mode]) {
+                    error_log(file_name, line_number, INVALID_SOURCE_ADDRESSING_MODE);
+                    return 0;
+                }
+            }
+        }
+
+            /* For single-operand instructions, operand is destination */
+        else if (parsed->operand_count == 1) {
+            if (src_mode >= 0 && src_mode <= 3) {
+                if (!allowed_dest_modes[opcode][src_mode]) {
+                    error_log(file_name, line_number, INVALID_DEST_ADDRESSING_MODE);
+                    return 0;
+                }
+            }
+        }
+    }
+
+    /* Validate destination operand for two-operand instructions */
+    if (parsed->operand_count == 2) {
+        int dest_mode = get_addressing_mode(parsed->operands[1]);
+
+        if (dest_mode >= 0 && dest_mode <= 3) {
+            if (!allowed_dest_modes[opcode][dest_mode]) {
+                error_log(file_name, line_number, INVALID_DEST_ADDRESSING_MODE);
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * @brief Validates matrix operand register names
+ *
+ * @param operand Matrix operand string (e.g., "M1[r2][r7]")
+ * @param file_name Filename for error reporting
+ * @param line_number Line number for error reporting
+ * @return 1 if valid, 0 if invalid register names
+ */
+int validate_matrix_registers(char *operand, char *file_name, int line_number) {
+    char *open_bracket_first_reg, *closed_bracket_first_reg, *open_bracket_second_reg, *closed_bracket_second_reg;
+    char temp_operand[MAX_LINE_LENGTH],*ptr;
+
+    /* Make a copy to avoid modifying original */
+    strncpy(temp_operand, operand, MAX_LINE_LENGTH - 1);
+    temp_operand[MAX_LINE_LENGTH - 1] = '\0';
+
+    /* Find register names between brackets */
+    open_bracket_first_reg = strchr(temp_operand, '[');
+    if (!open_bracket_first_reg) {
+        error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_BRACKET);
+        return 0;
+    }
+
+    closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, ']');
+    if (!closed_bracket_first_reg) {
+        error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_CLOSING);
+        return 0;
+    }
+
+    *closed_bracket_first_reg = '\0';
+    if (identify_register(open_bracket_first_reg + 1) == -1) {
+        error_log(file_name, line_number, INVALID_MATRIX_FIRST_REGISTER);
+        return 0;
+    }
+
+    /* Check for illegal whitespace between ']' and '[' */
+    ptr = closed_bracket_first_reg + 1;
+    while (*ptr != '\0' && *ptr != '[') {
+        if (isspace((unsigned char)*ptr)) {
+            error_log(file_name, line_number, MATRIX_INVALID_WHITESPACE);
+            return 0;
+        }
+        ptr++;
+    }
+
+    open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
+    if (!open_bracket_second_reg) {
+        error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_BRACKET);
+        return 0;
+    }
+
+    closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, ']');
+    if (!closed_bracket_second_reg) {
+        error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_CLOSING);
+        return 0;
+    }
+
+    *closed_bracket_second_reg = '\0';
+    if (identify_register(open_bracket_second_reg + 1) == -1) {
+        error_log(file_name, line_number, INVALID_MATRIX_SECOND_REGISTER);
+        return 0;
+    }
+
+    return 1;
+}
+
 /* Fixed instruction_word_count function */
 int instruction_word_count(ParsedLine *parsed) {
     int count;
@@ -266,7 +447,6 @@ int count_data_items(ParsedLine *parsed) {
 }
 
 
-
 /**
  * @brief Parses a single line from the source file.
  *
@@ -305,14 +485,14 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
 
     token = strtok(buffer, " \t\n");
     if (token == NULL) {
-    (*out).line_type = LINE_EMPTY;
-    return 1;
-}
+        (*out).line_type = LINE_EMPTY;
+        return 1;
+    }
 
-if (token[0] == ';') {
-    (*out).line_type = LINE_COMMENT;
-    return 1;
-}
+    if (token[0] == ';') {
+        (*out).line_type = LINE_COMMENT;
+        return 1;
+    }
 
 
     /* === LABEL === */
@@ -335,7 +515,7 @@ if (token[0] == ';') {
 
         token = strtok(NULL, " \t\n");
         if (token == NULL) {
-            error_log(file_name, line_number, SYNTAX_ERROR);
+            error_log(file_name, line_number, EMPTY_AFTER_LABEL);
             return 0;
         }
     }
@@ -344,7 +524,7 @@ if (token[0] == ';') {
     if (token[0] == '.') {
         int d = identify_directive(token);
         if (d == -1) {
-            error_log(file_name, line_number, SYNTAX_ERROR);
+            error_log(file_name, line_number, ILLEGAL_DIRECTIVE);
             return 0;
         }
         out->line_type = LINE_DIRECTIVE;
@@ -352,7 +532,7 @@ if (token[0] == ';') {
     } else {
         Opcode op = identify_opcode(token);
         if (op == OPCODE_INVALID) {
-            error_log(file_name, line_number, SYNTAX_ERROR);
+            error_log(file_name, line_number, INVALID_OPCODE);
             return 0;
         }
         out->line_type = LINE_INSTRUCTION;
@@ -372,13 +552,13 @@ if (token[0] == ';') {
     }
 
     /* Extract remaining line */
-     rest = strstr(line, token);
+    rest = strstr(line, token);
     if (rest == NULL) return 1;
     rest += strlen(token);
     rest = cut_spaces_before_and_after_string(rest);
     original_rest = rest;
 
-        /* === SPECIAL DIRECTIVE CHECKS === */
+    /* === SPECIAL DIRECTIVE CHECKS === */
     if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "string") == 0) {
         if (rest[0] != '"' || rest[strlen(rest) - 1] != '"') {
             error_log(file_name, line_number, STRING_MISSING_QUOTES);
@@ -407,7 +587,7 @@ if (token[0] == ';') {
 
     if (out->line_type == LINE_DIRECTIVE && strcmp(out->directive_name, "mat") == 0) {
         int n, m;
-        char *after_dims;
+        char *mat_values;
         if (sscanf(rest, " [%d][%d]%n", &n, &m, &i) != 2) {
             error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
             return 0;
@@ -418,16 +598,16 @@ if (token[0] == ';') {
         out->operands[0][i] = '\0';
         out->operand_count = 1;
 
-        after_dims = rest + i;
-        after_dims = cut_spaces_before_and_after_string(after_dims);
+        mat_values = rest + i;
+        mat_values = cut_spaces_before_and_after_string(mat_values);
 
-        if (after_dims[0] == ',') {
+        if (mat_values[0] == ',') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
             return 0;
         }
 
         /* Now parse the remaining values */
-        token = strtok(after_dims, ",");
+        token = strtok(mat_values, ",");
         while (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
             if (token[0] == '\0') {
@@ -486,53 +666,40 @@ if (token[0] == ';') {
     out->operand_count = i;
 
 
-        /* === Validate operand count for instructions === */
+    /* === Validate operand count for instructions === */
     if (out->line_type == LINE_INSTRUCTION) {
-        int expected = expected_operands[out->opcode];
+        int expected = expected_operands_for_each_opcode[out->opcode];
 
         if (out->operand_count != expected) {
             error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
             return 0;
         }
-    
-   }
 
-     /* === Check immediate operands range === */
-for (i = 0; i < out->operand_count; i++) {
-    if (out->operands[i][0] == '#') {
-        long val = strtol(out->operands[i] + 1, NULL, 10);
-        if (val < MIN_NUM || val > MAX_NUM) {
-            error_log(file_name, line_number, IMMEDIATE_OUT_OF_RANGE);
+        /* === NEW: Validate addressing modes for instructions === */
+        if (!validate_addressing_modes(out, file_name, line_number)) {
             return 0;
         }
+
+        /* === NEW: Validate matrix operands === */
+        for (i = 0; i < out->operand_count; i++) {
+            if (get_addressing_mode(out->operands[i]) == ADDRESS_MATRIX) {
+                if (!validate_matrix_registers(out->operands[i], file_name, line_number)) {
+                    return 0;
+                }
+            }
+        }
     }
-}
 
-
-return 1;
-}
-
-char *strip_quotes(char *str) {
-    size_t len;
-
-    if (str == NULL) return str;
-
-    len = strlen(str);
-
-    if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
-        str[len - 1] = '\0';
-        safe_shift_left(str);
-        return str;
+    /* === Check immediate operands range === */
+    for (i = 0; i < out->operand_count; i++) {
+        if (out->operands[i][0] == '#') {
+            long val = strtol(out->operands[i] + 1, NULL, 10);
+            if (val < MIN_NUM || val > MAX_NUM) {
+                error_log(file_name, line_number, IMMEDIATE_OUT_OF_RANGE);
+                return 0;
+            }
+        }
     }
-    return str;
-}
 
-void safe_shift_left(char *str) {
-    int i = 0;
-    if (str == NULL) return;
-
-    while (str[i] != '\0') {
-        str[i] = str[i + 1];
-        i++;
-    }
+    return 1;
 }
