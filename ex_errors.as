@@ -1,58 +1,103 @@
-; ===== קובץ בדיקות כולל כל סוגי השגיאות =====
+; =========================
+; Label errors
+; =========================
 
-; --- 1. שגיאת שם תווית: שם ריק או עם תו לא חוקי ---
-1LABEL:  mov r1, r2        ; מתחיל בספרה - לא חוקי
-LAB@EL:  mov r1, r2        ; תו לא חוקי בשם
+r3: mov r1, r2
+; ^ REGISTER_NAME_AS_LABEL
 
-; --- 2. שימוש במילה שמורה כתווית ---
-mov:     add r1, r2        ; שם של פקודה
-r3:      sub r1, r2        ; שם של רגיסטר
+mov: add r0, r1
+; ^ RESERVED_WORD_AS_LABEL
 
-; --- 3. תווית כפולה ---
-DUP:     mov r1, r2
-DUP:     add r3, r4
+1badlabel: sub r2, r3
+; ^ INVALID_LABEL_NAME (Starts with a digit)
 
-; --- 4. פסיקים מיותרים / כפולים / חסרים ---
-    mov ,r1, r2            ; פסיק מיותר בהתחלה
-    mov r1,, r2            ; פסיק כפול
-    mov r1 r2               ; חסר פסיק
+dup: clr r1
+dup: not r2
+; ^ DUPLICATE_LABEL
 
-; --- 5. Immediate מחוץ לטווח ±512 ---
-    mov #513, r1
-    mov #-513, r2
+label_before_extern: .extern extlbl
+; ^ ILLEGAL_EXTERN_LABEL (A label cannot precede a .extern directive)
 
-; --- 6. מספר אופרנדים לא נכון ---
-    clr r1, r2              ; clr אמורה לקבל רק אופרנד אחד
-    rts r3                  ; rts לא מקבלת אופרנדים
+; =========================
+; Directive errors
+; =========================
 
-; --- 7. אופרנד לא חוקי עבור פקודה ---
-    lea #5, r1              ; lea לא יכולה לקבל immediate כמקור
-    prn m1[r1][#3]          ; אינדקס מטריצה עם immediate לא חוקי
+.extern
+; ^ MISSING_OPERAND_EXTERN
 
-; --- 8. טקסט עודף אחרי פקודה ---
-    stop extra_text_here
+.extern good
+.extern good
+; ^ DUPLICATE_EXTERN
 
-; --- 9. .data עם ארגומנטים לא חוקיים ---
-    .data 5, , 7            ; פסיק כפול
-    .data                   ; אין ערכים
-    .data 1, two, 3         ; מחרוזת במקום מספר
+.extern a, , b
+; ^ EXTERN_SYNTAX_ERROR (Multiple commas / empty operand)
 
-; --- 10. .string עם בעיות ---
-    .string hello           ; בלי גרשיים
-    .string "no_end_quote   ; חסר סוגר גרשיים
+.string hello
+; ^ STRING_MISSING_QUOTES
 
-; --- 11. .mat עם בעיות ---
-    .mat [2][3]             ; אין ערכים אחרי המידות
-    .mat [x][3] 1, 2, 3    ; מימד לא מספרי
-    .mat [2][3] 1, 2       ; פחות איברים מהמינימום
-    .mat [2][3] 1, 2, 3, 4, 5, 6, 7 ; יותר מדי איברים
+.data
+; ^ MISSING_OPERANDS_DATA
 
-; --- 12. .entry / .extern עם בעיות ---
-    .entry                  ; חסר שם
-    .extern MOV             ; שם לא חוקי (פקודה)
-    .entry DUP              ; תווית קיימת אבל לא בקוד
-    .extern r1              ; שם של רגיסטר
+.data 1,,2,3
+; ^ MULTIPLE_COMMAS
 
-; --- 13. שימוש בתווית שלא הוגדרה ---
-    mov UNDEF_LABEL, r1
+.mat [0][2] 1, 2
+; ^ INVALID_MATRIX_DIMENSIONS (Non-positive dimensions)
 
+.mat 2,3, 1,2,3
+; ^ MATRIX_DIMENSION_FORMAT (Missing [n][m] format brackets)
+
+.mat [2][3] 1,2,3
+; ^ MATRIX_VALUE_COUNT_MISMATCH (Expected 6 values)
+
+; =========================
+; Instruction/operand errors
+; =========================
+
+mov #, r1
+; ^ INVALID_INSTRUCTION_OPERANDS (Invalid immediate – “#” without a number)
+
+add r1
+; ^ INVALID_INSTRUCTION_OPERANDS (Operand count does not match expectation)
+
+stop extra_text_here
+; ^ EXTRANEOUS_TEXT_AFTER_COMMAND
+
+.entry not_defined_label
+; ^ ENTRY_LABEL_NO_DEF
+
+.extern both_side
+.entry both_side
+; ^ SAME_NAME_ENTRY_AND_EXTERNAL_LABEL
+
+; Additional examples to trigger other checks:
+
+rts trailing_garbage
+; ^ EXTRANEOUS_TEXT_AFTER_COMMAND
+
+prn
+; ^ INVALID_INSTRUCTION_OPERANDS (Missing operand)
+
+lea #5, r1
+; ^ INVALID_INSTRUCTION_OPERANDS (If LEA does not support immediate as source)
+
+; =========================
+; More examples to trigger convenient error validations
+; =========================
+
+mov ##12, r0
+; ^ INVALID_INSTRUCTION_OPERANDS (Illegal immediate format)
+
+add r0, r1, r2
+; ^ INVALID_INSTRUCTION_OPERANDS or EXTRANEOUS_TEXT_AFTER_COMMAND (Extra operand)
+
+.entry both_side extra
+; ^ EXTRANEOUS_TEXT_AFTER_COMMAND (Also for directives)
+
+.string "ok   ;"  more
+; ^ EXTRANEOUS_TEXT_AFTER_COMMAND (Extra text after a valid string)
+
+; A few valid lines at the end to confirm processing doesn’t stop immediately:
+
+main:    mov r0, r1
+         stop
