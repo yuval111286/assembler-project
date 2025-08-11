@@ -6,6 +6,7 @@
 #include "errors_handler.h"
 #include "parser.h"
 #include "code_image.h"
+#include "first_pass.h"
 
 
 char *turn_line_to_base_4(unsigned int word) {
