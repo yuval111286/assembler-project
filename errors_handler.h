@@ -41,7 +41,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line\n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
 
-/* First Pass Parsing Errors */
+/* First Pass and Second Pass Errors */
 
 #define INVALID_SOURCE_ADDRESSING_MODE "Invalid source operand addressing mode for this instruction\n"
 #define INVALID_DEST_ADDRESSING_MODE "Invalid destination operand addressing mode for this instruction\n"
