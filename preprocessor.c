@@ -8,7 +8,7 @@
 #include "errors_handler.h"
 
 
-char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
+char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro",NULL};
 
 int check_as_file_ending(char *file_name)
 {
@@ -22,7 +22,7 @@ int check_as_file_ending(char *file_name)
     return -1;
 }
 
-int prepro_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head){
+int preprocessor_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head){
 
     FILE *fp;
     fpos_t pos;
@@ -183,15 +183,21 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
 int is_save_word(char *mcro_name){
 
     /*check if mcro_name is one of the forbidden saved word*/
+    char mcro_name_lower[MAX_LINE_LENGTH];
     int i;
+
+    for (i = 0; mcro_name[i] != '\0'; i++) {
+        mcro_name_lower[i] = tolower(mcro_name[i]);
+    }
+    mcro_name_lower[i] = '\0';
+
     for (i = 0; saved_words[i] != NULL; i++) {
-        if (strcmp(mcro_name, saved_words[i]) == 0) {
+        if (strcmp(mcro_name_lower, saved_words[i]) == 0) {
            return 0;
         }
     }
 
     return 1;
-
 }
 
 char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_counter) {
@@ -238,7 +244,7 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
 }
 
 
-int preproc_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name){
+int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name){
 
     FILE *fp_as, *fp_am;
     char line[MAX_LINE_LENGTH] ={0};
@@ -316,7 +322,7 @@ int preprocessor_full_flow(char *file_name,node **head){
     }
 
     /* map mcro definitions */
-    indication = prepro_first_pass(file_name,clean_file_name,&line_counter, head);
+    indication = preprocessor_first_pass(file_name,clean_file_name,&line_counter, head);
     if (indication){
         /* release mcro linked list, delete files */
         /*free_linked_list(head);*/
@@ -332,7 +338,7 @@ int preprocessor_full_flow(char *file_name,node **head){
 
     line_counter = 0;
     /*replace mcro call by its text*/
-    indication = preproc_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name);
+    indication = preprocessor_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name);
 
     if (indication){
         /* release mcro linked list, delete files */

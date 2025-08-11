@@ -31,6 +31,8 @@ unsigned int encode_signed_num(int num);
  */
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name);
 
+unsigned short parse_number_from_string(const char *str, int *error_flag);
+
 /*
  * Runs the first pass on the given source file.
  *

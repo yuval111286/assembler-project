@@ -127,8 +127,15 @@ int verify_string_is_valid(char *tested_word) {
     return 0;
 }
 
+void string_shifting_forward(char *str) {
+    int i = 0;
+    if (str == NULL) return;
 
-
+    while (str[i] != '\0') {
+        str[i] = str[i + 1];
+        i++;
+    }
+}
 
 char *strip_quotes(char *str) {
     size_t len;
@@ -139,21 +146,12 @@ char *strip_quotes(char *str) {
 
     if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
         str[len - 1] = '\0';
-        safe_shift_left(str);
+        string_shifting_forward(str);
         return str;
     }
     return str;
 }
 
-void safe_shift_left(char *str) {
-    int i = 0;
-    if (str == NULL) return;
-
-    while (str[i] != '\0') {
-        str[i] = str[i + 1];
-        i++;
-    }
-}
 
 int identify_opcode(char* op_code) {
 
@@ -209,11 +207,10 @@ int identify_register(char *reg){
 }
 
 
-
 /*
  * Removes the leading '.' from a directive token and stores the name.
  */
-static void copy_directive_name(char *token, char *dest) {
+void copy_directive_name(char *token, char *dest) {
     if (token[0] == '.') {
         strncpy(dest, token + 1, 7); /* Copy up to 7 characters after '.' */
         dest[7] = '\0';  /* Ensure null-termination */
@@ -294,7 +291,6 @@ int get_addressing_mode( char *operand) {
  */
 int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int line_number) {
     int opcode = parsed->opcode;
-
 
     /* Validate source operand (if exists) */
     if (parsed->operand_count >= 1) {
