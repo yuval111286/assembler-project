@@ -88,4 +88,6 @@ int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int l
 
 int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_number);
 
+int is_valid_number(char *str);
+
 #endif /* PARSER_H */
