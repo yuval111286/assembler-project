@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "second_pass.h"
-#include "first_pass.h"
 #include "utils.h"
 #include "errors_handler.h"
 #include "parser.h"
@@ -272,11 +271,13 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
 
     /* Add ARE field to the value - value is already shifted to correct position if needed */
     if (are == ARE_ABSOLUTE) {
-        final_value = (final_value << 2) | 0; /* 00 */
-    } else if (are == ARE_RELOCATABLE) {
-        final_value = (final_value << 2) | 2; /* 10 */
-    } else if (are == ARE_EXTERNAL) {
-        final_value = (final_value << 2) | 1; /* 01 */
+        final_value = shift_and_set_are(final_value, ABSOLUTE);  /* 00 */
+    }
+    else if (are == ARE_EXTERNAL) {
+        final_value = shift_and_set_are(final_value, EXTERNAL);  /* 01 */
+    }
+    else if (are == ARE_RELOCATABLE) {
+        final_value = shift_and_set_are(final_value, RELOCATABLE);  /* 10 */
     }
 
     /* Ensure we stay within 10-bit limit */
@@ -411,15 +412,6 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                 continue;
             }
         }
-
-            /* Skip data directives
-        if (parsed.line_type == LINE_DIRECTIVE &&
-            (strcmp(parsed.directive_name, "data") == 0 ||
-             strcmp(parsed.directive_name, "string") == 0 ||
-             strcmp(parsed.directive_name, "mat") == 0 ||
-             strcmp(parsed.directive_name, "extern") == 0)) {
-            continue;
-        }*/
 
         /*.entry directive */
         if (parsed.line_type == LINE_DIRECTIVE &&
