@@ -116,6 +116,19 @@ const int allowed_dest_modes[16][4] = {
         /* stop */ {0, 0, 0, 0}
 };
 
+int verify_string_is_valid(char *tested_word) {
+    int i;
+
+    for (i = 0; i < strlen(tested_word); i++) {
+        if (!isprint(tested_word[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+
 
 char *strip_quotes(char *str) {
     size_t len;
@@ -584,6 +597,10 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         }
         strncpy(out->operands[0], dynamic_operands_pointer, MAX_LINE_LENGTH - 1);
         string_without_quotes=strip_quotes(out->operands[0]);
+        if(verify_string_is_valid(string_without_quotes)){
+            error_log(file_name, line_number, INVALID_STRING);
+            return 0;
+        }
         strncpy(out->operands[0], string_without_quotes, MAX_LINE_LENGTH - 1);
 
         out->operands[0][MAX_LINE_LENGTH - 1] = '\0';

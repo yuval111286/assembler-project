@@ -1,1 +1,1 @@
-           STR: .string "abcdef"
+.string "hello\nworld"
