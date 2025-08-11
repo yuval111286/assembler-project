@@ -37,12 +37,6 @@
 #define MAX_CODE_SIZE 255
 #define MAX_DATA_SIZE 255
 
-/*directive options*/
-#define DIRECTIVE_DATA    "data"
-#define DIRECTIVE_STRING  "string"
-#define DIRECTIVE_MAT     "mat"
-#define DIRECTIVE_ENTRY   "entry"
-#define DIRECTIVE_EXTERN  "extern"
 
 /* Type of line in source file */
 typedef enum {

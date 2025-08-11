@@ -186,8 +186,8 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     continue;
                 }
             } else if (identify_directive_without_dots(parsed.directive_name) == 0 ||
-                    identify_directive_without_dots(parsed.directive_name) == 1 ||
-                    identify_directive_without_dots(parsed.directive_name) == 2) {
+                       identify_directive_without_dots(parsed.directive_name) == 1 ||
+                       identify_directive_without_dots(parsed.directive_name) == 2) {
                 if (!add_symbol(symbol_table, parsed.label, DC, SYMBOL_DATA)) {
                     error_log(file_name, line_number, FAILED_ADD_DATA_LABEL);
                     discover_errors = 1;
