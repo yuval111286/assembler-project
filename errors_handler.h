@@ -20,7 +20,7 @@ void error_log(char *file_name, int line, char *error_msg);
 
 
 /*Preprocessor errors*/
-#define LONG_LINE "Line too long more than 80 characters\n"
+#define LONG_LINE "Line is too long, more than 80 characters\n"
 #define MACRO_MULTI_DEF "Multi definitions for the same MACRO\n"
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
                           "or char different than letters, digits and underscore\n"
@@ -38,7 +38,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing\n"
 #define MEMORY_FAIL "Fail to allocate memory\n"
 #define ARG_NOT_AS_FILE "File does not .as file\n"
-#define FAIL_CLEAN_FILE "Failed to create clean file with no spaces, empty line or note line\n"
+#define FAIL_CLEAN_FILE "Can not create clean file with no spaces, empty line or note line\n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
 
 /* First Pass and Second Pass Errors */

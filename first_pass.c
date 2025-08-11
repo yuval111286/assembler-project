@@ -169,11 +169,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             continue;
         }
 
-        /* Skip empty lines and comments */
-        if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
-            continue;
-        }
-
         /* label handling */
         if (parsed.label[0] != '\0') {
 
