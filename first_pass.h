@@ -6,6 +6,11 @@
 #include "linked_list.h"
 #include <stdio.h>
 
+unsigned int shift_and_set_are(unsigned int final_value, int are_type);
+
+unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_mask, int shift);
+
+
 
 int parse_matrix_dimensions(const char *token, int *rows, int *cols);
 

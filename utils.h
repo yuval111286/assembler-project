@@ -20,4 +20,6 @@ void *malloc_allocation(size_t size);
 char *change_ending_of_file(char *file_name, char *new_ending);
 
 
+
+
 #endif

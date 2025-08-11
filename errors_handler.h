@@ -70,7 +70,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define DATA_IMAGE_OVERFLOW "Data image overflow – too much .data/.string/.mat content\n"
 #define CODE_IMAGE_OVERFLOW "Code image overflow – exceeded MAX_CODE_SIZE\n"
 #define EXTRANEOUS_TEXT_AFTER_COMMAND "Extraneous text after end of command\n"
-#define INVALID_STRING ".string label values contain invalid char"
+#define INVALID_STRING ".string label values contain invalid char\n"
 
 #define REGISTER_NAME_AS_LABEL "Register name cannot be used as label\n"
 #define RESERVED_WORD_AS_LABEL "Reserved word cannot be used as label\n"

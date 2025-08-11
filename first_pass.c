@@ -9,6 +9,16 @@
 #include "errors_handler.h"
 #include "code_image.h"
 
+
+unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
+    return (final_value << 2) | are_type;
+}
+
+unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_mask, int shift) {
+    encoded_word |= (value & bit_mask) << shift;
+    return encoded_word;
+}
+
 int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
     char cleaned[MAX_LINE_LENGTH];
     int len, read_len;
@@ -221,10 +231,16 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
 
             encoded_word = 0;
-            encoded_word |= (opcode & 0xF) << 6;
+            encoded_word = coding_word(encoded_word,opcode,FOUR_BITS_MASK,OPCODE_BITS);
+            encoded_word = coding_word(encoded_word,src_mode,TWO_BITS_MASK,SRC_BITS);
+            encoded_word = coding_word(encoded_word,dest_mode,TWO_BITS_MASK,DEST_BITS);
+            encoded_word = coding_word(encoded_word,ARE,TWO_BITS_MASK,ARE_BITS);
+
+
+            /*encoded_word |= (opcode & 0xF) << 6;
             encoded_word |= (src_mode & 0x3) << 4;
             encoded_word |= (dest_mode & 0x3) << 2;
-            encoded_word |= (ARE & 0x3);
+            encoded_word |= (ARE & 0x3);*/
 
             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
             IC++;
@@ -296,9 +312,13 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                         if (first_reg != -1 && second_reg != -1) {
                             encoded_word = 0;
-                            encoded_word |= (first_reg & 0xF) << 6;  /* Bits 9-6: first register */
-                            encoded_word |= (second_reg & 0xF) << 2;  /* Bits 5-2: second register */
-                            encoded_word |= 0;                   /* Bits 1-0: ARE = 00 (Absolute) */
+                            encoded_word = coding_word(encoded_word, first_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
+                            encoded_word = coding_word(encoded_word, second_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
+
+
+                            /*encoded_word |= (first_reg & 0xF) << 6;  Bits 9-6: first register */
+                            /*encoded_word |= (second_reg & 0xF) << 2;  Bits 5-2: second register */
+                            /*encoded_word |= 0;                    Bits 1-0: ARE = 00 (Absolute) */
                             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
                             add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
@@ -320,9 +340,15 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                                 if (src_reg != -1 && dest_reg != -1) {
                                     encoded_word = 0;
-                                    encoded_word |= (src_reg & 0xF) << 6;   /* Bits 9-6: source register */
-                                    encoded_word |= (dest_reg & 0xF) << 2; /* Bits 5-2: destination register */
-                                    encoded_word |= 0;                     /* Bits 1-0: ARE = 00 (Absolute) */
+
+                                    encoded_word = coding_word(encoded_word, src_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
+                                    encoded_word = coding_word(encoded_word, dest_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 9-6 */
+
+
+
+                                    /* encoded_word |= (src_reg & 0xF) << 6;    Bits 9-6: source register */
+                                    /* encoded_word |= (dest_reg & 0xF) << 2;  Bits 5-2: destination register */
+                                    /*encoded_word |= 0;                    Bits 1-0: ARE = 00 (Absolute) */
                                     add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                                 } else {
                                     add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
@@ -338,11 +364,16 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                             if (reg_num != -1) {
                                 encoded_word = 0;
                                 if (i == 0) { /* Source operand */
-                                    encoded_word |= (reg_num & 0xF) << 6; /* Bits 9-6 */
+                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
+
+
+
+                                    /*encoded_word |= (reg_num & 0xF) << 6;  Bits 9-6 */
                                 } else { /* Destination operand */
-                                    encoded_word |= (reg_num & 0xF) << 2; /* Bits 5-2 */
+                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
+                                    /*encoded_word |= (reg_num & 0xF) << 2;  Bits 5-2 */
                                 }
-                                encoded_word |= 0; /* ARE = 00 (Absolute) */
+                                /*encoded_word |= 0;  ARE = 00 (Absolute) */
                                 add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                             } else {
                                 add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
@@ -372,7 +403,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         discover_errors = 1;
                         continue;
                     }
-
                     value = parse_number_from_string(parsed.operands[i], &error);
                     if (!error) {
                         data_image[DC++] = (short)value;

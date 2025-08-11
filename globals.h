@@ -38,6 +38,22 @@
 #define MAX_DATA_SIZE 255
 
 
+/*groups of bit in encoded word*/
+#define ARE_BITS 0 /*0-1*/
+#define DEST_BITS 2 /*2-3*/
+#define SRC_BITS 4 /*4-5*/
+#define OPCODE_BITS 6 /*6-9*/
+
+#define FOUR_BITS_MASK 0xF /*moving 4 places*/
+#define TWO_BITS_MASK  0x3 /*moving 2 places*/
+
+
+/*ARE*/
+
+#define ABSOLUTE 0
+#define EXTERNAL 1
+#define RELOCATABLE 2
+
 /* Type of line in source file */
 typedef enum {
     LINE_EMPTY,
