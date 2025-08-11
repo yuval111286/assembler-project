@@ -56,8 +56,6 @@
 
 /* Type of line in source file */
 typedef enum {
-    LINE_EMPTY,
-    LINE_COMMENT,
     LINE_DIRECTIVE,
     LINE_INSTRUCTION,
     LINE_INVALID

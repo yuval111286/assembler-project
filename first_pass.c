@@ -169,11 +169,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             continue;
         }
 
-        /* Skip empty lines and comments */
-        if (parsed.line_type == LINE_EMPTY || parsed.line_type == LINE_COMMENT) {
-            continue;
-        }
-
         /* label handling */
         if (parsed.label[0] != '\0') {
 
@@ -235,13 +230,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             encoded_word = coding_word(encoded_word,src_mode,TWO_BITS_MASK,SRC_BITS);
             encoded_word = coding_word(encoded_word,dest_mode,TWO_BITS_MASK,DEST_BITS);
             encoded_word = coding_word(encoded_word,ARE,TWO_BITS_MASK,ARE_BITS);
-
-
-            /*encoded_word |= (opcode & 0xF) << 6;
-            encoded_word |= (src_mode & 0x3) << 4;
-            encoded_word |= (dest_mode & 0x3) << 2;
-            encoded_word |= (ARE & 0x3);*/
-
             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
             IC++;
 
@@ -280,7 +268,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                     case ADDRESS_MATRIX: {
                         /* Second word - encode register indices */
-                        char matrix_operand[MAX_LINE_LENGTH],*bracket1, *bracket2, *bracket3, *bracket4;
+                        char matrix_operand[MAX_LINE_LENGTH],*first_bracket, *second_bracket, *third_bracket, *forth_bracket;
                         int first_reg = -1, second_reg = -1;
 
                         /* Matrix addressing - first word (address) will be filled in second pass */
@@ -292,19 +280,19 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         strcpy(matrix_operand, parsed.operands[i]);
 
                         /* Find register names between brackets */
-                        bracket1 = strchr(matrix_operand, '[');
-                        if (bracket1) {
-                            bracket2 = strchr(bracket1 + 1, ']');
-                            if (bracket2) {
-                                *bracket2 = '\0';
-                                first_reg = identify_register(bracket1 + 1);
+                        first_bracket = strchr(matrix_operand, '[');
+                        if (first_bracket) {
+                            second_bracket = strchr(first_bracket + 1, ']');
+                            if (second_bracket) {
+                                *second_bracket = '\0';
+                                first_reg = identify_register(first_bracket + 1);
 
-                                bracket3 = strchr(bracket2 + 1, '[');
-                                if (bracket3) {
-                                    bracket4 = strchr(bracket3 + 1, ']');
-                                    if (bracket4) {
-                                        *bracket4 = '\0';
-                                        second_reg = identify_register(bracket3 + 1);
+                                third_bracket = strchr(second_bracket + 1, '[');
+                                if (third_bracket) {
+                                    forth_bracket = strchr(third_bracket + 1, ']');
+                                    if (forth_bracket) {
+                                        *forth_bracket = '\0';
+                                        second_reg = identify_register(third_bracket + 1);
                                     }
                                 }
                             }
@@ -314,11 +302,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                             encoded_word = 0;
                             encoded_word = coding_word(encoded_word, first_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
                             encoded_word = coding_word(encoded_word, second_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
-
-
-                            /*encoded_word |= (first_reg & 0xF) << 6;  Bits 9-6: first register */
-                            /*encoded_word |= (second_reg & 0xF) << 2;  Bits 5-2: second register */
-                            /*encoded_word |= 0;                    Bits 1-0: ARE = 00 (Absolute) */
                             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
                             add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
@@ -343,12 +326,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                                     encoded_word = coding_word(encoded_word, src_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
                                     encoded_word = coding_word(encoded_word, dest_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 9-6 */
-
-
-
-                                    /* encoded_word |= (src_reg & 0xF) << 6;    Bits 9-6: source register */
-                                    /* encoded_word |= (dest_reg & 0xF) << 2;  Bits 5-2: destination register */
-                                    /*encoded_word |= 0;                    Bits 1-0: ARE = 00 (Absolute) */
                                     add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                                 } else {
                                     add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
@@ -365,15 +342,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                                 encoded_word = 0;
                                 if (i == 0) { /* Source operand */
                                     encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
-
-
-
-                                    /*encoded_word |= (reg_num & 0xF) << 6;  Bits 9-6 */
                                 } else { /* Destination operand */
                                     encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
-                                    /*encoded_word |= (reg_num & 0xF) << 2;  Bits 5-2 */
                                 }
-                                /*encoded_word |= 0;  ARE = 00 (Absolute) */
                                 add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                             } else {
                                 add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */

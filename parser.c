@@ -509,16 +509,6 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     }
 
     token = strtok(buffer, " \t\n");
-    if (token == NULL) {
-        (*out).line_type = LINE_EMPTY;
-        return 1;
-    }
-
-    if (token[0] == ';') {
-        (*out).line_type = LINE_COMMENT;
-        return 1;
-    }
-
 
     /* Handle Label */
     if (token[strlen(token) - 1] == ':') {
