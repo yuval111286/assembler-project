@@ -1,52 +1,103 @@
-; Test file for addressing mode validation
-; This file contains examples of both valid and invalid addressing modes
-; to test the new validation functions
+; שגיאות - מספרים מחוץ לטווח
+mov #512, r1        ; שגיאה: 512 > 511
+mov #-513, r2       ; שגיאה: -513 < -512
+mov #1000, r3       ; שגיאה: 1000 > 511
+mov #-1000, r4      ; שגיאה: -1000 < -512
+mov #99999, r5      ; שגיאה: 99999 > 511
+mov #-99999, r6     ; שגיאה: -99999 < -512
 
-; === VALID INSTRUCTIONS ===
-; Valid: mov source=direct(1), dest=register(3)
-MAIN: mov LABEL1,r1
-; Valid: cmp source=immediate(0), dest=register(3)
-cmp #5,r2
-; Valid: add source=register(3), dest=register(3)
-add r1,r2
-; Valid: lea source=direct(1), dest=register(3) - WRONG! lea dest can't be register
-lea MATRIX1,r3
-; Valid: prn dest=immediate(0) - only prn allows immediate dest
-prn #-100
-; Valid: jmp dest=direct(1)
-jmp LABEL2
+; תקין - בטווח
+mov #511, r1        ; תקין: גבול עליון
+mov #-512, r2       ; תקין: גבול תחתון
+mov #0, r3          ; תקין
+mov #100, r4        ; תקין
+mov #-100, r5       ; תקין
 
-; === INVALID INSTRUCTIONS (should generate errors) ===
-; INVALID: mov can't have immediate destination
-ERROR1: mov #5,#6
-; INVALID: add can't have immediate source
-ERROR2: add #5,r1
-; INVALID: sub can't have immediate source
-ERROR3: sub #10,LABEL1
-; INVALID: jmp can't have immediate destination
-ERROR4: jmp #100
-; INVALID: clr can't have immediate destination
-ERROR5: clr #5
-; INVALID: inc can't have immediate destination
-ERROR6: inc #1
-; INVALID: lea can't have register source or dest
-ERROR7: lea r1,r2
-; INVALID: lea can't have immediate source
-ERROR8: lea #5,LABEL1
+; שגיאות
+cmp #512, r1        ; שגיאה
+cmp #-513, r2       ; שגיאה
+cmp r1, #1024       ; שגיאה
+cmp r2, #-2048      ; שגיאה
 
-; === MATRIX ADDRESSING TESTS ===
-; Valid: matrix with valid registers
-VALID_MAT: mov MATRIX1[r2][r3],r1
-; INVALID: r8 doesn't exist
-INVALID_MAT1: mov MATRIX1[r8][r1],r2
-; INVALID: xyz is not a register
-INVALID_MAT2: mov MATRIX1[r1][xyz],r2
-; INVALID: missing closing bracket
-INVALID_MAT3: mov MATRIX1[r1,r2
-; === DATA DEFINITIONS ===
-LABEL1: .data 10,20,30
-LABEL2: .data 50
-MATRIX1: .mat [3][3] 1,2,3,4,5,6,7,8,9
+; תקין
+cmp #511, r1        ; תקין
+cmp #-512, r2       ; תקין
+cmp r1, #0          ; תקין
+; שגיאות
+prn #512           ; שגיאה
+prn #-513          ; שגיאה
+prn #5000          ; שגיאה
+prn #-5000         ; שגיאה
 
-; === END ===
-END: stop
+; תקין
+prn #511           ; תקין
+prn #-512          ; תקין
+prn #255           ; תקין
+; ADD - שגיאות
+add #512, r1       ; שגיאה
+add #-513, r2      ; שגיאה
+add r1, #1000      ; שגיאה
+
+; SUB - שגיאות
+sub #512, r1       ; שגיאה
+sub #-513, r2      ; שגיאה
+sub r1, #2000      ; שגיאה
+
+; תקין
+add #511, r1       ; תקין
+add #-512, r2      ; תקין
+sub #0, r3         ; תקין
+sub #-1, r4        ; תקין
+; שגיאות
+VALUES1: .data 512, 100, 200      ; שגיאה: 512 > 511
+VALUES2: .data -513, 0, 1         ; שגיאה: -513 < -512
+VALUES3: .data 1000, 2000, 3000   ; שגיאה: כל המספרים מחוץ לטווח
+VALUES4: .data -1000, -2000       ; שגיאה: כל המספרים מחוץ לטווח
+BIG_NUMS: .data 99999, -99999     ; שגיאה: שני המספרים מחוץ לטווח
+
+; מעורב - חלק תקין חלק שגוי
+MIXED1: .data 511, 512, -512      ; שגיאה: 512 מחוץ לטווח
+MIXED2: .data -512, -513, 0       ; שגיאה: -513 מחוץ לטווח
+MIXED3: .data 100, 1000, 200      ; שגיאה: 1000 מחוץ לטווח
+
+; תקין
+VALID1: .data 511, -512, 0        ; תקין: כל המספרים בטווח
+VALID2: .data 100, -100, 255      ; תקין
+VALID3: .data -1, 1, 500          ; תקין
+; שגיאות
+MATRIX1: .mat [2][2] 512, 100, 200, 300        ; שגיאה: 512 > 511
+MATRIX2: .mat [2][2] -513, 0, 1, 2             ; שגיאה: -513 < -512
+MATRIX3: .mat [3][3] 1,2,3,4,1000,6,7,8,9      ; שגיאה: 1000 מחוץ לטווח
+MATRIX4: .mat [2][1] -2000, 100                ; שגיאה: -2000 < -512
+
+; מעורב
+MATRIX5: .mat [2][2] 511, 512, -512, 0         ; שגיאה: 512 מחוץ לטווח
+MATRIX6: .mat [1][3] -512, 0, 1000             ; שגיאה: 1000 מחוץ לטווח
+
+; תקין
+MATRIX7: .mat [2][2] 511, -512, 0, 100         ; תקין
+MATRIX8: .mat [3][1] 200, -200, 0              ; תקין
+; מספרים קיצוניים
+EXTREME: .data 2147483647, -2147483648         ; שגיאה: מספרים ענקיים
+mov #2147483647, r1                            ; שגיאה
+prn #-2147483648                               ; שגיאה
+
+; גבולות בדיוק
+BORDER1: .data 511                             ; תקין: גבול עליון
+BORDER2: .data -512                            ; תקין: גבול תחתון
+BORDER3: .data 512                             ; שגיאה: חריגה באחד
+BORDER4: .data -513                            ; שגיאה: חריגה באחד
+
+; בפקודות
+mov #511, r1                                   ; תקין
+mov #512, r1                                   ; שגיאה
+cmp #-512, r2                                  ; תקין
+cmp #-513, r2                                  ; שגיאה
+MAIN: mov #600, r1          ; שגיאה: 600 > 511
+add #-600, r2         ; שגיאה: -600 < -512
+cmp #511, r3          ; תקין
+prn #512              ; שגיאה: 512 > 511
+stop
+
+DATA1: .data 512, -513, 0   ; שגיאה: שני מספרים מחוץ לטווח
+MAT1: .mat [2][2] 1000, -1000, 2000, -2000  ; שגיאה: כל המספרים שגויים

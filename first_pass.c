@@ -171,14 +171,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
         /* label handling */
         if (parsed.label[0] != '\0') {
-
-            if (identify_opcode(parsed.label) != OPCODE_INVALID ||
-                identify_directive(parsed.label) != -1 ||
-                identify_register(parsed.label) != -1) {
-                error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
-                discover_errors = 1;
-                continue;
-            }
             if (symbol_exists(symbol_table, parsed.label)) {
                 error_log(file_name, line_number, DUPLICATE_LABEL);
                 discover_errors = 1;
