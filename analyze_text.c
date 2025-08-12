@@ -89,7 +89,8 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name) {
     }
 
     while (fgets(line, sizeof(line), input_file) != NULL) {
-        if (!check_line_comment_or_empty(line)) {
+        clean = cut_spaces_before_and_after_string(line);
+        if (!check_line_comment_or_empty(clean)) {
             /* create copy string for trimming space */
             strcpy(line_copy, line);
             clean = cut_spaces_before_and_after_string(line_copy);
