@@ -2,7 +2,8 @@
 CC = gcc
 CFLAGS = -ansi -Wall -pedantic -g
 GLOBAL_DEPS = globals.h
-EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o first_pass.o second_pass.o linked_list.o errors_handler.o analyze_text.o parser.o code_image.o
+
+EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o first_pass.o second_pass.o linked_list.o errors_handler.o analyze_text.o parser.o parser_helper.o code_image.o
 
 # Executable target
 assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
@@ -35,11 +36,14 @@ errors_handler.o: errors_handler.c errors_handler.h $(GLOBAL_DEPS)
 analyze_text.o: analyze_text.c analyze_text.h $(GLOBAL_DEPS)
 	$(CC) -c analyze_text.c $(CFLAGS) -o $@
 
-parser.o: parser.c parser.h $(GLOBAL_DEPS)
+parser.o: parser.c parser.h parser_helper.h $(GLOBAL_DEPS)
 	$(CC) -c parser.c $(CFLAGS) -o $@
+
+parser_helper.o: parser_helper.c parser_helper.h $(GLOBAL_DEPS)
+	$(CC) -c parser_helper.c $(CFLAGS) -o $@
 
 code_image.o: code_image.c code_image.h $(GLOBAL_DEPS)
 	$(CC) -c code_image.c $(CFLAGS) -o $@
 
 clean:
-	rm -rf *.o *.am *.ob *.ent *.ext
+	rm -rf *.o *.am *.ob *.ent *.ext assembler

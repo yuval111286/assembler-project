@@ -4,6 +4,23 @@
 #include "utils.h"
 #include "errors_handler.h"
 
+
+int is_empty_or_whitespace(char *str) {
+    if (str == NULL) {
+        return 1;
+    }
+
+    while (*str != '\0') {
+        if (!isspace((unsigned char)*str)) {
+            return 0;
+        }
+        str++;
+    }
+
+    return 1;
+}
+
+
 char *cut_spaces_before_and_after_string(char *str) {
     char *end_pointer_of_string;
     /* skip leading whitespace */
