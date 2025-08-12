@@ -16,6 +16,8 @@ char *turn_line_to_base_4(unsigned int word);
  */
 char *turn_address_to_base_4(unsigned int address);
 
+char *int_to_base_4(int number);
+
 
 /**
  * @brief Performs the second pass of the assembler

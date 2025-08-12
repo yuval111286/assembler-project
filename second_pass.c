@@ -56,6 +56,48 @@ char *turn_address_to_base_4(unsigned int address) {
     return address_is_coded_in_base4;
 }
 
+/**
+ * @brief Alternative version that uses a static buffer (thread-unsafe but simpler)
+ *
+ * @param number The integer to convert
+ * @return char* Static string containing the base-4 representation
+ *         The string is overwritten on each call
+ */
+char *int_to_base_4(int number) {
+    static char result[10]={0}; /* Static buffer - reused each call */
+    char base4_chars[4] = {'a', 'b', 'c', 'd'};
+    char temp_buffer[10]={0};
+    int i, digit_count, remainder;
+    int abs_number;
+
+    /* Handle zero case */
+    if (number == 0) {
+        result[0] = 'a';
+        result[1] = '\0';
+        return result;
+    }
+
+    abs_number=number;
+
+    /* Build digits in reverse order */
+    digit_count = 0;
+    while (abs_number > 0) {
+        remainder = abs_number % 4;
+        temp_buffer[digit_count] = base4_chars[remainder];
+        abs_number = abs_number / 4;
+        digit_count++;
+    }
+
+    result[digit_count] = '\0';
+    /* Reverse the digits to get correct order */
+    for (i = 0; i < digit_count; i++) {
+        result[i] = temp_buffer[digit_count - 1 - i];
+    }
+
+    return result;
+}
+
+
 int is_label_operand(char *operand) {
     /*check if not num  */
     if (operand[0] == '#') return 0;
@@ -103,11 +145,11 @@ void free_extern_list(ExternList *extern_list) {
     extern_list->head = NULL;
 }
 
+
 void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsigned int *data_image, char *file_name) {
     FILE *fp;
     int i;
-    char *obj_file_name;
-
+    char *obj_file_name,ic_size_in_base_4[10] = {0},dc_size_in_base_4[10] = {0},temp[10]={0};
     obj_file_name = change_ending_of_file(file_name, ".ob");
 
     fp = fopen(obj_file_name, "w");
@@ -117,32 +159,35 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
         return;
     }
 
+    strcpy(temp, int_to_base_4(ic_size));
+    strcpy(ic_size_in_base_4, temp);
+    strcpy(temp, int_to_base_4(dc_size));
+    strcpy(dc_size_in_base_4, temp);
+
+    fprintf(fp, "%s\t\t%s\n", ic_size_in_base_4,dc_size_in_base_4);
+
     /* go over code image section and code address and word*/
     for (i = 0; i < (*img).size; i++) {
-        if (i==(*img).size-1&&dc_size==0){
+        if (i == (*img).size - 1 && dc_size == 0) {
             fprintf(fp, "%s\t%s", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
-        }
-        else{
+        } else {
             fprintf(fp, "%s\t%s\n", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
         }
     }
 
-
     /* go over data image section code address and word*/
     for (i = 0; i < dc_size; i++) {
-        if (i==dc_size-1){
+        if (i == dc_size - 1) {
             fprintf(fp, "%s\t%s", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
-        }
-        else{
+        } else {
             fprintf(fp, "%s\t%s\n", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
         }
     }
 
-
-
     fclose(fp);
     free(obj_file_name);
 }
+
 
 void write_ext_file(char *file_name, ExternList *extern_list) {
     FILE *fp;
@@ -197,7 +242,6 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
 
         }
         current = current->next;
-
     }
 
     fclose(fp);
@@ -302,7 +346,6 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     int line_number = 0, discover_errors = 0, current_address = IC_INIT_VALUE;
     ParsedLine parsed;
     ExternList extern_list;
-    int i;
 
     /* initialize extern linked list */
     extern_list.head = NULL;
