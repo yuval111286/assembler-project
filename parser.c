@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include "parser.h"
 #include "analyze_text.h"
@@ -37,13 +36,13 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         token[strlen(token) - 1] = '\0';  /* Remove ':' */
 
         if (!is_valid_label(token, file_name, line_number)) {
-            if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
-                error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
-            } else if (identify_register(token) != -1) {
-                error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
-            } else {
-                error_log(file_name, line_number, INVALID_LABEL_NAME);
-            }
+            return 0;
+        }
+        if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
+            error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
+            return 0;
+        } else if (identify_register(token) != -1) {
+            error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
             return 0;
         }
 
@@ -68,7 +67,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         out->line_type = LINE_DIRECTIVE;
         copy_directive_name(token, out->directive_name);
 
-        return parse_directive(line, out, file_name, line_number);
+        return parse_directive_line(line, out, file_name, line_number);
     } else {
         /* Handle instruction */
         Opcode opcode_identifier = identify_opcode(token);
@@ -126,9 +125,8 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
 }
 
 /* Helper function to parse directive */
-int parse_directive(char *line, ParsedLine *out, char *file_name, int line_number) {
+int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char *dynamic_operands_pointer;
-
 
     /* Find operands part */
     dynamic_operands_pointer = strstr(line, out->directive_name);
@@ -223,13 +221,13 @@ int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int
     operands = cut_spaces_before_and_after_string(operands);
 
     if (!is_valid_label(operands, file_name, line_number)) {
-        if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
-            error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
-        } else if (identify_register(operands) != -1) {
-            error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
-        } else {
-            error_log(file_name, line_number, INVALID_LABEL_NAME);
-        }
+        return 0;
+    }
+    if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
+        error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
+        return 0;
+    } else if (identify_register(operands) != -1) {
+        error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
         return 0;
     }
 
@@ -250,13 +248,13 @@ int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int 
     operands = cut_spaces_before_and_after_string(operands);
 
     if (!is_valid_label(operands, file_name, line_number)) {
-        if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
-            error_log(file_name, line_number, RESERVED_WORD_AS_LABEL);
-        } else if (identify_register(operands) != -1) {
-            error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
-        } else {
-            error_log(file_name, line_number, INVALID_LABEL_NAME);
-        }
+        return 0;
+    }
+    if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
+        error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
+        return 0;
+    } else if (identify_register(operands) != -1) {
+        error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
         return 0;
     }
 
@@ -357,193 +355,115 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
 
 /* Helper function to validate operand for specific instruction */
 int validate_operand_for_instruction(char *operand, Opcode opcode, int position, char *file_name, int line_number) {
-    char ladder = '#', opening_bracket = '[', closing_bracket=']';
+    char ladder = '#', opening_bracket = '[', closing_bracket = ']';
 
     switch (opcode) {
         case OPCODE_MOV:
             if (position == 0) {
-                if (strchr(operand, ladder))  {
+                if (strchr(operand, ladder)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
                     }
-                }else if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, closing_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-
-                }else if (identify_register(operand) == -1 ) {
-                    if(!is_valid_label(operand, file_name, line_number)){
+                } else if (identify_register(operand) == -1) {
+                    if (!is_valid_label(operand, file_name, line_number)) {
                         return 0;
                     }
                 }
-
-            }
-
-                /* Source: 0,1,2,3 (no immediate) */
-                /*if (!is_valid_immediate(operand, file_name, line_number) ||
-                    !is_valid_label(operand, file_name, line_number) ||
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number) ||
-                    identify_register(operand) == -1) {
-                    return 0;
-                }*/
-
-
-             else {
-                 if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+            } else {
+                if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, closing_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-
-                }else if (identify_register(operand) == -1 ) {
-                     if(!is_valid_label(operand, file_name, line_number)){
-                         return 0;
-                     }
-                 }
-
-
-
-
-
-
-
-
-
-
-                /* Destination: 1,2,3 */
-                /*if (!is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                    identify_register(operand) == -1) {
-                    return 0;
-                }*/
+                } else if (identify_register(operand) == -1) {
+                    if (!is_valid_label(operand, file_name, line_number)) {
+                        return 0;
+                    }
+                }
             }
             break;
 
         case OPCODE_CMP:
             /* Both operands: 0,1,2,3 */
-
-            if (strchr(operand, ladder))  {
+            if (strchr(operand, ladder)) {
                 if (is_valid_immediate(operand, file_name, line_number) == 1) {
                     return 0;
                 }
-            }else if (strchr(operand, opening_bracket)) {
-                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+            } else if (strchr(operand, opening_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else if (strchr(operand, closing_bracket)){
-
-                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+            } else if (strchr(operand, closing_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-
-            }else if (identify_register(operand) == -1 ) {
-                if(!is_valid_label(operand, file_name, line_number)){
+            } else if (identify_register(operand) == -1) {
+                if (!is_valid_label(operand, file_name, line_number)) {
                     return 0;
                 }
             }
-
-
-
-            /*if (!is_valid_immediate(operand, file_name, line_number) &&
-                !is_valid_label(operand, file_name, line_number) &&
-                !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                identify_register(operand) == -1) {
-                return 0;
-            }*/
             break;
 
         case OPCODE_ADD:
         case OPCODE_SUB:
             if (position == 0) {
-                if (strchr(operand, ladder))  {
+                if (strchr(operand, ladder)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
                     }
-                }else if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, closing_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-
-                }else if (identify_register(operand) == -1 ) {
-                    if(!is_valid_label(operand, file_name, line_number)){
+                } else if (identify_register(operand) == -1) {
+                    if (!is_valid_label(operand, file_name, line_number)) {
                         return 0;
                     }
                 }
-
-
-                /* Source: 0,1,2,3 */
-               /* if (!is_valid_immediate(operand, file_name, line_number) &&
-                    !is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                    identify_register(operand) == -1) {
-                    return 0;
-                }*/
             } else {
-
                 if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                } else if (strchr(operand, closing_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-
-                }else if (identify_register(operand) == -1 ) {
-                    if(!is_valid_label(operand, file_name, line_number)){
+                } else if (identify_register(operand) == -1) {
+                    if (!is_valid_label(operand, file_name, line_number)) {
                         return 0;
                     }
                 }
-
-
-
-                /* Destination: 1,2,3 */
-               /* if (!is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                    identify_register(operand) == -1) {
-                    return 0;
-                }*/
             }
             break;
 
         case OPCODE_LEA:
-
             if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
-                        return 0;
-                    }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
-                        return 0;
-                    }
-
-                }else if(!is_valid_label(operand, file_name, line_number)){
-                        return 0;
-                    }
-
-
-                /* Source: 1,2 */
-                /*if (!is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
-                }*/
-
+                }
+            } else if (strchr(operand, closing_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
+                    return 0;
+                }
+            } else if (!is_valid_label(operand, file_name, line_number)) {
+                return 0;
+            }
             break;
 
         case OPCODE_CLR:
@@ -554,59 +474,39 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
-
             if (strchr(operand, opening_bracket)) {
-                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else if (strchr(operand, closing_bracket)){
-
-                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+            } else if (strchr(operand, closing_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-
-            }else if (identify_register(operand) == -1 ) {
-                if(!is_valid_label(operand, file_name, line_number)){
+            } else if (identify_register(operand) == -1) {
+                if (!is_valid_label(operand, file_name, line_number)) {
                     return 0;
                 }
             }
-
-            /* Single operand: 1,2,3 */
-            /*if (!is_valid_label(operand, file_name, line_number) &&
-                !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                identify_register(operand) == -1) {
-                return 0;
-            }*/
             break;
 
         case OPCODE_PRN:
-                if (strchr(operand, ladder))  {
-                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
-                        return 0;
-                    }
-                } else if (strchr(operand, opening_bracket)) {
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
-                        return 0;
-                    }
-                } else if (strchr(operand, closing_bracket)){
-
-                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
-                        return 0;
-                    }
-
-                }else if (identify_register(operand) == -1 ) {
-                    if(!is_valid_label(operand, file_name, line_number)){
-                        return 0;
-                    }
+            if (strchr(operand, ladder)) {
+                if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                    return 0;
                 }
-
-            /* Single operand: 0,1,2,3 */
-            /*if (!is_valid_immediate(operand, file_name, line_number) &&
-                !is_valid_label(operand, file_name, line_number) &&
-                !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                identify_register(operand) == -1) {
-                return 0;
-            }*/
+            } else if (strchr(operand, opening_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
+                    return 0;
+                }
+            } else if (strchr(operand, closing_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
+                    return 0;
+                }
+            } else if (identify_register(operand) == -1) {
+                if (!is_valid_label(operand, file_name, line_number)) {
+                    return 0;
+                }
+            }
             break;
 
         default:
