@@ -57,7 +57,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define INVALID_LABEL_NAME "Invalid label name\n"
 #define EMPTY_AFTER_LABEL "No continue after label name\n"
 #define FAIL_CONVERT_STRING_TO_NUM "Can not convert string to num\n"
-#define DUPLICATE_LABEL "Label already defined\n"
+#define DUPLICATE_LABEL "Label is already defined\n"
 #define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label\n"
 #define FAILED_ADD_DATA_LABEL "Failed to add data label\n"
 #define ILLEGAL_EXTERN_LABEL "Label cannot be defined for .extern\n"
@@ -73,7 +73,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define INVALID_STRING ".string label values contain invalid char\n"
 
 #define REGISTER_NAME_AS_LABEL "Register name cannot be used as label\n"
-#define RESERVED_WORD_AS_LABEL "Reserved word cannot be used as label\n"
+#define SAVED_WORD_AS_LABEL "Assemble saved word cannot be used as label name\n"
 #define STRING_MISSING_QUOTES "String must be enclosed in quotation marks\n"
 #define MISSING_OPERAND_EXTERN "Missing operand for .extern directive\n"
 #define MISSING_OPERANDS_DATA "Missing operands for .data directive\n"

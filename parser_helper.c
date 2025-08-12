@@ -342,7 +342,7 @@ int is_valid_label(char *label,char *file_name, int line_number) {
 
     for (i = 1; i < len; i++) {
         if (!isalnum((unsigned char)label[i])) {
-            /*error_log(file_name, line_number, "Label must contain only digits or letters \n");*/
+            error_log(file_name, line_number, "Label must contain only digits or letters \n");
             return 0; /* Label must contain only alphanumeric characters */
         }
     }

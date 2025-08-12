@@ -42,7 +42,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number);
  * Returns:
  *   1 if parsing succeeded, 0 if syntax error detected
  */
-int parse_directive(char *line, ParsedLine *out, char *file_name, int line_number);
+int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_number);
 
 /*
  * Parses .string directive operands.
