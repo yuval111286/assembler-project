@@ -38,6 +38,7 @@ int instruction_word_count(ParsedLine *parsed);
 
 int count_data_items(ParsedLine *parsed);
 
+int comma_validation(char *line,char *file_name,int line_number);
 
 
 

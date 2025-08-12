@@ -232,11 +232,15 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
 
 
 int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_name, int line_number) {
-    int i;
+    int i=0;
     if (!digit_or_letter_or_both){
         /*check tested word contain only digits*/
 
-        for (i = 0; i < strlen(tested_word); i++) {
+        if (tested_word[i] == '-' || tested_word[i] == '+')
+        {
+            i++;
+        }
+        for (i = i; i < strlen(tested_word); i++) {
             if (!isdigit(tested_word[i])) {
                 error_log(file_name, line_number, "Char is not digit\n");
                 return 1;
@@ -440,7 +444,7 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     char *open_bracket_first_reg, *closed_bracket_first_reg, *open_bracket_second_reg, *closed_bracket_second_reg;
     char temp_operand[MAX_LINE_LENGTH], *point_after_first_reg;
     char first_register[MAX_LINE_LENGTH], second_register[MAX_LINE_LENGTH];
-    char *reg;
+    char *reg, *point_after_second_reg;
 
     strncpy(temp_operand, operand, MAX_LINE_LENGTH - 1);
     temp_operand[MAX_LINE_LENGTH - 1] = '\0';
@@ -457,7 +461,6 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         return 1;
     }
 
-
     strncpy(first_register, open_bracket_first_reg + 1,
             closed_bracket_first_reg - open_bracket_first_reg - 1);
     first_register[closed_bracket_first_reg - open_bracket_first_reg - 1] = '\0';
@@ -468,7 +471,6 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         return 1;
     }
 
-
     point_after_first_reg = closed_bracket_first_reg + 1;
     while (*point_after_first_reg != '\0' && *point_after_first_reg != '[') {
         if (isspace((unsigned char)*point_after_first_reg)) {
@@ -477,7 +479,6 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         }
         point_after_first_reg++;
     }
-
 
     open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
     if (!open_bracket_second_reg) {
@@ -499,6 +500,15 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     if (identify_register(reg) == -1) {
         error_log(file_name, line_number, INVALID_MATRIX_SECOND_REGISTER);
         return 1;
+    }
+
+    point_after_second_reg = closed_bracket_second_reg + 1;
+    while (*point_after_second_reg != '\0') {
+        if (!isspace((unsigned char)*point_after_second_reg)) {
+            error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
+            return 1;
+        }
+        point_after_second_reg++;
     }
 
     return 0;

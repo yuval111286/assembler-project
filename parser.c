@@ -271,29 +271,31 @@ int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int 
 }
 
 int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
-    int n, m, i;
-    char *mat_values, *token;
+    int n, m, mat_size,i;
+    char *mat_values, *token,*number;
+
 
     if (!is_valid_matrix_dim(operands, file_name, line_number)) {
         return 0;
     }
 
-    if (sscanf(operands, " [%d][%d]%n", &n, &m, &i) != 2) {
+    if (sscanf(operands, " [%d][%d]%n", &n, &m, &mat_size) != 2) {
         error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
         return 0;
     }
 
     /* Add matrix dimensions as first operand */
-    strncpy(out->operands[0], operands, i);
-    out->operands[0][i] = '\0';
+    strncpy(out->operands[0], operands, mat_size);
+    out->operands[0][mat_size] = '\0';
     out->operand_count = 1;
 
     /* Parse matrix values */
-    mat_values = operands + i;
+    mat_values = operands + mat_size;
     mat_values = cut_spaces_before_and_after_string(mat_values);
 
     if (mat_values[0] != '\0') {
         token = strtok(mat_values, ",");
+
         while (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
 
@@ -301,8 +303,9 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
                 error_log(file_name, line_number, MULTIPLE_COMMAS);
                 return 0;
             }
+            number = token;
 
-            if (!is_digit_or_char(token, 0, file_name, line_number)) {
+            if (is_digit_or_char(number, 0, file_name, line_number)) {
                 return 0;
             }
 
@@ -311,6 +314,12 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
             out->operand_count++;
 
             token = strtok(NULL, ",");
+        }
+    } else{
+        for (i = 0; i < mat_size; i++) {
+            strncpy(out->operands[out->operand_count], "0", MAX_LINE_LENGTH - 1);
+            out->operands[out->operand_count][MAX_LINE_LENGTH - 1] = '\0';
+            out->operand_count++;
         }
     }
 
@@ -380,7 +389,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     }
                 }
             } else {
-                if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder)){
+                    error_log(file_name,line_number,"Immediate is not valid argument for dest in mov instruction\n");
+                    return 0;
+                }
+                else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -438,7 +451,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     }
                 }
             } else {
-                if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder)){
+                    error_log(file_name,line_number,"Immediate is not valid argument for dest in add and sub instructions\n");
+                    return 0;
+                }
+                else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -456,7 +473,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
         case OPCODE_LEA:
             if (position == 0) {
-                if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder)){
+                    error_log(file_name,line_number,"Immediate is not valid argument for source in lea instruction\n");
+                    return 0;
+                }
+                else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -468,7 +489,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     return 0;
                 }
             } else {
-                if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder)){
+                    error_log(file_name,line_number,"Immediate is not valid argument for dest in lea instruction\n");
+                    return 0;
+                }
+                else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -492,7 +517,12 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
-            if (strchr(operand, opening_bracket)) {
+            if (strchr(operand, ladder)){
+                error_log(file_name,line_number,"Immediate is not valid argument for dest in clr,not"
+                " inc, dec,jmp,bne,jsr and red instructions\n");
+                return 0;
+            }
+            else if (strchr(operand, opening_bracket)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
