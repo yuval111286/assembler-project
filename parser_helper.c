@@ -185,7 +185,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
         i++;
     }
 
-    if(!is_digit_or_char(immediate+i,0,file_name,line_number)){
+    if(is_digit_or_char(immediate+i,0,file_name,line_number)){
         return 1;
     }
 

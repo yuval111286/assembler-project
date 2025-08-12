@@ -362,10 +362,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
     switch (opcode) {
         case OPCODE_MOV:
             if (position == 0) {
-                if (strchr(operand, ladder) && is_valid_immediate(operand, file_name, line_number)) {
-                    return 0;
-                }
-                else if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                }else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
                         return 0;
                     }
@@ -430,10 +431,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_CMP:
             /* Both operands: 0,1,2,3 */
 
-            if (strchr(operand, ladder) && is_valid_immediate(operand, file_name, line_number)) {
-                return 0;
-            }
-            else if (strchr(operand, opening_bracket)) {
+            if (strchr(operand, ladder))  {
+                if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                    return 0;
+                }
+            }else if (strchr(operand, opening_bracket)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
                     return 0;
                 }
@@ -462,11 +464,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_ADD:
         case OPCODE_SUB:
             if (position == 0) {
-
-                if (strchr(operand, ladder) && is_valid_immediate(operand, file_name, line_number)) {
-                    return 0;
-                }
-                else if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                }else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
                         return 0;
                     }
@@ -578,11 +580,11 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         case OPCODE_PRN:
-
-                if (strchr(operand, ladder) && is_valid_immediate(operand, file_name, line_number)) {
-                    return 0;
-                }
-                else if (strchr(operand, opening_bracket)) {
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                } else if (strchr(operand, opening_bracket)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
                         return 0;
                     }
