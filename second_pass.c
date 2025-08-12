@@ -436,7 +436,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     fclose(fp);
 
     /* === DEBUG: CODE IMAGE OUTPUT === */
-    printf("\n--- CODE IMAGE DUMP (SECOND Pass) ---\n");
+    /*printf("\n--- CODE IMAGE DUMP (SECOND Pass) ---\n");
 
     for (i = 0; i < code_image->size; i++) {
         printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
@@ -444,14 +444,14 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                code_image->words[i].value,
                code_image->words[i].value,
                code_image->words[i].ARE);
-    }
+    }*/
 
     /* === DEBUG: DATA IMAGE OUTPUT === */
-    printf("\n--- DATA IMAGE DUMP (SECOND Pass) ---\n");
+    /*printf("\n--- DATA IMAGE DUMP (SECOND Pass) ---\n");
 
     for (i = 0; i < dc_final; i++) {
         printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
-    }
+    }*/
 
     /* Generate output files if no errors */
     if (!discover_errors) {

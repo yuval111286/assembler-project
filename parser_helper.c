@@ -181,7 +181,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
     if (immediate[i] == '\0') {
         error_log(file_name, line_number, "Immediate value must have num after #\n");
         return 1;
-    } else if(immediate[i] =='-'){
+    } else if(immediate[i] =='-'||immediate[i] =='+'){
         i++;
     }
 
@@ -575,4 +575,33 @@ int count_data_items(ParsedLine *parsed) {
     }
 
     return 0; /* Unknown or unsupported directive */
+}
+
+
+int comma_validation(char *line,char *file_name,int line_number) {
+    int i = 0;
+
+    while (line[i] != '\0') {
+        if (line[i] == ',') {
+            i++;
+
+            while (line[i] == ' ' || line[i] == '\t') {
+                i++;
+            }
+
+            if (line[i] == ',') {
+                error_log(file_name, line_number, MULTIPLE_COMMAS);
+                return 1;
+            }
+
+            if (line[i] == '\0' || line[i] == '\n') {
+                error_log(file_name, line_number, "Extra comma in the end of the line");
+                return 1;
+            }
+        } else {
+            i++;
+        }
+    }
+
+    return 0;
 }
