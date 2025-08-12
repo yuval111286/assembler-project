@@ -81,8 +81,8 @@ const int expected_operands_for_each_opcode[16] = {
 const int allowed_source_modes[16][4] = {
         /* mov  */ {1, 1, 1, 1},
         /* cmp  */ {1, 1, 1, 1},
-        /* add  */ {0, 1, 1, 1},
-        /* sub  */ {0, 1, 1, 1},
+        /* add  */ {1, 1, 1, 1},
+        /* sub  */ {1, 1, 1, 1},
         /* lea  */ {0, 1, 1, 0},
         /* clr  */ {0, 0, 0, 0},
         /* not  */ {0, 0, 0, 0},
@@ -100,9 +100,9 @@ const int allowed_source_modes[16][4] = {
 const int allowed_dest_modes[16][4] = {
         /* mov  */ {0, 1, 1, 1},
         /* cmp  */ {1, 1, 1, 1},
-        /* add  */ {1, 1, 1, 1},
-        /* sub  */ {1, 1, 1, 1},
-        /* lea  */ {0, 1, 1, 0},
+        /* add  */ {0, 1, 1, 1},
+        /* sub  */ {0, 1, 1, 1},
+        /* lea  */ {0, 1, 1, 1},
         /* clr  */ {0, 1, 1, 1},
         /* not  */ {0, 1, 1, 1},
         /* inc  */ {0, 1, 1, 1},
@@ -395,11 +395,11 @@ int get_addressing_mode( char *operand) {
 int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int line_number) {
     int opcode = parsed->opcode;
 
-    /* Validate source operand (if exists) */
+    /* validate source operand only if exists */
     if (parsed->operand_count >= 1) {
         int src_mode = get_addressing_mode(parsed->operands[0]);
 
-        /* For two-operand instructions, first operand is source */
+        /* For two-operand instructions the first operand is source address */
         if (parsed->operand_count == 2) {
             if (src_mode >= 0 && src_mode <= 3) {
                 if (!allowed_source_modes[opcode][src_mode]) {
