@@ -10,6 +10,8 @@
 
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro",NULL};
 
+
+
 int check_as_file_ending(char *file_name)
 {
     char *c;
@@ -287,12 +289,14 @@ int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name,
         } else {
             /* regular line will be copied to am file */
             fputs(line, fp_am);
+
         }
     }
 
-    /* close files*/
     fclose(fp_as);
     fclose(fp_am);
+
+
 
     return 0;
 }
@@ -304,9 +308,8 @@ int preprocessor_full_flow(char *file_name,node **head){
     FILE  *first_copy;
     char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
     int indication, line_counter = 0;
-
-    /*head = NULL;*/
     indication = 0;
+
     if(check_as_file_ending(file_name)!=0){
         error_log(file_name,line_counter,ARG_NOT_AS_FILE);
         return 1;
