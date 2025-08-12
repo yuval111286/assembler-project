@@ -357,71 +357,193 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
 
 /* Helper function to validate operand for specific instruction */
 int validate_operand_for_instruction(char *operand, Opcode opcode, int position, char *file_name, int line_number) {
+    char ladder = '#', opening_bracket = '[', closing_bracket=']';
+
     switch (opcode) {
         case OPCODE_MOV:
             if (position == 0) {
-                /* Source: 1,2,3 (no immediate) */
-                if (!is_valid_label(operand, file_name, line_number) &&
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                }else if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if (identify_register(operand) == -1 ) {
+                    if(!is_valid_label(operand, file_name, line_number)){
+                        return 0;
+                    }
+                }
+
+            }
+
+                /* Source: 0,1,2,3 (no immediate) */
+                /*if (!is_valid_immediate(operand, file_name, line_number) ||
+                    !is_valid_label(operand, file_name, line_number) ||
+                    !verify_matrix_registers_are_valid(operand, file_name, line_number) ||
+                    identify_register(operand) == -1) {
+                    return 0;
+                }*/
+
+
+             else {
+                 if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if (identify_register(operand) == -1 ) {
+                     if(!is_valid_label(operand, file_name, line_number)){
+                         return 0;
+                     }
+                 }
+
+
+
+
+
+
+
+
+
+
+                /* Destination: 1,2,3 */
+                /*if (!is_valid_label(operand, file_name, line_number) &&
                     !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                     identify_register(operand) == -1) {
                     return 0;
-                }
-            } else {
-                /* Destination: 0,1,2,3 */
-                if (!is_valid_immediate(operand, file_name, line_number) &&
-                    !is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
-                    identify_register(operand) == -1) {
-                    return 0;
-                }
+                }*/
             }
             break;
 
         case OPCODE_CMP:
             /* Both operands: 0,1,2,3 */
-            if (!is_valid_immediate(operand, file_name, line_number) &&
+
+            if (strchr(operand, ladder))  {
+                if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                    return 0;
+                }
+            }else if (strchr(operand, opening_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                    return 0;
+                }
+            } else if (strchr(operand, closing_bracket)){
+
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                    return 0;
+                }
+
+            }else if (identify_register(operand) == -1 ) {
+                if(!is_valid_label(operand, file_name, line_number)){
+                    return 0;
+                }
+            }
+
+
+
+            /*if (!is_valid_immediate(operand, file_name, line_number) &&
                 !is_valid_label(operand, file_name, line_number) &&
                 !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                 identify_register(operand) == -1) {
                 return 0;
-            }
+            }*/
             break;
 
         case OPCODE_ADD:
         case OPCODE_SUB:
             if (position == 0) {
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                }else if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if (identify_register(operand) == -1 ) {
+                    if(!is_valid_label(operand, file_name, line_number)){
+                        return 0;
+                    }
+                }
+
+
                 /* Source: 0,1,2,3 */
-                if (!is_valid_immediate(operand, file_name, line_number) &&
+               /* if (!is_valid_immediate(operand, file_name, line_number) &&
                     !is_valid_label(operand, file_name, line_number) &&
                     !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                     identify_register(operand) == -1) {
                     return 0;
-                }
+                }*/
             } else {
-                /* Destination: 0,1,2,3 */
-                if (!is_valid_immediate(operand, file_name, line_number) &&
-                    !is_valid_label(operand, file_name, line_number) &&
+
+                if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if (identify_register(operand) == -1 ) {
+                    if(!is_valid_label(operand, file_name, line_number)){
+                        return 0;
+                    }
+                }
+
+
+
+                /* Destination: 1,2,3 */
+               /* if (!is_valid_label(operand, file_name, line_number) &&
                     !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                     identify_register(operand) == -1) {
                     return 0;
-                }
+                }*/
             }
             break;
 
         case OPCODE_LEA:
-            if (position == 0) {
+
+            if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if(!is_valid_label(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+
                 /* Source: 1,2 */
-                if (!is_valid_label(operand, file_name, line_number) &&
+                /*if (!is_valid_label(operand, file_name, line_number) &&
                     !verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
-                }
-            } else {
-                /* Destination: 1,2 */
-                if (!is_valid_label(operand, file_name, line_number) &&
-                    !verify_matrix_registers_are_valid(operand, file_name, line_number)) {
-                    return 0;
-                }
-            }
+                }*/
+
             break;
 
         case OPCODE_CLR:
@@ -432,22 +554,59 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
+
+            if (strchr(operand, opening_bracket)) {
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                    return 0;
+                }
+            } else if (strchr(operand, closing_bracket)){
+
+                if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                    return 0;
+                }
+
+            }else if (identify_register(operand) == -1 ) {
+                if(!is_valid_label(operand, file_name, line_number)){
+                    return 0;
+                }
+            }
+
             /* Single operand: 1,2,3 */
-            if (!is_valid_label(operand, file_name, line_number) &&
+            /*if (!is_valid_label(operand, file_name, line_number) &&
                 !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                 identify_register(operand) == -1) {
                 return 0;
-            }
+            }*/
             break;
 
         case OPCODE_PRN:
+                if (strchr(operand, ladder))  {
+                    if (is_valid_immediate(operand, file_name, line_number) == 1) {
+                        return 0;
+                    }
+                } else if (strchr(operand, opening_bracket)) {
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+                } else if (strchr(operand, closing_bracket)){
+
+                    if (verify_matrix_registers_are_valid(operand, file_name, line_number)){
+                        return 0;
+                    }
+
+                }else if (identify_register(operand) == -1 ) {
+                    if(!is_valid_label(operand, file_name, line_number)){
+                        return 0;
+                    }
+                }
+
             /* Single operand: 0,1,2,3 */
-            if (!is_valid_immediate(operand, file_name, line_number) &&
+            /*if (!is_valid_immediate(operand, file_name, line_number) &&
                 !is_valid_label(operand, file_name, line_number) &&
                 !verify_matrix_registers_are_valid(operand, file_name, line_number) &&
                 identify_register(operand) == -1) {
                 return 0;
-            }
+            }*/
             break;
 
         default:
