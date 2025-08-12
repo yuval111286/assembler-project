@@ -169,25 +169,23 @@ int identify_register(char *reg){
     return -1;
 }
 
-
-
-
-
-
-
 int is_valid_immediate(char *immediate, char* file_name, int line_number){
 
-    if (immediate[0] != '#') {
-        error_log(file_name, line_number, "Immediate value must start with an #\n");
+    int i=0;
 
+    if (immediate[i] != '#') {
+       error_log(file_name, line_number, "Immediate value must start with an #\n");
         return 1;
     }
-    if (immediate[1] == '\0') {
+    i++;
+    if (immediate[i] == '\0') {
         error_log(file_name, line_number, "Immediate value must have num after #\n");
         return 1;
+    } else if(immediate[i] =='-'){
+        i++;
     }
 
-    if(!is_digit_or_char(immediate+1,0,file_name,line_number)){
+    if(!is_digit_or_char(immediate+i,0,file_name,line_number)){
         return 1;
     }
 
@@ -344,7 +342,7 @@ int is_valid_label(char *label,char *file_name, int line_number) {
 
     for (i = 1; i < len; i++) {
         if (!isalnum((unsigned char)label[i])) {
-            error_log(file_name, line_number, "Label must contain only digits or letters \n");
+            /*error_log(file_name, line_number, "Label must contain only digits or letters \n");*/
             return 0; /* Label must contain only alphanumeric characters */
         }
     }
@@ -437,38 +435,29 @@ int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int l
     return 1;
 }
 
-/**
- * @brief בודקת תקינות אופרנד מטריצה
- *
- * @param operand אופרנד המטריצה לבדיקה
- * @param file_name שם הקובץ (לדיווח שגיאות)
- * @param line_number מספר השורה (לדיווח שגיאות)
- * @return 1 אם תקין, 0 אם לא תקין
- */
+
 int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_number) {
     char *open_bracket_first_reg, *closed_bracket_first_reg, *open_bracket_second_reg, *closed_bracket_second_reg;
     char temp_operand[MAX_LINE_LENGTH], *point_after_first_reg;
     char first_register[MAX_LINE_LENGTH], second_register[MAX_LINE_LENGTH];
     char *reg;
 
-    /* יצירת עותק כדי לא לשנות את המקור */
     strncpy(temp_operand, operand, MAX_LINE_LENGTH - 1);
     temp_operand[MAX_LINE_LENGTH - 1] = '\0';
 
-    /* מציאת הסוגריים הראשונים */
     open_bracket_first_reg = strchr(temp_operand, '[');
     if (!open_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_BRACKET);
-        return 0;
+        return 1;
     }
 
     closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, ']');
     if (!closed_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_CLOSING);
-        return 0;
+        return 1;
     }
 
-    /* חילוץ הרגיסטר הראשון והסרת רווחים */
+
     strncpy(first_register, open_bracket_first_reg + 1,
             closed_bracket_first_reg - open_bracket_first_reg - 1);
     first_register[closed_bracket_first_reg - open_bracket_first_reg - 1] = '\0';
@@ -476,33 +465,32 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     reg = cut_spaces_before_and_after_string(first_register);
     if (identify_register(reg) == -1) {
         error_log(file_name, line_number, INVALID_MATRIX_FIRST_REGISTER);
-        return 0;
+        return 1;
     }
 
-    /* בדיקת רווחים לא חוקיים בין הסוגריים */
+
     point_after_first_reg = closed_bracket_first_reg + 1;
     while (*point_after_first_reg != '\0' && *point_after_first_reg != '[') {
         if (isspace((unsigned char)*point_after_first_reg)) {
             error_log(file_name, line_number, MATRIX_INVALID_WHITESPACE);
-            return 0;
+            return 1;
         }
         point_after_first_reg++;
     }
 
-    /* מציאת הסוגריים השניים */
+
     open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
     if (!open_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_BRACKET);
-        return 0;
+        return 1;
     }
 
     closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, ']');
     if (!closed_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_CLOSING);
-        return 0;
+        return 1;
     }
 
-    /* חילוץ הרגיסטר השני והסרת רווחים */
     strncpy(second_register, open_bracket_second_reg + 1,
             closed_bracket_second_reg - open_bracket_second_reg - 1);
     second_register[closed_bracket_second_reg - open_bracket_second_reg - 1] = '\0';
@@ -510,18 +498,13 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     reg = cut_spaces_before_and_after_string(second_register);
     if (identify_register(reg) == -1) {
         error_log(file_name, line_number, INVALID_MATRIX_SECOND_REGISTER);
-        return 0;
+        return 1;
     }
 
-    return 1; /* המטריצה תקינה */
+    return 0;
 }
 
-/**
- * @brief מחשבת כמה מילים זוכה הוראה
- *
- * @param parsed מבנה הוראה מפוענחת
- * @return מספר המילים הנדרש להוראה
- */
+
 int instruction_word_count(ParsedLine *parsed) {
     int word_counter, i, mode;
 
