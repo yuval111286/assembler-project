@@ -8,7 +8,7 @@
 #include "parser_helper.h"
 
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
-    char buffer[MAX_LINE_LENGTH];
+    char *buffer,*cleaned_buffer;
     char *token, *dynamic_operands_pointer;
     int expected;
 
@@ -19,17 +19,18 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     out->opcode = OPCODE_INVALID;
     out->line_type = LINE_INVALID;
 
+    buffer = malloc_allocation(MAX_LINE_LENGTH);
+
     /* Copy line to buffer for tokenization */
     strncpy(buffer, line, MAX_LINE_LENGTH - 1);
     buffer[MAX_LINE_LENGTH - 1] = '\0';
 
-    /* Check for double commas */
-    if (strstr(buffer, ",,") != NULL) {
-        error_log(file_name, line_number, MULTIPLE_COMMAS);
+    cleaned_buffer = cut_spaces_before_and_after_string(buffer);
+    /*check for invalid comma*/
+    if(comma_validation(cleaned_buffer,file_name,line_number)){
         return 0;
     }
-
-    token = strtok(buffer, " \t\n");
+    token = strtok(cleaned_buffer, " \t\n");
 
     /* Handle Label */
     if (token[strlen(token) - 1] == ':') {
@@ -85,7 +86,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
             token = strtok(NULL, "\n");
             if (token != NULL) {
                 token = cut_spaces_before_and_after_string(token);
-                if (token[0] != '\0' && token[0] != ';') {
+                if (token[0] != '\0') {
                     error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
                     return 0;
                 }
@@ -102,7 +103,9 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         /* Parse operands */
         if (dynamic_operands_pointer[0] == '\0') {
             /* No operands found */
+            error_log(file_name,line_number,"No argument for instruction\n");
             out->operand_count = 0;
+            return 0;
         } else {
             if (!parse_instruction_operands(dynamic_operands_pointer, out, file_name, line_number)) {
                 return 0;
@@ -157,6 +160,11 @@ int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_
 int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     char *string_without_quotes;
 
+    if(operands[0]=='\n'||operands[0]=='\0'){
+        error_log(file_name, line_number, "String directive can not be empty\n");
+        return 0;
+    }
+
     if (operands[0] != '"' || operands[strlen(operands) - 1] != '"') {
         error_log(file_name, line_number, STRING_MISSING_QUOTES);
         return 0;
@@ -195,7 +203,7 @@ int parse_data_directive(char *operands, ParsedLine *out, char *file_name, int l
             return 0;
         }
 
-        if (!is_digit_or_char(token, 0, file_name, line_number)) {
+        if (is_digit_or_char(token, 0, file_name, line_number)) {
             return 0;
         }
 
@@ -238,7 +246,7 @@ int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int
 
 int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     if (operands[0] == '\0') {
-        error_log(file_name, line_number, "Empty after entry");
+        error_log(file_name, line_number, "Missing operand for .entry directive\n");
         return 0;
     }
 
@@ -338,7 +346,7 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
         if (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
             if (token[0] != '\0') {
-                error_log(file_name, line_number, "Too many operands");
+                error_log(file_name, line_number, "Too many operands\n");
                 return 0;
             }
         }
