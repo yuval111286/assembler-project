@@ -19,6 +19,7 @@ unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_
     return encoded_word;
 }
 
+
 int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
     char cleaned[MAX_LINE_LENGTH];
     int len, read_len;
@@ -48,6 +49,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
 
     return 0;
 }
+
 
 /* encode signed integer in 10-bit two's complement */
 unsigned int encode_signed_num(int num) {
