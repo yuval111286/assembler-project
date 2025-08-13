@@ -44,9 +44,10 @@ int preprocessor_first_pass(char *org_file_name, char *file_name, int *line_coun
  * @param as_file_name clean file name to read from
  * @param line_counter counter of lines in clean file
  * @param am_file_name am file name to write to
+ * @param total_line_num number of lines in file
  * @return 0 for success, -1 for fail
  */
-int preprocessor_second_pass(char *org_file_name, node **head, char *as_file_name, int *line_counter, char *am_file_name);
+int preprocessor_second_pass(char *org_file_name, node **head, char *as_file_name, int *line_counter, char *am_file_name, int total_line_num);
 
 /**
  *@brief extract macro name from line and verify if valid name using internal functions
