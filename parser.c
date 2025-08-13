@@ -331,7 +331,7 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
     int i = 0;
     int max_operands = expected_operands_for_each_opcode[out->opcode];
 
-    while (i < max_operands && (token = strtok((i == 0) ? operands : NULL, ",")) != NULL) {
+    while (i < max_operands && (token = strtok((i == 0) ? operands : NULL, COMMA)) != NULL) {
         token = cut_spaces_before_and_after_string(token);
 
         if (token[0] == '\0') {
