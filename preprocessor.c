@@ -246,11 +246,11 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
 }
 
 
-int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name){
+int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name,int total_line_num){
 
     FILE *fp_as, *fp_am;
     char line[MAX_LINE_LENGTH] ={0};
-    int found;
+    int found,i;
     node *macro_node;
 
     /*open clean file for reading*/
@@ -269,29 +269,32 @@ int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name,
         return -1;
     }
 
-    while (fgets(line, sizeof(line), fp_as) != NULL) {
-        if (strncmp(line, MCRO, 5) == 0) {
-            /* skip lines until mcroend */
-            while (fgets(line, sizeof(line), fp_as) != NULL) {
-                if (strncmp(line, MCROEND, 7) == 0) {
-                    fgets(line, sizeof(line), fp_as);
-                    break;
+    for (i = 0; i < total_line_num ; i++) {
+        fgets(line, sizeof(line), fp_as);
+        if (line != NULL){
+            if (strncmp(line, MCRO, 5) == 0) {
+                /* skip lines until mcroend */
+                while (fgets(line, sizeof(line), fp_as) != NULL) {
+                    if (strncmp(line, MCROEND, 7) == 0) {
+                        fgets(line, sizeof(line), fp_as);
+                        break;
+                    }
                 }
             }
-        }
+            /* search for mcro define in linked list*/
+            macro_node = search_node_in_linked_list(*head, line, &found);
 
-        /* search for mcro define in linked list*/
-        macro_node = search_node_in_linked_list(*head, line, &found);
+            if (found) {
+                /*mcro name will be switched with definition */
+                fputs(macro_node->text, fp_am);
+            } else {
+                /* regular line will be copied to am file */
+                fputs(line, fp_am);
 
-        if (found) {
-            /*mcro name will be switched with definition */
-            fputs(macro_node->text, fp_am);
-        } else {
-            /* regular line will be copied to am file */
-            fputs(line, fp_am);
-
+            }
         }
     }
+
 
     fclose(fp_as);
     fclose(fp_am);
@@ -307,7 +310,8 @@ int preprocessor_full_flow(char *file_name,node **head){
 
     FILE  *first_copy;
     char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
-    int indication, line_counter = 0;
+    int indication, line_counter = 0,total_line_num;
+
     indication = 0;
 
     if(check_as_file_ending(file_name)!=0){
@@ -328,7 +332,6 @@ int preprocessor_full_flow(char *file_name,node **head){
     indication = preprocessor_first_pass(file_name,clean_file_name,&line_counter, head);
     if (indication){
         /* release mcro linked list, delete files */
-        /*free_linked_list(head);*/
         remove(clean_file_name);
         return 1;
     }
@@ -339,9 +342,11 @@ int preprocessor_full_flow(char *file_name,node **head){
         return 1;
     }
 
+    total_line_num = line_counter;
+
     line_counter = 0;
     /*replace mcro call by its text*/
-    indication = preprocessor_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name);
+    indication = preprocessor_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name,total_line_num);
 
     if (indication){
         /* release mcro linked list, delete files */

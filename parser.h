@@ -2,6 +2,8 @@
 #define PARSER_H
 
 #include "utils.h"
+#include "parser_helper.h"
+
 
 /* External tables from parser_helper.c */
 extern OpcodeEntry opcode_table[];

@@ -182,8 +182,8 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
     int i = 0;
 
     /* Immediate values must start with '#' */
-    if (immediate[i] != '#') {
-        error_log(file_name, line_number, "Immediate value must start with an #\n");
+    if (immediate[i] != LADDER) {
+        error_log(file_name, line_number, IMM_LADDER);
         return 1;
     }
 
@@ -191,7 +191,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
 
     /* '#' must be followed by a number  */
     if (immediate[i] == '\0') {
-        error_log(file_name, line_number, "Immediate value must have num after #\n");
+        error_log(file_name, line_number, IMM_NUM_AFTER_LADDER);
         return 1;
     } else if (immediate[i] == '-' || immediate[i] == '+') {
         i++;
@@ -216,10 +216,10 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
     strcpy(matrix_dim_editable, mat_dim);
 
     /* Locate the first opening bracket '[' */
-    first_bracket = strchr(matrix_dim_editable, '[');
+    first_bracket = strchr(matrix_dim_editable, OPENING_BRACKET);
     if (first_bracket) {
         /* Locate the first closing bracket ']' after the first '[' */
-        second_bracket = strchr(first_bracket + 1, ']');
+        second_bracket = strchr(first_bracket + 1, CLOSED_BRACKET);
         if (second_bracket) {
             /* Temporarily terminate the string at the closing bracket */
             *second_bracket = '\0';
@@ -231,10 +231,10 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
             }
 
             /* Locate the second dimension's opening bracket */
-            third_bracket = strchr(second_bracket + 1, '[');
+            third_bracket = strchr(second_bracket + 1, OPENING_BRACKET);
             if (third_bracket) {
                 /* Locate the second dimension's closing bracket */
-                forth_bracket = strchr(third_bracket + 1, ']');
+                forth_bracket = strchr(third_bracket + 1, CLOSED_BRACKET);
                 if (forth_bracket) {
                     *forth_bracket = '\0';
 
@@ -265,7 +265,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Iterate through the rest of the string */
         for (i = i; i < strlen(tested_word); i++) {
             if (!isdigit(tested_word[i])) {
-                error_log(file_name, line_number, "Char is not digit\n");
+                error_log(file_name, line_number, NOT_DIGIT);
                 return 1; 
             }
         }
@@ -274,7 +274,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Case 1: Check if the tested word contains only letters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalpha(tested_word[i])) {
-                error_log(file_name, line_number, "Char is not letter\n");
+                error_log(file_name, line_number, NOT_LETTER);
                 return 1; 
             }
         }
@@ -283,7 +283,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Case 2: Check if the tested word contains only alphanumeric characters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalnum((unsigned char)tested_word[i])) {
-                error_log(file_name, line_number, "Char is not digit or letter\n");
+                error_log(file_name, line_number, NOT_DIGIT_LETTER);
                 return 1; 
             }
         }
@@ -348,7 +348,7 @@ int is_valid_label(char *label, char *file_name, int line_number) {
 
     /* Check if label is null or empty */
     if (label == NULL || label[0] == '\0') {
-        error_log(file_name, line_number, "Missing Label name\n");
+        error_log(file_name, line_number, MISSING_LABEL_NAME);
         return 0; /* Invalid label */
     }
 
@@ -356,20 +356,20 @@ int is_valid_label(char *label, char *file_name, int line_number) {
 
     /* Check if label length exceeds maximum allowed length */
     if (len > MAX_LABEL_LEN) {
-        error_log(file_name, line_number, "Label is too long \n");
+        error_log(file_name, line_number, LONG_LABEL);
         return 0;
     }
 
     /* First character must be a letter */
     if (!isalpha((unsigned char)label[0])) {
-        error_log(file_name, line_number, "Label must starts with letter\n");
+        error_log(file_name, line_number, LABEL_STARTS_WITH_LETTER);
         return 0;
     }
 
     /* All subsequent characters must be alphanumeric */
     for (i = 1; i < len; i++) {
         if (!isalnum((unsigned char)label[i])) {
-            error_log(file_name, line_number, "Label must contain only digits or letters \n");
+            error_log(file_name, line_number, LABEL_LETTER_DIGIT);
             return 0;
         }
     }
@@ -390,7 +390,7 @@ int get_addressing_mode( char *operand) {
     len = strlen(operand);
 
     /* Immediate addressing: begins with '#' followed by number */
-    if (operand[0] == '#') {
+    if (operand[0] == LADDER) {
         if (len > 1 && (isdigit((unsigned char)operand[1]) ||
                         operand[1] == '+' || operand[1] == '-')) {
             return ADDRESS_IMMEDIATE;
@@ -399,7 +399,7 @@ int get_addressing_mode( char *operand) {
     }
 
     /* Matrix addressing: contains both '[' and ']' characters */
-    if (strchr(operand, '[') && strchr(operand, ']')) {
+    if (strchr(operand, OPENING_BRACKET) && strchr(operand, CLOSED_BRACKET)) {
         return ADDRESS_MATRIX;
     }
 
@@ -467,14 +467,14 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     temp_operand[MAX_LINE_LENGTH - 1] = '\0';
 
     /* Locate first opening bracket for first register */
-    open_bracket_first_reg = strchr(temp_operand, '[');
+    open_bracket_first_reg = strchr(temp_operand, OPENING_BRACKET);
     if (!open_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_BRACKET);
         return 1;
     }
 
     /* Locate first closing bracket for first register */
-    closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, ']');
+    closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, CLOSED_BRACKET);
     if (!closed_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_CLOSING);
         return 1;
@@ -503,14 +503,14 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     }
 
     /* Locate second opening bracket for second register */
-    open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
+    open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, OPENING_BRACKET);
     if (!open_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_BRACKET);
         return 1;
     }
 
     /* Locate second closing bracket for second register */
-    closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, ']');
+    closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, CLOSED_BRACKET);
     if (!closed_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_CLOSING);
         return 1;
@@ -640,11 +640,10 @@ int comma_validation(char *line, char *file_name, int line_number) {
 
             /* If a comma is followed by end of line, it's an extraneous comma */
             if (line[i] == '\0' || line[i] == '\n') {
-                error_log(file_name, line_number, "Extra comma in the end of the line");
+                error_log(file_name, line_number, COMMA_END_OF_LINE);
                 return 1;
             }
         } else {
-            /* Move to the next character */
             i++;
         }
     }
