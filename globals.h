@@ -50,9 +50,9 @@
 
 /*ARE*/
 
-#define ABSOLUTE 0
-#define EXTERNAL 1
-#define RELOCATABLE 2
+#define ABSOLUTE 0 /*00*/
+#define EXTERNAL 1 /*01*/
+#define RELOCATABLE 2 /*10*/
 
 /* Type of line in source file */
 typedef enum {
