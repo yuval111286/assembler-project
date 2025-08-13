@@ -10,7 +10,7 @@ typedef struct Symbol {
     char name[MAX_LABEL_LEN + 1]; /* Label name */
     int address;    /* Memory address */
     SymbolType type; /* CODE / DATA / EXTERN */
-    int is_entry;   /* 1 if .entry, 0 otherwise */
+    int is_entry;   /* 1 if .entry, 0 else */
     struct Symbol *next; /* Pointer to next symbol in list */
 } Symbol;
 

@@ -25,8 +25,8 @@ int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
     /* Allocate memory for the new symbol */
     current = (Symbol *)malloc(sizeof(Symbol));
     if (current == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed for symbol\n");
-        exit(1); /* Abort on critical memory error */
+        fprintf(stderr, MEMORY_FAIL);
+        return 1; /* Abort on critical memory error */
     }
 
     /* Set all fields of the new symbol */
