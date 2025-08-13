@@ -1,1 +1,0 @@
-mov r1, MATRIX r2][r3]

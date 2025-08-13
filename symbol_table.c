@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "symbol_table.h" 
+#include "symbol_table.h"
+#include "errors_handler.h"
 
 
 void init_symbol_table(SymbolTable *table) {
@@ -25,7 +26,7 @@ int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
     /* Allocate memory for the new symbol */
     current = (Symbol *)malloc(sizeof(Symbol));
     if (current == NULL) {
-        fprintf(stderr, MEMORY_FAIL);
+        error_log(INTERNAL,0,MEMORY_FAIL);
         return 1; /* Abort on critical memory error */
     }
 

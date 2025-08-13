@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 
-int is_empty_or_whitespace(char *str);
 /**
  * @param str line from file
  * @returns clean string without space in the start and the end of the string.
