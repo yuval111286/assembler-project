@@ -24,7 +24,7 @@ char *turn_address_to_base_4(unsigned int address);
  * @param number The integer to convert.
  * @return Pointer to string with base 4 representation.
  */
-char *int_to_base_4(int number);
+char *turn_num_to_base_4(int number);
 
 /**
  * @brief Run the second pass of the assembler.

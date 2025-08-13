@@ -56,38 +56,37 @@ char *turn_address_to_base_4(unsigned int address) {
 }
 
 
-char *int_to_base_4(int number) {
-    static char result[10]={0}; /* Static buffer - reused each call */
-    char base4_chars[4] = {'a', 'b', 'c', 'd'};
-    char temp_buffer[10]={0};
+char *turn_num_to_base_4(int number) {
+    static char num_in_base4[10]={0};
+    char temp[10]={0}, base4_chars[4] = {'a', 'b', 'c', 'd'};
     int i, digit_count, remainder;
-    int abs_number;
 
-    /* Handle zero case */
+    /* for zero return 'a'*/
     if (number == 0) {
-        result[0] = 'a';
-        result[1] = '\0';
-        return result;
+        num_in_base4[0] = 'a';
+        num_in_base4[1] = '\0';
+        return num_in_base4;
     }
-
-    abs_number=number;
 
     /* Build digits in reverse order */
     digit_count = 0;
-    while (abs_number > 0) {
-        remainder = abs_number % 4;
-        temp_buffer[digit_count] = base4_chars[remainder];
-        abs_number = abs_number / 4;
+    while (number > 0) {
+        /* Calculate the remainder by dividing by 4 */
+        remainder = number % 4;
+        /* Build the word by placing the base4_options in remainder index in coded word */
+        temp[digit_count] = base4_chars[remainder];
+        /* Divide num by 4 to move to the next digit */
+        number = number / 4;
         digit_count++;
     }
 
-    result[digit_count] = '\0';
+    num_in_base4[digit_count] = '\0';
     /* Reverse the digits to get correct order */
     for (i = 0; i < digit_count; i++) {
-        result[i] = temp_buffer[digit_count - 1 - i];
+        num_in_base4[i] = temp[digit_count - 1 - i];
     }
 
-    return result;
+    return num_in_base4;
 }
 
 
@@ -151,9 +150,9 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
         return;
     }
 
-    strcpy(temp, int_to_base_4(ic_size));
+    strcpy(temp, turn_num_to_base_4(ic_size));
     strcpy(ic_size_in_base_4, temp);
-    strcpy(temp, int_to_base_4(dc_size));
+    strcpy(temp, turn_num_to_base_4(dc_size));
     strcpy(dc_size_in_base_4, temp);
 
     fprintf(fp, "%s\t\t%s\n", ic_size_in_base_4,dc_size_in_base_4);
