@@ -4,66 +4,61 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*
- * Node in a linked list
- * Containing:
- * node name
- * node text -
- * number of line
- * pointer to the next node in the list
+/**
+ * @brief Node in a linked list.
+ *
+ * Contains
+ * - name: Name of the node.
+ * - text: Associated text content.
+ * - line: Line number where the text starts.
+ * - next: Pointer to the next node in the list.
  */
-typedef struct node{
-    char *name;
-    char *text;
-    int line;
-    struct node *next;
+typedef struct node {
+    char *name;       
+    char *text;        
+    int line;        
+    struct node *next; 
 } node;
 
-
 /**
- * @brief create node and fill the relevant data
- *
- * @param name name of the node
- * @param text node text
- * @param line_num line number of the start of the required text
- * @return new pointer of the new node
+ * @brief Create a new linked list node and fill its data.
+ * @param name Name of the node.
+ * @param text Text content of the node.
+ * @param line_num Line number associated with the node.
+ * @return Pointer to the newly created node.
  */
 node *create_node(char *name, char *text, int line_num);
 
 /**
- * @brief add node to exising linked list
- *
- * @param head the first node of the linked list
- * @param name name of the required node
- * @param text node text
- * @param line_num line number of the start of the required text
+ * @brief Add a new node to an existing linked list.
+ * @param head Pointer to the head of the linked list.
+ * @param name Name of the new node.
+ * @param text Text content of the new node.
+ * @param line_num Line number associated with the new node.
  */
 void add_node_to_linked_list(node **head, char *name, char *text, int line_num);
 
 /**
- * @brief search node in exising linked list according to the name
- *
- * @param head the first node of the linked list
- * @param name name of the required node
- * @param found indicate if the name already exists
- * @return the required node if found.
- *         NULL if the list is empty.
- *         the previous node if node does not exist.
+ * @brief Search for a node in the linked list by name.
+ * @param head Pointer to the head of the linked list.
+ * @param name Name of the node to search for.
+ * @param found Pointer to int that will be set to 1 if found, 0 otherwise.
+ * @return If found, returns the node.
+ *         If list is empty, returns NULL.
+ *         If not found, returns the last node.
  */
 node *search_node_in_linked_list(node *head, char *name, int *found);
 
 /**
- * @brief Frees memory allocation for node.
- *
- * @param node a pointer to the node to be free
+ * @brief Free the memory allocated for a single node.
+ * @param node Pointer to the node to free.
  */
 void free_node(node *node);
 
 /**
- * @brief Frees memory allocation for the linked list.
- *
- * @param head the first node of the linked list
+ * @brief Free the entire linked list.
+ * @param head Pointer to the head of the linked list.
  */
 void free_linked_list(node *head);
 
-#endif /*ASSEMBLER_PROJECT_LINKED_LIST_H*/
+#endif 

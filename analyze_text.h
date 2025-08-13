@@ -12,8 +12,7 @@ int is_empty_or_whitespace(char *str);
 char *cut_spaces_before_and_after_string(char *str);
 
 /**
- *@brief Checks if the line is a comment or empty
- *
+ * @brief Checks if the line is a comment or empty
  * @param line the tested line
  * @return 1 if the line is a comment or empty, 0 if contain different char
  */
@@ -29,7 +28,6 @@ FILE* create_clean_file(char* input_file_name, char* output_file_name);
 
 /**
  * @brief Skip the first word str points
- *
  * @param word starts of string
  * @return the next word after str
  */
@@ -37,7 +35,6 @@ char *skip_one_word(char *word);
 
 /**
  * @brief Read text from file and place it in string
- *
  * @param fp File to read from
  * @param pos position in the file
  * @param len_of_chars_to_copy length of chars to read from file
@@ -45,4 +42,4 @@ char *skip_one_word(char *word);
  */
 char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len_of_chars_to_copy);
 
-#endif /*ANALYZE_TEXT_H*/
+#endif 

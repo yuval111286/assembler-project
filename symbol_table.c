@@ -3,12 +3,12 @@
 #include <string.h>
 #include "symbol_table.h" 
 
-/* Initializes the symbol table to an empty list */
+
 void init_symbol_table(SymbolTable *table) {
     (*table).head = NULL; /* Set head of symbol list to NULL */
 }
 
-/* Adds a new symbol to the symbol table */
+
 int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
     Symbol *current;
 
@@ -38,84 +38,94 @@ int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
     (*current).next = (*table).head;     /* Link to previous head */
     (*table).head = current;   /* Set new head of list */
 
-    return 1; /* Symbol added successfully */
+    return 1; 
 }
 
-/* Checks if a symbol already exists in the table */
+
 int symbol_exists(SymbolTable *table, char *name) {
     Symbol *current;
 
+    /* The head of the symbol table */
     current = (*table).head;
 
+    /* Move the linked list of symbols */
     while (current != NULL) {
+        /* Compare current symbol's name to the target name */
         if (strcmp((*current).name, name) == 0) {
-            return 1; /* Symbol found */
+            return 1; 
         }
-        current = (*current).next;
+        current = (*current).next; 
     }
 
-    return 0; /* Symbol not found */
+    return 0; 
 }
 
-/* Marks a symbol as .entry (sets is_entry = 1) */
 void mark_entry_label(SymbolTable *table, char *name) {
     Symbol *current;
 
+    /* Start from the head of the symbol table */
     current = (*table).head;
 
+    /* Move in the linked list */
     while (current != NULL) {
+        /* If symbol name matches, mark it as entry */
         if (strcmp((*current).name, name) == 0) {
             (*current).is_entry = 1; /* Mark as entry */
-            return; /* Done */
+            return; 
         }
-        current = (*current).next;
+        current = (*current).next; 
     }
-
-    /* If not found, do nothing – might be handled later in second pass */
 }
 
-/* Adds IC final value to all data symbols after first pass */
 void update_data_symbols_base_address(SymbolTable *table, int ic_final) {
     Symbol *current;
 
+    /* Start from the head of the symbol table */
     current = (*table).head;
 
+    /* Traverse the linked list */
     while (current != NULL) {
+        /* Update address for data symbols only */
         if ((*current).type == SYMBOL_DATA) {
-            (*current).address += ic_final; /* Adjust address */
+            (*current).address += ic_final; 
         }
-        current = (*current).next;
+        current = (*current).next; 
     }
 }
 
-/* Retrieves a pointer to a symbol by name (or NULL if not found) */
 Symbol *get_symbol(SymbolTable *table, char *name) {
     Symbol *current;
 
+    /* Start from the head of the symbol table */
     current = (*table).head;
 
+    /* Traverse the linked list */
     while (current != NULL) {
+        /* If symbol matches the given name, return it */
         if (strcmp((*current).name, name) == 0) {
-            return current; /* Return found symbol */
+            return current; 
         }
-        current = (*current).next;
+        current = (*current).next; 
     }
 
-    return NULL; /* Symbol not found */
+    
+    return NULL; 
 }
 
-/* Frees all memory used by the symbol table */
 void free_symbol_table(SymbolTable *table) {
     Symbol *current;
     Symbol *temp;
 
+    /* Start from the head of the symbol table */
     current = (*table).head;
 
+    /* Free each symbol node */
     while (current != NULL) {
-        temp = current;       /* Save current node */
-        current = (*current).next;    /* Move to next */
-        free(temp);    /* Free saved node */
+        temp = current;                 
+        current = (*current).next;      
+        free(temp);                      
     }
 
-    (*table).head = NULL; /* Table is now empty */
+    /* Set the table head to NULL */
+    (*table).head = NULL;
 }

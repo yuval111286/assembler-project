@@ -11,47 +11,53 @@
 
 
 unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
+    /* Shift the given value left by 2 bits and add the ARE bits  */
     return (final_value << 2) | are_type;
 }
 
 unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_mask, int shift) {
+    /* Mask the value to keep only allowed and insert into the encoded word */
     encoded_word |= (value & bit_mask) << shift;
     return encoded_word;
 }
-
 
 int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
     char cleaned[MAX_LINE_LENGTH];
     int len, read_len;
 
+    /* Validate that input pointers are not NULL */
     if (token == NULL || rows == NULL || cols == NULL) {
         return 0;
     }
 
+    /* Copy the token and ensure it is null-terminated */
     strncpy(cleaned, token, MAX_LINE_LENGTH - 1);
     cleaned[MAX_LINE_LENGTH - 1] = '\0';
 
+    /* Remove any trailing commas or spaces */
     len = strlen(cleaned);
     while (len > 0 && (cleaned[len - 1] == ',' || isspace((unsigned char)cleaned[len - 1]))) {
         cleaned[len - 1] = '\0';
         len--;
     }
 
+    /* Try to parse the format "[rows][cols]" and also capture where parsing stopped */
     if (sscanf(cleaned, "[%d][%d]%n", rows, cols, &read_len) == 2) {
         if (cleaned[read_len] != '\0') {
-            return 0; /* extra characters after matrix dimension */
+            return 0;
         }
 
+        /* Valid positive numbers */
         if (*rows > 0 && *cols > 0) {
             return 1;
         }
     }
 
+    
     return 0;
 }
 
 
-/* encode signed integer in 10-bit two's complement */
 unsigned int encode_signed_num(int num) {
     /*for positive num return the num
      *for negative num return two's complement representation*/
@@ -74,7 +80,7 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
         return 0;
     }
 
-    /* go over macro linked list */
+    /* Go over macro linked list */
     current_macro = *macro_head;
 
     len = strlen(current_macro->name);
@@ -120,13 +126,17 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
     }
 
     errno = 0;
+
+    /* Convert the string to a long using base 10 and save position in endptr */
     value = strtol(str, &endptr, 10);
 
+    /* If no digits were found or there are extra characters after the number */
     if (endptr == str || *endptr != '\0') {
         *error_flag = 1;
         return 0;
     }
 
+    /* Check if the value is outside the range */
     if ((value > MAX_NUM) || (value < MIN_NUM)) {
         *error_flag = 1;
         return 0;
@@ -134,19 +144,18 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
 
     *error_flag = 0;
 
-    /* Convert to 2's complement encoding in 10 bits*/
+    /* Convert it to 2 complement in 10bit range */
     if (value < 0) {
         value = (1 << BITS_IN_WORD) + value;
     }
 
+    
     return (unsigned short)value;
 }
 
 
-/**
- * Performs the first pass over a .am file and builds the symbol table,
- * encodes instructions, and processes data directives into the image arrays.
- */
+
+
 int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image, node **head,unsigned int *data_image)
 {
     FILE *fp;
@@ -155,55 +164,64 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     ParsedLine parsed;
     unsigned int encoded_word;
 
+    /* Try to open the source file .am for reading */
     fp = fopen(file_name, "r");
     if (fp == NULL) {
         error_log(file_name, 0, FILE_NOT_OPEN_READING);
         return 1;
     }
 
+    /* Initialize code image structure before starting */
     init_code_image(code_image);
 
+    /* Read the file */
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
         line_number++;
 
+        /* Parse current line into structured format */
         if (!parse_line(line, &parsed, file_name, line_number)) {
-            discover_errors = 1;
-            continue;
+            discover_errors = 1; /* Mark that an error was found */
+            continue; 
         }
 
-        /* label handling */
-        if (parsed.label[0] != '\0') {
-            if (symbol_exists(symbol_table, parsed.label)) {
+        /* LABEL HANDLING */
+        if (parsed.label[0] != '\0') { /* If line has a label */
+            if (symbol_exists(symbol_table, parsed.label)) { /* Duplicate check */
                 error_log(file_name, line_number, DUPLICATE_LABEL);
                 discover_errors = 1;
                 continue;
             }
+            /* Label before an instruction */
             if (parsed.line_type == LINE_INSTRUCTION) {
                 if (!add_symbol(symbol_table, parsed.label, IC, SYMBOL_CODE)) {
                     error_log(file_name, line_number, FAILED_ADD_INSTRUCTION_LABEL);
                     discover_errors = 1;
                     continue;
                 }
-            } else if (identify_directive_without_dots(parsed.directive_name) == 0 ||
-                       identify_directive_without_dots(parsed.directive_name) == 1 ||
-                       identify_directive_without_dots(parsed.directive_name) == 2) {
+            }
+            /* Label before .data / .string / .mat */
+            else if (identify_directive_without_dots(parsed.directive_name) == 0 ||
+                     identify_directive_without_dots(parsed.directive_name) == 1 ||
+                     identify_directive_without_dots(parsed.directive_name) == 2) {
                 if (!add_symbol(symbol_table, parsed.label, DC, SYMBOL_DATA)) {
                     error_log(file_name, line_number, FAILED_ADD_DATA_LABEL);
                     discover_errors = 1;
                     continue;
                 }
-            } else if (identify_directive_without_dots(parsed.directive_name) == 4) {
+            }
+            /* Label before .extern is illegal */
+            else if (identify_directive_without_dots(parsed.directive_name) == 4) {
                 error_log(file_name, line_number, ILLEGAL_EXTERN_LABEL);
                 discover_errors = 1;
                 continue;
             }
         }
 
-        /* instruction line handling */
+        /*  INSTRUCTION HANDLING  */
         if (parsed.line_type == LINE_INSTRUCTION) {
-            /* Encode base word of instruction */
-            int opcode,src_mode = 0, dest_mode = 0, ARE = 0,current_word;/* Absolute */
+            int opcode,src_mode = 0, dest_mode = 0, ARE = 0,current_word; /* ARE = Absolute */
 
+            /* Validate operand count for this opcode */
             words = instruction_word_count(&parsed);
             if (words <= 0) {
                 error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
@@ -211,6 +229,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 continue;
             }
 
+            /* Determine opcode and addressing modes */
             opcode = parsed.opcode;
             if (parsed.operand_count == 2) {
                 src_mode = get_addressing_mode(parsed.operands[0]);
@@ -219,6 +238,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                 dest_mode = get_addressing_mode(parsed.operands[0]);
             }
 
+            /* Encode first word */
             encoded_word = 0;
             encoded_word = coding_word(encoded_word,opcode,FOUR_BITS_MASK,OPCODE_BITS);
             encoded_word = coding_word(encoded_word,src_mode,TWO_BITS_MASK,SRC_BITS);
@@ -227,25 +247,25 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
             IC++;
 
-            /* Now encode additional words that can be encoded in first pass */
+            /* Prepare to encode additional words if needed */
             current_word = 1;
 
-            /* Handle operands */
+            /*  OPERANDS ENCODING  */
             for (i = 0; i < parsed.operand_count; i++) {
                 int addressing_mode = get_addressing_mode(parsed.operands[i]);
 
                 switch (addressing_mode) {
                     case ADDRESS_IMMEDIATE: {
-                        /* Parse and encode immediate value */
+                        /* Immediate value #num encode directly */
                         int local_error_flag = 0;
                         int immediate_value = parse_number_from_string(parsed.operands[i] + 1, &local_error_flag); /* Skip '#' */
 
                         if (!local_error_flag) {
                             encoded_word = encode_signed_num(immediate_value);
-                            encoded_word = (encoded_word << 2) | 0; /* ARE = 00 (Absolute) */
+                            encoded_word = (encoded_word << 2) | 0; /* ARE = 00 Absolute */
                             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
-                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
+                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); 
                         }
                         IC++;
                         current_word++;
@@ -253,27 +273,24 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
 
                     case ADDRESS_DIRECT: {
-                        /* Direct addressing - will be filled in second pass */
-                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Placeholder */
+                        /* Label address — will be resolved in second pass */
+                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                         IC++;
                         current_word++;
                         break;
                     }
 
                     case ADDRESS_MATRIX: {
-                        /* Second word - encode register indices */
                         char matrix_operand[MAX_LINE_LENGTH],*first_bracket, *second_bracket, *third_bracket, *forth_bracket;
                         int first_reg = -1, second_reg = -1;
 
-                        /* Matrix addressing - first word (address) will be filled in second pass */
-                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Placeholder for matrix address */
+                        /* First placeholder for matrix base address */
+                        add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                         IC++;
                         current_word++;
 
-
+                        /* Extract register numbers from inside the brackets */
                         strcpy(matrix_operand, parsed.operands[i]);
-
-                        /* Find register names between brackets */
                         first_bracket = strchr(matrix_operand, '[');
                         if (first_bracket) {
                             second_bracket = strchr(first_bracket + 1, ']');
@@ -292,13 +309,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                             }
                         }
 
+                        /* If both registers are valid encode them into one word */
                         if (first_reg != -1 && second_reg != -1) {
                             encoded_word = 0;
-                            encoded_word = coding_word(encoded_word, first_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
-                            encoded_word = coding_word(encoded_word, second_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
+                            encoded_word = coding_word(encoded_word, first_reg, FOUR_BITS_MASK, OPCODE_BITS);
+                            encoded_word = coding_word(encoded_word, second_reg, FOUR_BITS_MASK, DEST_BITS);
                             add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                         } else {
-                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
+                            add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error placeholder */
                         }
                         IC++;
                         current_word++;
@@ -306,42 +324,40 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
 
                     case ADDRESS_REGISTER: {
-                        /* Check if both operands are registers - they share one word */
+                        /* Two registers can share one word */
                         if (parsed.operand_count == 2 &&
                             get_addressing_mode(parsed.operands[0]) == ADDRESS_REGISTER &&
                             get_addressing_mode(parsed.operands[1]) == ADDRESS_REGISTER) {
 
-                            if (i == 0) { /* First register operand */
+                            if (i == 0) { /* Only on first operand */
                                 int src_reg = identify_register(parsed.operands[0]);
                                 int dest_reg = identify_register(parsed.operands[1]);
 
                                 if (src_reg != -1 && dest_reg != -1) {
                                     encoded_word = 0;
-
-                                    encoded_word = coding_word(encoded_word, src_reg, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
-                                    encoded_word = coding_word(encoded_word, dest_reg, FOUR_BITS_MASK, DEST_BITS); /* Bits 9-6 */
+                                    encoded_word = coding_word(encoded_word, src_reg, FOUR_BITS_MASK, OPCODE_BITS);
+                                    encoded_word = coding_word(encoded_word, dest_reg, FOUR_BITS_MASK, DEST_BITS);
                                     add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                                 } else {
-                                    add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
+                                    add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                                 }
                                 IC++;
                                 current_word++;
                             }
-                            /* Skip second register as it's already encoded */
                         } else {
-                            /* Single register operand */
+                            /* Single register operand encode normally */
                             int reg_num = identify_register(parsed.operands[i]);
 
                             if (reg_num != -1) {
                                 encoded_word = 0;
-                                if (i == 0) { /* Source operand */
-                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, OPCODE_BITS); /* Bits 9-6 */
-                                } else { /* Destination operand */
-                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, DEST_BITS); /* Bits 5-2 */
+                                if (i == 0) { /* Source reg */
+                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, OPCODE_BITS);
+                                } else { /* Destination reg */
+                                    encoded_word = coding_word(encoded_word, reg_num, FOUR_BITS_MASK, DEST_BITS);
                                 }
                                 add_code_word(code_image, IC, encoded_word, ARE_ABSOLUTE);
                             } else {
-                                add_code_word(code_image, IC, 0, ARE_ABSOLUTE); /* Error case */
+                                add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                             }
                             IC++;
                             current_word++;
@@ -350,7 +366,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
 
                     default:
-                        /* Unknown addressing mode */
+                        /* Unknown addressing mode placeholder */
                         add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                         IC++;
                         current_word++;
@@ -359,9 +375,10 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             }
         }
 
-        /* directive line handling */
+        /*  DIRECTIVE HANDLING  */
         if (parsed.line_type == LINE_DIRECTIVE) {
             if (strcmp(parsed.directive_name, "data") == 0) {
+                /* Store integers in data image */
                 for (i = 0; i < parsed.operand_count; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
@@ -375,9 +392,10 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
-            } else if (strcmp(parsed.directive_name, "string") == 0) {
-                char *s;
-                s = parsed.operands[0];
+            } 
+            else if (strcmp(parsed.directive_name, "string") == 0) {
+                /* Store string characters + null terminator in data image */
+                char *s = parsed.operands[0];
                 for (i = 0; s[i] != '\0'; i++) {
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
@@ -387,12 +405,14 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     data_image[DC++] = (unsigned int)s[i];
                 }
                 if (DC < MAX_DATA_SIZE) {
-                    data_image[DC++] = 0;
+                    data_image[DC++] = 0; /* Null terminator */
                 } else {
                     error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
                     discover_errors = 1;
                 }
-            } else if (strcmp(parsed.directive_name, "mat") == 0) {
+            } 
+            else if (strcmp(parsed.directive_name, "mat") == 0) {
+                /* Store matrix dimensions and values */
                 int mat_rows, mat_cols, expected_values;
 
                 if (!parse_matrix_dimensions(parsed.operands[0], &mat_rows, &mat_cols)) {
@@ -423,7 +443,9 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                         error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
                 }
-            } else if (strcmp(parsed.directive_name, "extern") == 0) {
+            } 
+            else if (strcmp(parsed.directive_name, "extern") == 0) {
+                /* Add external label to symbol table */
                 if (parsed.operand_count != 1) {
                     error_log(file_name, line_number, EXTERN_SYNTAX_ERROR);
                     discover_errors = 1;
@@ -435,40 +457,46 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         }
     }
 
+    /* Close the source file */
     fclose(fp);
 
+    /* Save final IC and DC values for second pass */
     *IC_final = IC;
     *DC_final = DC;
 
+    /* Update data symbol addresses to account for final IC */
     update_data_symbols_base_address(symbol_table, IC);
 
+    /* Check for macro names that conflict with labels */
     if (check_mcro_name_not_label(symbol_table, head, file_name)) {
         discover_errors = 1;
     }
 
-    /* === DEBUG: CODE IMAGE OUTPUT === */
-   /* printf("\n--- CODE IMAGE DUMP (FIRST Pass) ---\n");*/
+    /* === DEBUG: CODE IMAGE OUTPUT === 
+   printf("\n--- CODE IMAGE DUMP (FIRST Pass) ---\n");
 
-    /*for (i = 0; i < code_image->size; i++) {
+    for (i = 0; i < code_image->size; i++) {
         printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
                code_image->words[i].address,
                code_image->words[i].value,
                code_image->words[i].value,
                code_image->words[i].ARE);
-    }*/
+    }
 
-    /* === DEBUG: DATA IMAGE OUTPUT === */
-   /* printf("\n--- DATA IMAGE DUMP (FIRST Pass) ---\n");*/
+     === DEBUG: DATA IMAGE OUTPUT === 
+    printf("\n--- DATA IMAGE DUMP (FIRST Pass) ---\n");
 
-    /*for (i = 0; i < DC; i++) {
+    for (i = 0; i < DC; i++) {
         printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
     }
 
-    /* make sure IC + DC doesn't exceed allowed memory*/
-    /*if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
+     make sure IC + DC doesn't exceed allowed memory
+    if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
         discover_errors = 1;
-    }*/
+    } */
 
+
+    /* Return 1 if any errors were found */
     return discover_errors;
 }

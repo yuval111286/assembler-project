@@ -156,7 +156,7 @@ int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_
     return 0;
 }
 
-/* Helper function to parse string directive */
+
 int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     char *string_without_quotes;
 

@@ -117,241 +117,264 @@ const int allowed_dest_modes[16][4] = {
 };
 
 int identify_opcode(char* op_code) {
-
     int i;
+
+    /* Check for NULL input */
     if (op_code == NULL) {
         return OPCODE_INVALID;
     }
 
+    /* Loop through the opcode table to find a matching opcode name */
     for (i = 0; opcode_table[i].name != NULL; i++) {
         if (strcmp(op_code, opcode_table[i].name) == 0) {
-            return opcode_table[i].opcode;
+            return opcode_table[i].opcode; /* Return the matching opcode value */
         }
     }
 
+    /* If not found, return invalid opcode */
     return OPCODE_INVALID;
 }
 
 
 int identify_directive(char *directive){
-
     int i;
-    for (i = 0; i<NUM_DIRECTIVE; i++) {
+
+    /* Loop through the directive table and check for a match */
+    for (i = 0; i < NUM_DIRECTIVE; i++) {
         if (strcmp(directive, directive_table[i].name) == 0) {
-            return directive_table[i].directive;
+            return directive_table[i].directive; /* Return matching directive ID */
         }
     }
 
+    /* No match found */
     return -1;
 }
 
 int identify_directive_without_dots(char *directive){
-
     int i;
-    for (i = 0; i<NUM_DIRECTIVE; i++) {
+
+    /* Similar to identify_directive but uses the table without leading dots */
+    for (i = 0; i < NUM_DIRECTIVE; i++) {
         if (strcmp(directive, directive_table_without_dots[i].name) == 0) {
-            return directive_table_without_dots[i].directive;
+            return directive_table_without_dots[i].directive; /* Return matching directive ID */
         }
     }
 
+    /* No match found */
     return -1;
-
 }
 
 int identify_register(char *reg){
     int i;
-    for (i = 0; i<NUM_REGISTERS; i++) {
+
+    /* Loop through the register table to find a matching register name */
+    for (i = 0; i < NUM_REGISTERS; i++) {
         if (strcmp(reg, register_table[i].name) == 0) {
-            return register_table[i].reg;
+            return register_table[i].reg; /* Return the register number */
         }
     }
 
+    /* Register not found */
     return -1;
 }
 
 int is_valid_immediate(char *immediate, char* file_name, int line_number){
+    int i = 0;
 
-    int i=0;
-
+    /* Immediate values must start with '#' */
     if (immediate[i] != '#') {
-       error_log(file_name, line_number, "Immediate value must start with an #\n");
+        error_log(file_name, line_number, "Immediate value must start with an #\n");
         return 1;
     }
+
     i++;
+
+    /* '#' must be followed by a number  */
     if (immediate[i] == '\0') {
         error_log(file_name, line_number, "Immediate value must have num after #\n");
         return 1;
-    } else if(immediate[i] =='-'||immediate[i] =='+'){
+    } else if (immediate[i] == '-' || immediate[i] == '+') {
         i++;
     }
 
-    if(is_digit_or_char(immediate+i,0,file_name,line_number)){
-        return 1;
+    /* Validate that the rest of the string contains only digits */
+    if (is_digit_or_char(immediate + i, 0, file_name, line_number)) {
+        return 1; /* Invalid characters found */
     }
 
+    /* Valid immediate value */
     return 0;
 }
 
+
 int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
 {
-    char matrix_dim_editable[MAX_LINE_LENGTH],*first_bracket, *second_bracket, *third_bracket, *forth_bracket;
-    int n,m;
+    char matrix_dim_editable[MAX_LINE_LENGTH], *first_bracket, *second_bracket, *third_bracket, *forth_bracket;
+    int n, m;
 
+    /* Make an editable copy of the matrix dimension string */
     strcpy(matrix_dim_editable, mat_dim);
 
-    /* Find register names between brackets */
+    /* Locate the first opening bracket '[' */
     first_bracket = strchr(matrix_dim_editable, '[');
     if (first_bracket) {
+        /* Locate the first closing bracket ']' after the first '[' */
         second_bracket = strchr(first_bracket + 1, ']');
         if (second_bracket) {
+            /* Temporarily terminate the string at the closing bracket */
             *second_bracket = '\0';
-            n = is_digit_or_char(first_bracket + 1,0,file_name,line_number);
-            if(!n){
-                return 1;
+
+            /* Validate that the first dimension contains only digits */
+            n = is_digit_or_char(first_bracket + 1, 0, file_name, line_number);
+            if (!n) {
+                return 1; /* Invalid first dimension */
             }
 
+            /* Locate the second dimension's opening bracket */
             third_bracket = strchr(second_bracket + 1, '[');
             if (third_bracket) {
+                /* Locate the second dimension's closing bracket */
                 forth_bracket = strchr(third_bracket + 1, ']');
                 if (forth_bracket) {
                     *forth_bracket = '\0';
-                    m = is_digit_or_char(third_bracket + 1,0,file_name,line_number);
-                    if(!m){
-                        return 1;
+
+                    /* Validate that the second dimension contains only digits */
+                    m = is_digit_or_char(third_bracket + 1, 0, file_name, line_number);
+                    if (!m) {
+                        return 1; 
                     }
                 }
             }
         }
     }
 
-
-    return 0;
+    return 0; 
 }
 
 
-
-
 int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_name, int line_number) {
-    int i=0;
-    if (!digit_or_letter_or_both){
-        /*check tested word contain only digits*/
+    int i = 0;
 
-        if (tested_word[i] == '-' || tested_word[i] == '+')
-        {
-            i++;
+    if (!digit_or_letter_or_both) {
+        /* Case 0: Check if the tested word contains only digits */
+
+        if (tested_word[i] == '-' || tested_word[i] == '+') {
+            i++; 
         }
+
+        /* Iterate through the rest of the string */
         for (i = i; i < strlen(tested_word); i++) {
             if (!isdigit(tested_word[i])) {
                 error_log(file_name, line_number, "Char is not digit\n");
-                return 1;
+                return 1; 
             }
         }
 
-
-    } else if (digit_or_letter_or_both == 1){
-        /*check tested word contain only letter*/
+    } else if (digit_or_letter_or_both == 1) {
+        /* Case 1: Check if the tested word contains only letters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalpha(tested_word[i])) {
                 error_log(file_name, line_number, "Char is not letter\n");
-                return 1;
+                return 1; 
             }
         }
 
-    } else if (digit_or_letter_or_both == 2)
-    {
-        /*check tested word contain digits and letters*/
-
+    } else if (digit_or_letter_or_both == 2) {
+        /* Case 2: Check if the tested word contains only alphanumeric characters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalnum((unsigned char)tested_word[i])) {
                 error_log(file_name, line_number, "Char is not digit or letter\n");
-                return 1;
+                return 1; 
             }
         }
-
     }
 
-    return 0;
+    return 0; /* String passed validation */
 }
 
 int verify_string_is_valid(char *tested_word) {
     int i;
 
+    /* Check each character to ensure it is printable */
     for (i = 0; i < strlen(tested_word); i++) {
         if (!isprint(tested_word[i])) {
-            return 1;
+            return 1; 
         }
     }
-    return 0;
+    return 0; 
 }
 
 void string_shifting_forward(char *str) {
     int i = 0;
     if (str == NULL) return;
 
+    /* Shift all characters one position to the left */
     while (str[i] != '\0') {
         str[i] = str[i + 1];
         i++;
     }
 }
 
+
 char *strip_quotes(char *str) {
     size_t len;
 
-    if (str == NULL) return str;
+    if (str == NULL) return str; /* Return as is if null pointer */
 
     len = strlen(str);
 
+    /* Check if the string has at least two characters and is wrapped in double quotes */
     if (len >= 2 && str[0] == '"' && str[len - 1] == '"') {
-        str[len - 1] = '\0';
-        string_shifting_forward(str);
+        str[len - 1] = '\0'; /* Remove trailing quote */
+        string_shifting_forward(str); /* Remove leading quote by shifting characters */
         return str;
     }
-    return str;
+    return str; 
 }
 
-/*
- * Removes the leading '.' from a directive token and stores the name.
- */
 void copy_directive_name(char *token, char *dest) {
+    /* Check if token starts with '.' indicating a directive */
     if (token[0] == '.') {
-        strncpy(dest, token + 1, 7); /* Copy up to 7 characters after '.' */
-        dest[7] = '\0';  /* Ensure null-termination */
+        strncpy(dest, token + 1, 7);
+        dest[7] = '\0';  
     } else {
-        dest[0] = '\0';   /* Invalid directive format */
+        dest[0] = '\0';   
     }
 }
 
-
-/* Checks whether the given label is valid (starts with letter, alphanumeric, not too long) */
-int is_valid_label(char *label,char *file_name, int line_number) {
+int is_valid_label(char *label, char *file_name, int line_number) {
     int i;
     int len;
 
+    /* Check if label is null or empty */
     if (label == NULL || label[0] == '\0') {
         error_log(file_name, line_number, "Missing Label name\n");
-        return 0; /* Null or empty label */
+        return 0; /* Invalid label */
     }
 
     len = strlen(label);
 
+    /* Check if label length exceeds maximum allowed length */
     if (len > MAX_LABEL_LEN) {
         error_log(file_name, line_number, "Label is too long \n");
-        return 0; /* Label exceeds maximum allowed length */
+        return 0;
     }
 
+    /* First character must be a letter */
     if (!isalpha((unsigned char)label[0])) {
         error_log(file_name, line_number, "Label must starts with letter\n");
-        return 0; /* Label must start with an alphabetic character */
+        return 0;
     }
 
+    /* All subsequent characters must be alphanumeric */
     for (i = 1; i < len; i++) {
         if (!isalnum((unsigned char)label[i])) {
             error_log(file_name, line_number, "Label must contain only digits or letters \n");
-            return 0; /* Label must contain only alphanumeric characters */
+            return 0;
         }
     }
 
-    return 1; /* Valid label */
+    return 1; /* Label passed all checks */
 }
 
 
@@ -388,14 +411,7 @@ int get_addressing_mode( char *operand) {
     return ADDRESS_DIRECT;
 }
 
-/**
- * @brief Validates that operands use allowed addressing modes for the specific instruction
- *
- * @param parsed Pointer to parsed line structure
- * @param file_name Filename for error reporting
- * @param line_number Line number for error reporting
- * @return 1 if valid, 0 if invalid addressing mode detected
- */
+
 int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int line_number) {
     int opcode = parsed->opcode;
 
@@ -446,31 +462,37 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     char first_register[MAX_LINE_LENGTH], second_register[MAX_LINE_LENGTH];
     char *reg, *point_after_second_reg;
 
+    /* Copy operand into a modifiable buffer */
     strncpy(temp_operand, operand, MAX_LINE_LENGTH - 1);
     temp_operand[MAX_LINE_LENGTH - 1] = '\0';
 
+    /* Locate first opening bracket for first register */
     open_bracket_first_reg = strchr(temp_operand, '[');
     if (!open_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_BRACKET);
         return 1;
     }
 
+    /* Locate first closing bracket for first register */
     closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, ']');
     if (!closed_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_CLOSING);
         return 1;
     }
 
+    /* Extract the first register string */
     strncpy(first_register, open_bracket_first_reg + 1,
             closed_bracket_first_reg - open_bracket_first_reg - 1);
     first_register[closed_bracket_first_reg - open_bracket_first_reg - 1] = '\0';
 
+    /* Trim spaces and validate first register */
     reg = cut_spaces_before_and_after_string(first_register);
     if (identify_register(reg) == -1) {
         error_log(file_name, line_number, INVALID_MATRIX_FIRST_REGISTER);
         return 1;
     }
 
+    /* Ensure no spaces or invalid characters between first closing bracket and second opening bracket */
     point_after_first_reg = closed_bracket_first_reg + 1;
     while (*point_after_first_reg != '\0' && *point_after_first_reg != '[') {
         if (isspace((unsigned char)*point_after_first_reg)) {
@@ -480,28 +502,33 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         point_after_first_reg++;
     }
 
+    /* Locate second opening bracket for second register */
     open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
     if (!open_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_BRACKET);
         return 1;
     }
 
+    /* Locate second closing bracket for second register */
     closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, ']');
     if (!closed_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_CLOSING);
         return 1;
     }
 
+    /* Extract the second register string */
     strncpy(second_register, open_bracket_second_reg + 1,
             closed_bracket_second_reg - open_bracket_second_reg - 1);
     second_register[closed_bracket_second_reg - open_bracket_second_reg - 1] = '\0';
 
+    /* Trim spaces and validate second register */
     reg = cut_spaces_before_and_after_string(second_register);
     if (identify_register(reg) == -1) {
         error_log(file_name, line_number, INVALID_MATRIX_SECOND_REGISTER);
         return 1;
     }
 
+    /* After second register closing bracket, only spaces are allowed */
     point_after_second_reg = closed_bracket_second_reg + 1;
     while (*point_after_second_reg != '\0') {
         if (!isspace((unsigned char)*point_after_second_reg)) {
@@ -511,15 +538,17 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         point_after_second_reg++;
     }
 
+    /* If all checks pass, the matrix registers format is valid */
     return 0;
 }
+
 
 
 int instruction_word_count(ParsedLine *parsed) {
     int word_counter, i, mode;
 
     if (parsed == NULL) {
-        return 0; /* Defensive check */
+        return 0; 
     }
 
     word_counter = 1; /* Every instruction has at least one base word */
@@ -588,30 +617,38 @@ int count_data_items(ParsedLine *parsed) {
 }
 
 
-int comma_validation(char *line,char *file_name,int line_number) {
+int comma_validation(char *line, char *file_name, int line_number) {
     int i = 0;
 
+    /* Iterate through each character in the line */
     while (line[i] != '\0') {
+
+        /* Check for a comma */
         if (line[i] == ',') {
             i++;
 
+            /* Skip over any spaces or tabs after the comma */
             while (line[i] == ' ' || line[i] == '\t') {
                 i++;
             }
 
+            /* If the next non-space character is another comma, it's an error */
             if (line[i] == ',') {
                 error_log(file_name, line_number, MULTIPLE_COMMAS);
                 return 1;
             }
 
+            /* If a comma is followed by end of line, it's an extraneous comma */
             if (line[i] == '\0' || line[i] == '\n') {
                 error_log(file_name, line_number, "Extra comma in the end of the line");
                 return 1;
             }
         } else {
+            /* Move to the next character */
             i++;
         }
     }
 
+    
     return 0;
 }

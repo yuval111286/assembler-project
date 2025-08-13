@@ -17,20 +17,19 @@ char *turn_line_to_base_4(unsigned int word) {
     /* Mask to 10 bits to ensure we only work with valid range */
     word &= 0x3FF;
 
-    /*last char should be 0*/
+    /* Last char should be 0 */
     word_is_coded_in_base4[5] = '\0';
 
-    /*loop is running from the end to the start*/
+    /* Loop is running from the end to the start */
     for (i = 4; i >= 0; i--) {
-        /*calculate the remainder by dividing by 4*/
+        /* Calculate the remainder by dividing by 4 */
         remainder = word % 4;
-        /*build the word by placing the base4_options in remainder index in coded word*/
+        /* Build the word by placing the base4_options in remainder index in coded word */
         word_is_coded_in_base4[i] = base4_options[remainder];
-        /*divide address by 4 to move to the next digit*/
+        /* Divide address by 4 to move to the next digit */
         word = word / 4;
     }
 
-    /*return coded address word*/
     return word_is_coded_in_base4;
 }
 
@@ -39,16 +38,16 @@ char *turn_address_to_base_4(unsigned int address) {
     char base4_options[4] = {'a', 'b', 'c', 'd'};
     int i, remainder;
 
-    /*last char should be 0*/
+    /* Last char should be 0 */
     address_is_coded_in_base4[4] = '\0';
 
-    /*loop is running from the end to the start*/
+    /* Loop is running from the end to the start */
     for (i = 3; i >= 0; i--) {
-        /*calculate the remainder by dividing by 4*/
+        /* Calculate the remainder by dividing by 4 */
         remainder = address % 4;
-        /*build the word by placing the base4_options in remainder index in coded word*/
+        /* Build the word by placing the base4_options in remainder index in coded word */
         address_is_coded_in_base4[i] = base4_options[remainder];
-        /*divide address by 4 to move to the next digit*/
+        /* Divide address by 4 to move to the next digit */
         address = address / 4;
     }
 
@@ -56,13 +55,7 @@ char *turn_address_to_base_4(unsigned int address) {
     return address_is_coded_in_base4;
 }
 
-/**
- * @brief Alternative version that uses a static buffer (thread-unsafe but simpler)
- *
- * @param number The integer to convert
- * @return char* Static string containing the base-4 representation
- *         The string is overwritten on each call
- */
+
 char *int_to_base_4(int number) {
     static char result[10]={0}; /* Static buffer - reused each call */
     char base4_chars[4] = {'a', 'b', 'c', 'd'};
@@ -108,24 +101,23 @@ int is_label_operand(char *operand) {
     /*check if not register */
     if (identify_register(operand) != -1) return 0;
 
-    /* return 1 for label */
     return 1;
 }
 
 void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address) {
     ExternSymbol *new_node;
 
-    /* memory for new extern reference */
+    /* Memory for new extern reference */
     new_node = malloc_allocation(sizeof(ExternSymbol));
     if (new_node == NULL) {
         return;
     }
 
-    /* copy symbol name */
+    /* Copy symbol name */
     strncpy(new_node->symbol_name, symbol_name, MAX_LABEL_LEN);
     new_node->symbol_name[MAX_LABEL_LEN] = '\0';
 
-    /* set address and link to list */
+    /* Set address and link to list */
     new_node->address = address;
     new_node->next = extern_list->head;
     extern_list->head = new_node;
@@ -135,7 +127,7 @@ void free_extern_list(ExternList *extern_list) {
     ExternSymbol *current = extern_list->head;
     ExternSymbol *temp;
 
-    /*go over the list and free all nodes*/
+    /* Go over the list and free all nodes */
     while (current != NULL) {
         temp = current;
         current = current->next;
@@ -166,7 +158,7 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
 
     fprintf(fp, "%s\t\t%s\n", ic_size_in_base_4,dc_size_in_base_4);
 
-    /* go over code image section and code address and word*/
+    /* Go over code image section and code address and word */
     for (i = 0; i < (*img).size; i++) {
         if (i == (*img).size - 1 && dc_size == 0) {
             fprintf(fp, "%s\t%s", turn_address_to_base_4((*img).words[i].address), turn_line_to_base_4((*img).words[i].value));
@@ -175,7 +167,7 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
         }
     }
 
-    /* go over data image section code address and word*/
+    /* Go over data image section code address and word */
     for (i = 0; i < dc_size; i++) {
         if (i == dc_size - 1) {
             fprintf(fp, "%s\t%s", turn_address_to_base_4(IC_INIT_VALUE + ic_size + i), turn_line_to_base_4(data_image[i]));
@@ -195,9 +187,9 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     ExternSymbol *current;
     int count_extern_labels_during_print=0,num_of_extern_labels=0;
 
-    /* see if there are extern labels */
+    /* See if there are extern labels */
     if (extern_list->head == NULL) {
-        /* no extern labels so no need to create ext file */
+        /* No extern labels so no need to create ext file */
         return;
     }
 
@@ -208,13 +200,13 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     }
 
 
-    /*create ext file name*/
+    /* Create ext file name */
     ext_file_name = change_ending_of_file(file_name, ".ext");
     if (ext_file_name == NULL) {
         return;
     }
 
-    /*open ext file for writing*/
+    /* Open ext file for writing */
     fp = fopen(ext_file_name, "w");
     if (fp == NULL) {
         error_log(file_name, 0, FILE_NOT_OPEN_WRITING);
@@ -222,23 +214,22 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
         return;
     }
 
-    /*writing all extern labels with matching addresses */
+    /* Writing all extern labels with matching addresses */
     current = extern_list->head;
     while (current != NULL) {
 
         if (count_extern_labels_during_print==num_of_extern_labels-1)
         {
-            /*calculate address in base4*/
+            /* Calculate address in base4 */
             base4_address = turn_address_to_base_4(current->address);
-            /*write to extern file extern label name and address */
+            /* Write to extern file extern label name and address */
             fprintf(fp, "%s\t%s", current->symbol_name, base4_address);
         }
         else {
             /*calculate address in base4*/
             base4_address = turn_address_to_base_4(current->address);
             /*write to extern file extern label name and address */
-            fprintf(fp, "%s\t%s\n", current->symbol_name, base4_address);
-            count_extern_labels_during_print++;
+            fprintf(fp, "%s\t%s", current->symbol_name, base4_address);
 
         }
         current = current->next;
@@ -265,17 +256,17 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
     }
 
     if (!has_entries_labels) {
-        /* no entry label so no need to create ent file */
+        /* No entry label so no need to create ent file */
         return;
     }
 
-    /*create ent file name*/
+    /* Create ent file name */
     ent_file_name = change_ending_of_file(file_name, ".ent");
     if (ent_file_name == NULL) {
         return;
     }
 
-    /*open ent file for writing*/
+    /* Open ent file for writing */
     fp = fopen(ent_file_name, "w");
     if (fp == NULL) {
         error_log(file_name, 0, FILE_NOT_OPEN_WRITING);
@@ -283,21 +274,21 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
         return;
     }
 
-    /* go over all entry labels and write their name and address */
+    /* Go over all entry labels and write their name and address */
     current = symbol_table->head;
     while (current != NULL) {
         if (current->is_entry == 1) {
             if(count_entry_labels_during_print == has_entries_labels)
             {
-                /*calculate address in base 4*/
+                /* Calculate address in base 4* */
                 base4_address = turn_address_to_base_4(current->address);
-                /*write to file entry label name and address*/
+                /* Write to file entry label name and address */
                 fprintf(fp, "%s\t%s", current->name, base4_address);
 
             } else{
-                /*calculate address in base 4*/
+                /* Calculate address in base 4 */
                 base4_address = turn_address_to_base_4(current->address);
-                /*write to file entry label name and address*/
+                /* Write to file entry label name and address */
                 fprintf(fp, "%s\t%s\n", current->name, base4_address);
                 count_entry_labels_during_print++;
             }
@@ -314,7 +305,7 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
     int i;
     unsigned int final_value = value;
 
-    /* Add ARE field to the value - value is already shifted to correct position if needed */
+    /* Add ARE field to the value */
     if (are == ARE_ABSOLUTE) {
         final_value = shift_and_set_are(final_value, ABSOLUTE);  /* 00 */
     }
@@ -347,27 +338,27 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     ParsedLine parsed;
     ExternList extern_list;
 
-    /* initialize extern linked list */
+    /* Initialize extern linked list */
     extern_list.head = NULL;
 
-    /*open am file for reading*/
+    /*Open am file for reading*/
     fp = fopen(am_file, "r");
     if (fp == NULL) {
         error_log(am_file, 0, FILE_NOT_OPEN_READING);
         return 1;
     }
 
-    /* go over all line and process*/
+    /* Go over all line and process*/
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
         line_number++;
 
-        /* parse the line */
+        /* Parse the line */
         if (!parse_line(line, &parsed, am_file, line_number)) {
             continue;
         }
 
 
-        /* instruction lines */
+        /* Instruction lines */
         if (parsed.line_type == LINE_INSTRUCTION) {
             /* Complete encoding of operand words that need symbol resolution */
             int i, word_offset = 1; /* Skip the first word which is already encoded */
@@ -445,7 +436,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                 }
             }
 
-            /* update current address */
+            /* Update current address */
             current_address += instruction_word_count(&parsed);
         }
 
@@ -461,7 +452,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
         if (parsed.line_type == LINE_DIRECTIVE &&
                 identify_directive_without_dots(parsed.directive_name) == 3) {
 
-            /* validate that the symbol exists */
+            /* Validate that the symbol exists */
             Symbol *sym = get_symbol(symbol_table, parsed.operands[0]);
             if (sym == NULL) {
                 error_log(am_file, line_number, ENTRY_LABEL_NO_DEF);
@@ -470,7 +461,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                 error_log(am_file, line_number, SAME_NAME_ENTRY_AND_EXTERNAL_LABEL);
                 discover_errors = 1;
             } else {
-                /* mark symbol as entry */
+                /* Mark symbol as entry */
                 sym->is_entry = 1;
             }
         }
