@@ -103,7 +103,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         /* Parse operands */
         if (dynamic_operands_pointer[0] == '\0') {
             /* No operands found */
-            error_log(file_name,line_number,"No argument for instruction\n");
+            error_log(file_name,line_number,MISSING_INSTRUCTION_ARG);
             out->operand_count = 0;
             return 0;
         } else {
@@ -161,7 +161,7 @@ int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int
     char *string_without_quotes;
 
     if(operands[0]=='\n'||operands[0]=='\0'){
-        error_log(file_name, line_number, "String directive can not be empty\n");
+        error_log(file_name, line_number, EMPTY_STRING_DIR);
         return 0;
     }
 
@@ -246,7 +246,7 @@ int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int
 
 int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     if (operands[0] == '\0') {
-        error_log(file_name, line_number, "Missing operand for .entry directive\n");
+        error_log(file_name, line_number, MISSING_OPERANDS_DATA);
         return 0;
     }
 
@@ -355,7 +355,7 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
         if (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
             if (token[0] != '\0') {
-                error_log(file_name, line_number, "Too many operands\n");
+                error_log(file_name, line_number, MANY_OP);
                 return 0;
             }
         }
@@ -390,7 +390,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                 }
             } else {
                 if (strchr(operand, ladder)){
-                    error_log(file_name,line_number,"Immediate is not valid argument for dest in mov instruction\n");
+                    error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_MOV);
                     return 0;
                 }
                 else if (strchr(operand, opening_bracket)) {
@@ -452,7 +452,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                 }
             } else {
                 if (strchr(operand, ladder)){
-                    error_log(file_name,line_number,"Immediate is not valid argument for dest in add and sub instructions\n");
+                    error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_ADD_SUB);
                     return 0;
                 }
                 else if (strchr(operand, opening_bracket)) {
@@ -474,7 +474,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_LEA:
             if (position == 0) {
                 if (strchr(operand, ladder)){
-                    error_log(file_name,line_number,"Immediate is not valid argument for source in lea instruction\n");
+                    error_log(file_name,line_number,IMM_NOT_VALID_ARG_SRC_LEA);
                     return 0;
                 }
                 else if (strchr(operand, opening_bracket)) {
@@ -490,7 +490,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                 }
             } else {
                 if (strchr(operand, ladder)){
-                    error_log(file_name,line_number,"Immediate is not valid argument for dest in lea instruction\n");
+                    error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_LEA);
                     return 0;
                 }
                 else if (strchr(operand, opening_bracket)) {
@@ -518,8 +518,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_JSR:
         case OPCODE_RED:
             if (strchr(operand, ladder)){
-                error_log(file_name,line_number,"Immediate is not valid argument for dest in clr,not"
-                " inc, dec,jmp,bne,jsr and red instructions\n");
+                error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_REST_OP);
                 return 0;
             }
             else if (strchr(operand, opening_bracket)) {

@@ -43,6 +43,17 @@ void error_log(char *file_name, int line, char *error_msg);
 
 /* First Pass and Second Pass Errors */
 
+
+#define MISSING_INSTRUCTION_ARG "Missing argument for instruction\n"
+#define EMPTY_STRING_DIR "String directive can not be empty\n"
+#define MANY_OP "Too many operands\n"
+#define IMM_NOT_VALID_ARG_DEST_MOV "Immediate is not valid argument for dest in mov instruction\n"
+#define IMM_NOT_VALID_ARG_DEST_ADD_SUB "Immediate is not valid argument for dest in add and sub instructions\n"
+#define IMM_NOT_VALID_ARG_SRC_LEA "Immediate is not valid argument for source in lea instruction\n"
+#define IMM_NOT_VALID_ARG_DEST_LEA "Immediate is not valid argument for dest in lea instruction\n"
+#define IMM_NOT_VALID_ARG_DEST_REST_OP "Immediate is not valid argument for dest in clr,not"
+" inc, dec,jmp,bne,jsr and red instructions\n"
+
 #define INVALID_SOURCE_ADDRESSING_MODE "Invalid source operand addressing mode for this instruction\n"
 #define INVALID_DEST_ADDRESSING_MODE "Invalid destination operand addressing mode for this instruction\n"
 #define INVALID_MATRIX_FORMAT_FIRST_BRACKET "Invalid matrix format - missing first bracket\n"
@@ -98,10 +109,6 @@ void error_log(char *file_name, int line, char *error_msg);
 "bne, red, prn, jsr, rts, and stop\n"\
 "Generate output files if no errors: .am .ob .ent .ext \n"\
 "Errors are printed to the screen\n\n"
-
-
-
-
 #define LONG_FILE_NAME "File name too long, moving to next file %s \n\n"
 #define PREPROC "-- Processing PREPROCESSOR --\n"
 #define FIRST_PASS  "-- Processing FIRST PASS --\n"
