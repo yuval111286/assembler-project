@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "code_image.h"
 #include "errors_handler.h"
 #include "utils.h"
@@ -14,7 +13,7 @@ void init_code_image(CodeImage *img) {
 void add_code_word(CodeImage *img, int address, unsigned int value, char are) {
     /* Not exceed maximum allowed code size */
     if ((*img).size >= MAX_CODE_SIZE) {
-        error_log("internal", -1, CODE_IMAGE_OVERFLOW); 
+        error_log(INTERNAL, -1, CODE_IMAGE_OVERFLOW);
         exit(1);
     }
 

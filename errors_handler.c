@@ -3,7 +3,6 @@
 
 void error_log(char *file_name, int line, char *error_msg) {
     /* Print the file name, line number and the error message */
-    printf("--ERROR--: In file %s at line: %d\n          The error is: %s\n",
-           file_name, line, error_msg);
+    printf(ERROR_STRUCT,file_name, line, error_msg);
 }
 

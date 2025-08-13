@@ -42,7 +42,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
     }
 
     /* Try to parse the format "[rows][cols]" and also capture where parsing stopped */
-    if (sscanf(cleaned, "[%d][%d]%n", rows, cols, &read_len) == 2) {
+    if (sscanf(cleaned, MAT_DIM, rows, cols, &read_len) == 2) {
         if (cleaned[read_len] != '\0') {
             return 0;
         }
@@ -291,16 +291,16 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                         /* Extract register numbers from inside the brackets */
                         strcpy(matrix_operand, parsed.operands[i]);
-                        first_bracket = strchr(matrix_operand, '[');
+                        first_bracket = strchr(matrix_operand, OPENING_BRACKET);
                         if (first_bracket) {
-                            second_bracket = strchr(first_bracket + 1, ']');
+                            second_bracket = strchr(first_bracket + 1, CLOSED_BRACKET);
                             if (second_bracket) {
                                 *second_bracket = '\0';
                                 first_reg = identify_register(first_bracket + 1);
 
-                                third_bracket = strchr(second_bracket + 1, '[');
+                                third_bracket = strchr(second_bracket + 1, OPENING_BRACKET);
                                 if (third_bracket) {
-                                    forth_bracket = strchr(third_bracket + 1, ']');
+                                    forth_bracket = strchr(third_bracket + 1, CLOSED_BRACKET);
                                     if (forth_bracket) {
                                         *forth_bracket = '\0';
                                         second_reg = identify_register(third_bracket + 1);
@@ -377,7 +377,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
         /*  DIRECTIVE HANDLING  */
         if (parsed.line_type == LINE_DIRECTIVE) {
-            if (strcmp(parsed.directive_name, "data") == 0) {
+            if (strcmp(parsed.directive_name, DATA) == 0) {
                 /* Store integers in data image */
                 for (i = 0; i < parsed.operand_count; i++) {
                     if (DC >= MAX_DATA_SIZE) {
@@ -393,7 +393,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
                 }
             } 
-            else if (strcmp(parsed.directive_name, "string") == 0) {
+            else if (strcmp(parsed.directive_name, STRING) == 0) {
                 /* Store string characters + null terminator in data image */
                 char *s = parsed.operands[0];
                 for (i = 0; s[i] != '\0'; i++) {
@@ -411,7 +411,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     discover_errors = 1;
                 }
             } 
-            else if (strcmp(parsed.directive_name, "mat") == 0) {
+            else if (strcmp(parsed.directive_name, MAT) == 0) {
                 /* Store matrix dimensions and values */
                 int mat_rows, mat_cols, expected_values;
 
@@ -444,7 +444,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
                 }
             } 
-            else if (strcmp(parsed.directive_name, "extern") == 0) {
+            else if (strcmp(parsed.directive_name, EXTERN) == 0) {
                 /* Add external label to symbol table */
                 if (parsed.operand_count != 1) {
                     error_log(file_name, line_number, EXTERN_SYNTAX_ERROR);

@@ -92,10 +92,10 @@ char *turn_num_to_base_4(int number) {
 
 int is_label_operand(char *operand) {
     /*check if not num  */
-    if (operand[0] == '#') return 0;
+    if (operand[0] == LADDER) return 0;
 
     /*check if not matrix */
-    if (strchr(operand, '[')) return 0;
+    if (strchr(operand, OPENING_BRACKET)) return 0;
 
     /*check if not register */
     if (identify_register(operand) != -1) return 0;

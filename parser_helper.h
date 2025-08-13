@@ -3,6 +3,22 @@
 
 #include "globals.h" 
 
+
+/*used strings*/
+#define EXTERN "extern"
+#define MAT "mat"
+#define STRING "string"
+#define ENTRY "entry"
+#define DATA "data"
+#define OPENING_BRACKET '['
+#define CLOSED_BRACKET ']'
+#define LADDER '#'
+#define MAT_DIM "[%d][%d]%n"
+#define MAT_DIM_SPACE " [%d][%d]%n"
+#define COMMA ","
+#define DOUBLE_DOTS ':'
+
+
 /**
  * @brief Identify opcode number from its name.
  * @param op_code String containing opcode name.

@@ -6,6 +6,9 @@
 #include "linked_list.h"
 #include <stdio.h>
 
+
+
+
 /**
  * @brief Shift value left and set ARE bits.
  * @param final_value Current value.

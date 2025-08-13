@@ -18,6 +18,7 @@
  */
 void error_log(char *file_name, int line, char *error_msg);
 
+#define ERROR_STRUCT "--ERROR--: In file %s at line: %d\n          The error is: %s\n"
 
 /*Preprocessor errors*/
 #define LONG_LINE "Line is too long, more than 80 characters\n"
@@ -34,6 +35,7 @@ void error_log(char *file_name, int line, char *error_msg);
 
 
 /*Internal errors*/
+#define INTERNAL "internal"
 #define FILE_NOT_OPEN_READING "Can not open file for reading\n"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing\n"
 #define MEMORY_FAIL "Fail to allocate memory\n"

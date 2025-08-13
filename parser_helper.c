@@ -182,7 +182,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
     int i = 0;
 
     /* Immediate values must start with '#' */
-    if (immediate[i] != '#') {
+    if (immediate[i] != LADDER) {
         error_log(file_name, line_number, IMM_LADDER);
         return 1;
     }
@@ -216,10 +216,10 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
     strcpy(matrix_dim_editable, mat_dim);
 
     /* Locate the first opening bracket '[' */
-    first_bracket = strchr(matrix_dim_editable, '[');
+    first_bracket = strchr(matrix_dim_editable, OPENING_BRACKET);
     if (first_bracket) {
         /* Locate the first closing bracket ']' after the first '[' */
-        second_bracket = strchr(first_bracket + 1, ']');
+        second_bracket = strchr(first_bracket + 1, CLOSED_BRACKET);
         if (second_bracket) {
             /* Temporarily terminate the string at the closing bracket */
             *second_bracket = '\0';
@@ -231,10 +231,10 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
             }
 
             /* Locate the second dimension's opening bracket */
-            third_bracket = strchr(second_bracket + 1, '[');
+            third_bracket = strchr(second_bracket + 1, OPENING_BRACKET);
             if (third_bracket) {
                 /* Locate the second dimension's closing bracket */
-                forth_bracket = strchr(third_bracket + 1, ']');
+                forth_bracket = strchr(third_bracket + 1, CLOSED_BRACKET);
                 if (forth_bracket) {
                     *forth_bracket = '\0';
 
@@ -390,7 +390,7 @@ int get_addressing_mode( char *operand) {
     len = strlen(operand);
 
     /* Immediate addressing: begins with '#' followed by number */
-    if (operand[0] == '#') {
+    if (operand[0] == LADDER) {
         if (len > 1 && (isdigit((unsigned char)operand[1]) ||
                         operand[1] == '+' || operand[1] == '-')) {
             return ADDRESS_IMMEDIATE;
@@ -399,7 +399,7 @@ int get_addressing_mode( char *operand) {
     }
 
     /* Matrix addressing: contains both '[' and ']' characters */
-    if (strchr(operand, '[') && strchr(operand, ']')) {
+    if (strchr(operand, OPENING_BRACKET) && strchr(operand, CLOSED_BRACKET)) {
         return ADDRESS_MATRIX;
     }
 
@@ -467,14 +467,14 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     temp_operand[MAX_LINE_LENGTH - 1] = '\0';
 
     /* Locate first opening bracket for first register */
-    open_bracket_first_reg = strchr(temp_operand, '[');
+    open_bracket_first_reg = strchr(temp_operand, OPENING_BRACKET);
     if (!open_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_BRACKET);
         return 1;
     }
 
     /* Locate first closing bracket for first register */
-    closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, ']');
+    closed_bracket_first_reg = strchr(open_bracket_first_reg + 1, CLOSED_BRACKET);
     if (!closed_bracket_first_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_FIRST_CLOSING);
         return 1;
@@ -503,14 +503,14 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
     }
 
     /* Locate second opening bracket for second register */
-    open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, '[');
+    open_bracket_second_reg = strchr(closed_bracket_first_reg + 1, OPENING_BRACKET);
     if (!open_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_BRACKET);
         return 1;
     }
 
     /* Locate second closing bracket for second register */
-    closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, ']');
+    closed_bracket_second_reg = strchr(open_bracket_second_reg + 1, CLOSED_BRACKET);
     if (!closed_bracket_second_reg) {
         error_log(file_name, line_number, INVALID_MATRIX_FORMAT_SECOND_CLOSING);
         return 1;

@@ -33,7 +33,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     token = strtok(cleaned_buffer, " \t\n");
 
     /* Handle Label */
-    if (token[strlen(token) - 1] == ':') {
+    if (token[strlen(token) - 1] == DOUBLE_DOTS) {
         token[strlen(token) - 1] = '\0';  /* Remove ':' */
 
         /*checking label validity*/
@@ -137,19 +137,19 @@ int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_
     dynamic_operands_pointer += strlen(out->directive_name) + 1; /* +1 for the '.' */
     dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
 
-    if (strcmp(out->directive_name, "string") == 0) {
+    if (strcmp(out->directive_name, STRING) == 0) {
         return parse_string_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, "data") == 0) {
+    else if (strcmp(out->directive_name, DATA) == 0) {
         return parse_data_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, "extern") == 0) {
+    else if (strcmp(out->directive_name, EXTERN) == 0) {
         return parse_extern_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, "entry") == 0) {
+    else if (strcmp(out->directive_name, ENTRY) == 0) {
         return parse_entry_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, "mat") == 0) {
+    else if (strcmp(out->directive_name, MAT) == 0) {
         return parse_mat_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
 
@@ -194,7 +194,7 @@ int parse_data_directive(char *operands, ParsedLine *out, char *file_name, int l
         return 0;
     }
 
-    token = strtok(operands, ",");
+    token = strtok(operands, COMMA);
     while (token != NULL) {
         token = cut_spaces_before_and_after_string(token);
 
@@ -211,7 +211,7 @@ int parse_data_directive(char *operands, ParsedLine *out, char *file_name, int l
         out->operands[i][MAX_LINE_LENGTH - 1] = '\0';
         i++;
 
-        token = strtok(NULL, ",");
+        token = strtok(NULL, COMMA);
     }
 
     out->operand_count = i;
@@ -279,7 +279,7 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
         return 0;
     }
 
-    if (sscanf(operands, " [%d][%d]%n", &n, &m, &mat_size) != 2) {
+    if (sscanf(operands, MAT_DIM_SPACE, &n, &m, &mat_size) != 2) {
         error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
         return 0;
     }
@@ -294,7 +294,7 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
     mat_values = cut_spaces_before_and_after_string(mat_values);
 
     if (mat_values[0] != '\0') {
-        token = strtok(mat_values, ",");
+        token = strtok(mat_values, COMMA);
 
         while (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
@@ -313,7 +313,7 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
             out->operands[out->operand_count][MAX_LINE_LENGTH - 1] = '\0';
             out->operand_count++;
 
-            token = strtok(NULL, ",");
+            token = strtok(NULL, COMMA);
         }
     } else{
         for (i = 0; i < mat_size; i++) {
@@ -366,20 +366,19 @@ int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name,
 }
 
 int validate_operand_for_instruction(char *operand, Opcode opcode, int position, char *file_name, int line_number) {
-    char ladder = '#', opening_bracket = '[', closing_bracket = ']';
 
     switch (opcode) {
         case OPCODE_MOV:
             if (position == 0) {
-                if (strchr(operand, ladder)) {
+                if (strchr(operand, LADDER)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
                     }
-                } else if (strchr(operand, opening_bracket)) {
+                } else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -389,15 +388,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     }
                 }
             } else {
-                if (strchr(operand, ladder)){
+                if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_MOV);
                     return 0;
                 }
-                else if (strchr(operand, opening_bracket)) {
+                else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -411,15 +410,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
         case OPCODE_CMP:
             /* Both operands: 0,1,2,3 */
-            if (strchr(operand, ladder)) {
+            if (strchr(operand, LADDER)) {
                 if (is_valid_immediate(operand, file_name, line_number) == 1) {
                     return 0;
                 }
-            } else if (strchr(operand, opening_bracket)) {
+            } else if (strchr(operand, OPENING_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else if (strchr(operand, closing_bracket)) {
+            } else if (strchr(operand, CLOSED_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
@@ -433,15 +432,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_ADD:
         case OPCODE_SUB:
             if (position == 0) {
-                if (strchr(operand, ladder)) {
+                if (strchr(operand, LADDER)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
                     }
-                } else if (strchr(operand, opening_bracket)) {
+                } else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -451,15 +450,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     }
                 }
             } else {
-                if (strchr(operand, ladder)){
+                if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_ADD_SUB);
                     return 0;
                 }
-                else if (strchr(operand, opening_bracket)) {
+                else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -473,15 +472,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
         case OPCODE_LEA:
             if (position == 0) {
-                if (strchr(operand, ladder)){
+                if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_SRC_LEA);
                     return 0;
                 }
-                else if (strchr(operand, opening_bracket)) {
+                else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -489,15 +488,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                     return 0;
                 }
             } else {
-                if (strchr(operand, ladder)){
+                if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_LEA);
                     return 0;
                 }
-                else if (strchr(operand, opening_bracket)) {
+                else if (strchr(operand, OPENING_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
-                } else if (strchr(operand, closing_bracket)) {
+                } else if (strchr(operand, CLOSED_BRACKET)) {
                     if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                         return 0;
                     }
@@ -517,15 +516,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
-            if (strchr(operand, ladder)){
+            if (strchr(operand, LADDER)){
                 error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_REST_OP);
                 return 0;
             }
-            else if (strchr(operand, opening_bracket)) {
+            else if (strchr(operand, OPENING_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else if (strchr(operand, closing_bracket)) {
+            } else if (strchr(operand, CLOSED_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
@@ -537,15 +536,15 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         case OPCODE_PRN:
-            if (strchr(operand, ladder)) {
+            if (strchr(operand, LADDER)) {
                 if (is_valid_immediate(operand, file_name, line_number) == 1) {
                     return 0;
                 }
-            } else if (strchr(operand, opening_bracket)) {
+            } else if (strchr(operand, OPENING_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else if (strchr(operand, closing_bracket)) {
+            } else if (strchr(operand, CLOSED_BRACKET)) {
                 if (verify_matrix_registers_are_valid(operand, file_name, line_number)) {
                     return 0;
                 }

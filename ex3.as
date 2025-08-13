@@ -1,2 +1,1 @@
-; error - ra doesn't exist
-mov ra, r1
+mov r1, MATRIX r2][r3]
