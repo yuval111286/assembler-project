@@ -122,9 +122,9 @@ void error_log(char *file_name, int line, char *error_msg);
 "     Generates output files if no errors: .am .ob .ent .ext \n"\
 "     Errors shall be printed to the screen\n\n"
 #define LONG_FILE_NAME "File name too long, moving to next file %s \n\n"
-#define PREPROC "   Processing PREPROCESSOR   \n"
-#define FIRST_PASS  "   Processing FIRST PASS   \n"
-#define SECOND_PASS "   Processing SECOND PASS   \n"
+#define PREPROC "-- Processing PREPROCESSOR --\n"
+#define FIRST_PASS  "-- Processing FIRST PASS --\n"
+#define SECOND_PASS "-- Processing SECOND PASS --\n"
 #define FINISH "Finish processing file %s \n"
 #define GOODBYE "\nNo more files, end of assembler program. \nHope you enjoyed!\n"
 #endif /*PROJECT_ERRORS_HANDLER_H*/

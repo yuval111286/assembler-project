@@ -48,16 +48,7 @@ int main(int argc, char *argv[])
 
         /*performing first pass step*/
         printf(FIRST_PASS);
-        if (first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image)) {
-            free_symbol_table(&symbol_table);
-            if (mcro_head) {
-                free_linked_list(mcro_head);
-            }
-            free(as_file);
-            free(am_file);
-            printf(FINISH, argv[argc]);
-            continue;
-        }
+        first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image);
 
         /*free mcro linked list after use*/
         if (mcro_head) {
@@ -66,13 +57,7 @@ int main(int argc, char *argv[])
 
         /*performing second pass*/
         printf(SECOND_PASS);
-        if (second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image)) {
-            free_symbol_table(&symbol_table);
-            free(as_file);
-            free(am_file);
-            printf(FINISH, argv[argc]);
-            continue;
-        }
+        second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image);
 
         /*releasing all resources*/
         free_symbol_table(&symbol_table);
