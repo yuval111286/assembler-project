@@ -143,12 +143,6 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
  */
 int instruction_word_count(ParsedLine *parsed);
 
-/**
- * @brief Count memory words for .data, .string, or .mat directive.
- * @param parsed Pointer to ParsedLine struct.
- * @return Number of words.
- */
-int count_data_items(ParsedLine *parsed);
 
 /**
  * @brief Validate commas in a line.

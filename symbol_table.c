@@ -61,23 +61,6 @@ int symbol_exists(SymbolTable *table, char *name) {
     return 0; 
 }
 
-void mark_entry_label(SymbolTable *table, char *name) {
-    Symbol *current;
-
-    /* Start from the head of the symbol table */
-    current = (*table).head;
-
-    /* Move in the linked list */
-    while (current != NULL) {
-        /* If symbol name matches, mark it as entry */
-        if (strcmp((*current).name, name) == 0) {
-            (*current).is_entry = 1; /* Mark as entry */
-            return; 
-        }
-        current = (*current).next; 
-    }
-}
-
 void update_data_symbols_base_address(SymbolTable *table, int ic_final) {
     Symbol *current;
 

@@ -62,13 +62,6 @@ int add_symbol(SymbolTable *table, char *name, int address, SymbolType type);
 int symbol_exists(SymbolTable *table, char *name);
 
 /**
- * @brief Mark a symbol as .entry.
- * @param table Pointer to the symbol table.
- * @param name Symbol name to mark.
- */
-void mark_entry_label(SymbolTable *table, char *name);
-
-/**
  * @brief Add IC_final to addresses of all DATA symbols.
  * @param table Pointer to the symbol table.
  * @param ic_final Final IC value from first pass.

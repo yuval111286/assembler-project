@@ -582,40 +582,6 @@ int instruction_word_count(ParsedLine *parsed) {
     return word_counter;
 }
 
-/* Returns the number of memory words required for .data, .string or .mat directives */
-int count_data_items(ParsedLine *parsed) {
-
-    if (parsed == NULL) {
-        return 0;
-    }
-
-    /* For .data, each operand is a number stored in one word */
-    if (strcmp((*parsed).directive_name, "data") == 0) {
-        return (*parsed).operand_count;
-    }
-
-    /* For .string, each character is one word including null terminator */
-    if (strcmp((*parsed).directive_name, "string") == 0) {
-        if ((*parsed).operand_count != 1) {
-            return 0; /* Error: .string must have exactly one operand */
-        }
-
-        if ((*parsed).operands[0][0] == '"' &&
-            (*parsed).operands[0][strlen((*parsed).operands[0]) - 1] == '"') {
-            return strlen((*parsed).operands[0]) - 1; /* Includes null terminator */
-        }
-
-        return 0; /* Invalid format (missing quotes) */
-    }
-
-    /* For .mat, return number of operands (including size and values) */
-    if (strcmp((*parsed).directive_name, "mat") == 0) {
-        return (*parsed).operand_count;
-    }
-
-    return 0; /* Unknown or unsupported directive */
-}
-
 
 int comma_validation(char *line, char *file_name, int line_number) {
     int i = 0;
