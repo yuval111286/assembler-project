@@ -488,13 +488,13 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
     for (i = 0; i < DC; i++) {
         printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
-    }
+    }*/
 
-     make sure IC + DC doesn't exceed allowed memory
+     /*make sure IC + DC doesn't exceed allowed memory*/
     if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
         discover_errors = 1;
-    } */
+    }
 
 
     /* Return 1 if any errors were found */

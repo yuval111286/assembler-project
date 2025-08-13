@@ -183,7 +183,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
 
     /* Immediate values must start with '#' */
     if (immediate[i] != '#') {
-        error_log(file_name, line_number, "Immediate value must start with an #\n");
+        error_log(file_name, line_number, IMM_LADDER);
         return 1;
     }
 
@@ -191,7 +191,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
 
     /* '#' must be followed by a number  */
     if (immediate[i] == '\0') {
-        error_log(file_name, line_number, "Immediate value must have num after #\n");
+        error_log(file_name, line_number, IMM_NUM_AFTER_LADDER);
         return 1;
     } else if (immediate[i] == '-' || immediate[i] == '+') {
         i++;
@@ -265,7 +265,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Iterate through the rest of the string */
         for (i = i; i < strlen(tested_word); i++) {
             if (!isdigit(tested_word[i])) {
-                error_log(file_name, line_number, "Char is not digit\n");
+                error_log(file_name, line_number, NOT_DIGIT);
                 return 1; 
             }
         }
@@ -274,7 +274,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Case 1: Check if the tested word contains only letters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalpha(tested_word[i])) {
-                error_log(file_name, line_number, "Char is not letter\n");
+                error_log(file_name, line_number, NOT_LETTER);
                 return 1; 
             }
         }
@@ -283,7 +283,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         /* Case 2: Check if the tested word contains only alphanumeric characters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalnum((unsigned char)tested_word[i])) {
-                error_log(file_name, line_number, "Char is not digit or letter\n");
+                error_log(file_name, line_number, NOT_DIGIT_LETTER);
                 return 1; 
             }
         }
@@ -348,7 +348,7 @@ int is_valid_label(char *label, char *file_name, int line_number) {
 
     /* Check if label is null or empty */
     if (label == NULL || label[0] == '\0') {
-        error_log(file_name, line_number, "Missing Label name\n");
+        error_log(file_name, line_number, MISSING_LABEL_NAME);
         return 0; /* Invalid label */
     }
 
@@ -356,20 +356,20 @@ int is_valid_label(char *label, char *file_name, int line_number) {
 
     /* Check if label length exceeds maximum allowed length */
     if (len > MAX_LABEL_LEN) {
-        error_log(file_name, line_number, "Label is too long \n");
+        error_log(file_name, line_number, LONG_LABEL);
         return 0;
     }
 
     /* First character must be a letter */
     if (!isalpha((unsigned char)label[0])) {
-        error_log(file_name, line_number, "Label must starts with letter\n");
+        error_log(file_name, line_number, LABEL_STARTS_WITH_LETTER);
         return 0;
     }
 
     /* All subsequent characters must be alphanumeric */
     for (i = 1; i < len; i++) {
         if (!isalnum((unsigned char)label[i])) {
-            error_log(file_name, line_number, "Label must contain only digits or letters \n");
+            error_log(file_name, line_number, LABEL_LETTER_DIGIT);
             return 0;
         }
     }
@@ -640,11 +640,10 @@ int comma_validation(char *line, char *file_name, int line_number) {
 
             /* If a comma is followed by end of line, it's an extraneous comma */
             if (line[i] == '\0' || line[i] == '\n') {
-                error_log(file_name, line_number, "Extra comma in the end of the line");
+                error_log(file_name, line_number, COMMA_END_OF_LINE);
                 return 1;
             }
         } else {
-            /* Move to the next character */
             i++;
         }
     }

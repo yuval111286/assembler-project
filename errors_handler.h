@@ -43,6 +43,15 @@ void error_log(char *file_name, int line, char *error_msg);
 
 /* First Pass and Second Pass Errors */
 
+#define IMM_LADDER "Immediate value must start with an #\n"
+#define IMM_NUM_AFTER_LADDER "Immediate value must have num after #\n"
+#define NOT_DIGIT "Char is not digit\n"
+#define NOT_LETTER "Char is not letter\n"
+#define NOT_DIGIT_LETTER "Char is not digit or letter\n"
+#define MISSING_LABEL_NAME "Missing Label name\n"
+#define LONG_LABEL "Label is too long \n"
+#define LABEL_STARTS_WITH_LETTER "Label must starts with letter\n"
+#define LABEL_LETTER_DIGIT "Label must contain only digits or letters \n"
 
 #define MISSING_INSTRUCTION_ARG "Missing argument for instruction\n"
 #define EMPTY_STRING_DIR "String directive can not be empty\n"
@@ -51,7 +60,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define IMM_NOT_VALID_ARG_DEST_ADD_SUB "Immediate is not valid argument for dest in add and sub instructions\n"
 #define IMM_NOT_VALID_ARG_SRC_LEA "Immediate is not valid argument for source in lea instruction\n"
 #define IMM_NOT_VALID_ARG_DEST_LEA "Immediate is not valid argument for dest in lea instruction\n"
-#define IMM_NOT_VALID_ARG_DEST_REST_OP "Immediate is not valid argument for dest in clr,not"
+#define IMM_NOT_VALID_ARG_DEST_REST_OP "Immediate is not valid argument for dest in clr,not"\
 " inc, dec,jmp,bne,jsr and red instructions\n"
 
 #define INVALID_SOURCE_ADDRESSING_MODE "Invalid source operand addressing mode for this instruction\n"
@@ -90,6 +99,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define MISSING_OPERANDS_DATA "Missing operands for .data directive\n"
 #define MATRIX_DIMENSION_FORMAT "[n][m] format is required for .mat dimensions\n"
 #define MULTIPLE_COMMAS "It's illegal to have multiple consecutive commas\n"
+#define COMMA_END_OF_LINE "Extra comma in the end of the line"
 #define TOTAL_MEMORY_OVERFLOW "Total memory exceeded: IC + DC > 255\n"
 #define IMMEDIATE_OUT_OF_RANGE "Immediate value out of range (-512 to +511)\n"
 
