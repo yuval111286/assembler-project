@@ -5,11 +5,11 @@
 
 
 /*used strings*/
-#define EXTERN "extern"
-#define MAT "mat"
-#define STRING "string"
-#define ENTRY "entry"
-#define DATA "data"
+#define DIR_EXTERN "extern"
+#define DIR_MAT "mat"
+#define DIR_STRING "string"
+#define DIR_ENTRY "entry"
+#define DIR_DATA "data"
 #define OPENING_BRACKET '['
 #define CLOSED_BRACKET ']'
 #define LADDER '#'

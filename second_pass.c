@@ -9,6 +9,7 @@
 #include "first_pass.h"
 
 
+
 char *turn_line_to_base_4(unsigned int word) {
     static char word_is_coded_in_base4[6] = {0};
     char base4_options[4] = {'a', 'b', 'c', 'd'};

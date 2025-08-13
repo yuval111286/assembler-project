@@ -377,7 +377,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
         /*  DIRECTIVE HANDLING  */
         if (parsed.line_type == LINE_DIRECTIVE) {
-            if (strcmp(parsed.directive_name, DATA) == 0) {
+            if (strcmp(parsed.directive_name, DIR_DATA) == 0) {
                 /* Store integers in data image */
                 for (i = 0; i < parsed.operand_count; i++) {
                     if (DC >= MAX_DATA_SIZE) {
@@ -393,7 +393,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
                 }
             } 
-            else if (strcmp(parsed.directive_name, STRING) == 0) {
+            else if (strcmp(parsed.directive_name, DIR_STRING) == 0) {
                 /* Store string characters + null terminator in data image */
                 char *s = parsed.operands[0];
                 for (i = 0; s[i] != '\0'; i++) {
@@ -411,7 +411,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     discover_errors = 1;
                 }
             } 
-            else if (strcmp(parsed.directive_name, MAT) == 0) {
+            else if (strcmp(parsed.directive_name, DIR_MAT) == 0) {
                 /* Store matrix dimensions and values */
                 int mat_rows, mat_cols, expected_values;
 
@@ -444,7 +444,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
                 }
             } 
-            else if (strcmp(parsed.directive_name, EXTERN) == 0) {
+            else if (strcmp(parsed.directive_name, DIR_EXTERN) == 0) {
                 /* Add external label to symbol table */
                 if (parsed.operand_count != 1) {
                     error_log(file_name, line_number, EXTERN_SYNTAX_ERROR);

@@ -5,7 +5,7 @@
 #include "analyze_text.h"
 #include "errors_handler.h"
 #include "globals.h"
-#include "parser_helper.h"
+
 
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char *buffer,*cleaned_buffer;
@@ -137,19 +137,19 @@ int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_
     dynamic_operands_pointer += strlen(out->directive_name) + 1; /* +1 for the '.' */
     dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
 
-    if (strcmp(out->directive_name, STRING) == 0) {
+    if (strcmp(out->directive_name, DIR_STRING) == 0) {
         return parse_string_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, DATA) == 0) {
+    else if (strcmp(out->directive_name, DIR_DATA) == 0) {
         return parse_data_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, EXTERN) == 0) {
+    else if (strcmp(out->directive_name, DIR_EXTERN) == 0) {
         return parse_extern_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, ENTRY) == 0) {
+    else if (strcmp(out->directive_name, DIR_ENTRY) == 0) {
         return parse_entry_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
-    else if (strcmp(out->directive_name, MAT) == 0) {
+    else if (strcmp(out->directive_name, DIR_MAT) == 0) {
         return parse_mat_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
 
