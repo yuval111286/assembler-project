@@ -5,7 +5,6 @@
 #include "parser_helper.h"
 
 
-
 unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_mask, int shift) {
     /* Mask the value to keep only allowed and insert into the encoded word */
     encoded_word |= (value & bit_mask) << shift;
