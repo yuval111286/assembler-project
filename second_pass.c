@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "errors_handler.h"
 #include "parser.h"
-#include "code_image.h"
+
 
 
 /**

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
 #include "first_pass.h"
 #include "parser.h"
 #include "utils.h"
