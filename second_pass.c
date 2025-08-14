@@ -9,7 +9,7 @@
 
 
 /* Simplified operand parsing for second pass - no validation */
-int parse_instruction_operands_simple(char *operands, ParsedLine *out) {
+int shorter_parse_instruction_operands_for_second_pass(char *operands, ParsedLine *out) {
     char *token;
     int i = 0;
     int max_operands = expected_operands_for_each_opcode[out->opcode];
@@ -25,7 +25,7 @@ int parse_instruction_operands_simple(char *operands, ParsedLine *out) {
     return 1;
 }
 
-int parse_line_second_pass(char *line, ParsedLine *out, char *file_name, int line_number) {
+int parse_line_second_pass(char *line, ParsedLine *out) {
     char *buffer, *cleaned_buffer;
     char *token, *dynamic_operands_pointer;
 
@@ -38,22 +38,22 @@ int parse_line_second_pass(char *line, ParsedLine *out, char *file_name, int lin
 
     buffer = malloc_allocation(MAX_LINE_LENGTH);
 
-    /* Copy line to buffer for tokenization */
     strncpy(buffer, line, MAX_LINE_LENGTH - 1);
     buffer[MAX_LINE_LENGTH - 1] = '\0';
 
     cleaned_buffer = cut_spaces_before_and_after_string(buffer);
     token = strtok(cleaned_buffer, " \t\n");
 
-    /* Handle Label - just extract, no validation needed */
+    /* extract labels */
     if (token != NULL && token[strlen(token) - 1] == DOUBLE_DOTS) {
-        token[strlen(token) - 1] = '\0';  /* Remove ':' */
+        /* emove ':' from label*/
+        token[strlen(token) - 1] = '\0';
         strncpy(out->label, token, MAX_LABEL_LEN);
         out->label[MAX_LABEL_LEN] = '\0';
         token = strtok(NULL, " \t\n");
     }
 
-    /* Process directive or instruction - minimal parsing only */
+    /* Process directive or instruction - parsing without validations since it was performed in first pass */
     if (token != NULL && token[0] == '.') {
         /* Handle directive - just identify type */
         out->line_type = LINE_DIRECTIVE;
@@ -92,8 +92,7 @@ int parse_line_second_pass(char *line, ParsedLine *out, char *file_name, int lin
             dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
 
             if (dynamic_operands_pointer[0] != '\0') {
-                /* Simple operand parsing - no validation needed */
-                parse_instruction_operands_simple(dynamic_operands_pointer, out);
+                shorter_parse_instruction_operands_for_second_pass(dynamic_operands_pointer, out);
             }
         }
     }
@@ -112,22 +111,22 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
     ParsedLine parsed;
     ExternList extern_list;
 
-    /* Initialize extern linked list */
+    /* initialize extern linked list */
     extern_list.head = NULL;
 
-    /*Open am file for reading*/
+    /*opening am file for reading*/
     fp = fopen(am_file, "r");
     if (fp == NULL) {
         error_log(am_file, 0, FILE_NOT_OPEN_READING);
         return 1;
     }
 
-    /* Go over all line and process*/
+    /* go over the line and process*/
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
         line_number++;
 
-        /* Parse the line */
-        if (!parse_line_second_pass(line, &parsed, am_file, line_number)) {
+        /* Parse the line for second pass */
+        if (!parse_line_second_pass(line, &parsed)) {
             continue;
         }
 
