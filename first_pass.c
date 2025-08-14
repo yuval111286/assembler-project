@@ -125,8 +125,6 @@ unsigned short parse_number_from_string(const char *str, int *error_flag) {
         return 0;
     }
 
-    errno = 0;
-
     /* Convert the string to a long using base 10 and save position in endptr */
     value = strtol(str, &endptr, 10);
 

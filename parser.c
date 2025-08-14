@@ -173,7 +173,7 @@ int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int
     strncpy(out->operands[0], operands, MAX_LINE_LENGTH - 1);
     string_without_quotes = strip_quotes(out->operands[0]);
 
-    if (verify_string_is_valid(string_without_quotes)) {
+    if (verify_string_has_invalid_chars(string_without_quotes)) {
         error_log(file_name, line_number, INVALID_STRING);
         return 0;
     }

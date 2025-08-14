@@ -63,7 +63,7 @@ char *identify_macro_name(char *org_file_name, char *line, int *line_counter);
  * @brief check if mcro name contain char different than letter, digit or underscore, instruction, opcode or register
  *
  * @param mcro_name mcro name to be verified
- * @return number indication name validations result
+ * @return return 1 if the name is valid, 0 if invalid
  */
 int mcro_name_validation(char *mcro_name);
 

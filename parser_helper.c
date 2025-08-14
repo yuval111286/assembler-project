@@ -292,7 +292,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
     return 0; /* String passed validation */
 }
 
-int verify_string_is_valid(char *tested_word) {
+int verify_string_has_invalid_chars(char *tested_word) {
     int i;
 
     /* Check each character to ensure it is printable */

@@ -18,6 +18,7 @@ char *cut_spaces_before_and_after_string(char *str);
 int check_line_comment_or_empty(char *line);
 
 /**
+ * @brief Create a cleaned version of file without comments and empty lines.
  *
  * @param input_file_name  original file may contain empty line or comment line
  * @param output_file_name file name to be written clean org file name
