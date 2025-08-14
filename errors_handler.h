@@ -107,6 +107,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define ENTRY_LABEL_NO_DEF "Entry label was not defined\n"
 #define SAME_NAME_ENTRY_AND_EXTERNAL_LABEL "Same label is external and entry\n"
 #define WORD_NOT_IN_ADDRESS "Could not find word at address \n"
+#define UNDEFINED_LABEL "Label is not defined\n"
 
 
 #endif /*ERRORS_HANDLER_H*/

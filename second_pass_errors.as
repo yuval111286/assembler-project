@@ -1,7 +1,3 @@
-; Comprehensive second pass error testing file
-; Tests all possible errors that can only be detected the second pass
-; according to the assembler specification doc
-
 ; ==================== ENTRY DIRECTIVE ERRORS ====================
 
 ; Erro 1: Entry label that was never defined  the file
