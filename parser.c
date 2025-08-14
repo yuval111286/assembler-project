@@ -6,126 +6,6 @@
 #include "globals.h"
 
 
-int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
-    char *buffer,*cleaned_buffer;
-    char *token, *dynamic_operands_pointer;
-    int expected;
-
-    /* initial output ParsedLine */
-    out->label[0] = '\0';
-    out->directive_name[0] = '\0';
-    out->operand_count = 0;
-    out->opcode = OPCODE_INVALID;
-    out->line_type = LINE_INVALID;
-
-    buffer = malloc_allocation(MAX_LINE_LENGTH);
-
-    /* Copy line to buffer for tokenization */
-    strncpy(buffer, line, MAX_LINE_LENGTH - 1);
-    buffer[MAX_LINE_LENGTH - 1] = '\0';
-
-    cleaned_buffer = cut_spaces_before_and_after_string(buffer);
-    /*check for invalid comma*/
-    if(comma_validation(cleaned_buffer,file_name,line_number)){
-        return 0;
-    }
-    token = strtok(cleaned_buffer, " \t\n");
-
-    /* Handle Label */
-    if (token[strlen(token) - 1] == DOUBLE_DOTS) {
-        token[strlen(token) - 1] = '\0';  /* Remove ':' */
-
-        /*checking label validity*/
-        if (!is_valid_label(token, file_name, line_number)) {
-            return 0;
-        }
-        if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
-            error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
-            return 0;
-        } else if (identify_register(token) != -1) {
-            error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
-            return 0;
-        }
-
-        strncpy(out->label, token, MAX_LABEL_LEN);
-        out->label[MAX_LABEL_LEN] = '\0';
-
-        token = strtok(NULL, " \t\n");
-        if (token == NULL) {
-            error_log(file_name, line_number, EMPTY_AFTER_LABEL);
-            return 0;
-        }
-    }
-
-    /* Process directive or instruction */
-    if (token[0] == '.') {
-        /* Handle directive */
-        int directive_identifier = identify_directive(token);
-        if (directive_identifier == -1) {
-            error_log(file_name, line_number, ILLEGAL_DIRECTIVE);
-            return 0;
-        }
-        out->line_type = LINE_DIRECTIVE;
-        copy_directive_name(token, out->directive_name);
-
-        return parse_directive_line(line, out, file_name, line_number);
-    } else {
-        /* Handle instruction */
-        Opcode opcode_identifier = identify_opcode(token);
-        if (opcode_identifier == OPCODE_INVALID) {
-            error_log(file_name, line_number, INVALID_OPCODE);
-            return 0;
-        }
-
-        out->line_type = LINE_INSTRUCTION;
-        out->opcode = opcode_identifier;
-
-        /* Handle instructions with no operands */
-        if (opcode_identifier == OPCODE_STOP || opcode_identifier == OPCODE_RTS) {
-            token = strtok(NULL, "\n");
-            if (token != NULL) {
-                token = cut_spaces_before_and_after_string(token);
-                if (token[0] != '\0') {
-                    error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
-                    return 0;
-                }
-            }
-            return 1;
-        }
-
-        /* Process remaining line for operands */
-        dynamic_operands_pointer = strstr(line, token);
-        if (dynamic_operands_pointer == NULL) return 1;
-        dynamic_operands_pointer += strlen(token);
-        dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
-
-        /* Parse operands */
-        if (dynamic_operands_pointer[0] == '\0') {
-            /* No operands found */
-            error_log(file_name,line_number,MISSING_INSTRUCTION_ARG);
-            out->operand_count = 0;
-            return 0;
-        } else {
-            if (!parse_instruction_operands(dynamic_operands_pointer, out, file_name, line_number)) {
-                return 0;
-            }
-        }
-
-        /* validate operand count match operand name*/
-        expected = expected_operands_for_each_opcode[out->opcode];
-        if (out->operand_count != expected) {
-            error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
-            return 0;
-        }
-
-        /* Verify addressing modes */
-        if (!verify_addressing_modes_are_valid(out, file_name, line_number)) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
 
 int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char *dynamic_operands_pointer;
@@ -556,6 +436,127 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
         default:
             return 0;
+    }
+
+    return 1;
+}
+
+int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
+    char *buffer,*cleaned_buffer;
+    char *token, *dynamic_operands_pointer;
+    int expected;
+
+    /* initial output ParsedLine */
+    out->label[0] = '\0';
+    out->directive_name[0] = '\0';
+    out->operand_count = 0;
+    out->opcode = OPCODE_INVALID;
+    out->line_type = LINE_INVALID;
+
+    buffer = malloc_allocation(MAX_LINE_LENGTH);
+
+    /* Copy line to buffer for tokenization */
+    strncpy(buffer, line, MAX_LINE_LENGTH - 1);
+    buffer[MAX_LINE_LENGTH - 1] = '\0';
+
+    cleaned_buffer = cut_spaces_before_and_after_string(buffer);
+    /*check for invalid comma*/
+    if(comma_validation(cleaned_buffer,file_name,line_number)){
+        return 0;
+    }
+    token = strtok(cleaned_buffer, " \t\n");
+
+    /* Handle Label */
+    if (token[strlen(token) - 1] == DOUBLE_DOTS) {
+        token[strlen(token) - 1] = '\0';  /* Remove ':' */
+
+        /*checking label validity*/
+        if (!is_valid_label(token, file_name, line_number)) {
+            return 0;
+        }
+        if (identify_opcode(token) != OPCODE_INVALID || identify_directive(token) != -1) {
+            error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
+            return 0;
+        } else if (identify_register(token) != -1) {
+            error_log(file_name, line_number, REGISTER_NAME_AS_LABEL);
+            return 0;
+        }
+
+        strncpy(out->label, token, MAX_LABEL_LEN);
+        out->label[MAX_LABEL_LEN] = '\0';
+
+        token = strtok(NULL, " \t\n");
+        if (token == NULL) {
+            error_log(file_name, line_number, EMPTY_AFTER_LABEL);
+            return 0;
+        }
+    }
+
+    /* Process directive or instruction */
+    if (token[0] == '.') {
+        /* Handle directive */
+        int directive_identifier = identify_directive(token);
+        if (directive_identifier == -1) {
+            error_log(file_name, line_number, ILLEGAL_DIRECTIVE);
+            return 0;
+        }
+        out->line_type = LINE_DIRECTIVE;
+        copy_directive_name(token, out->directive_name);
+
+        return parse_directive_line(line, out, file_name, line_number);
+    } else {
+        /* Handle instruction */
+        Opcode opcode_identifier = identify_opcode(token);
+        if (opcode_identifier == OPCODE_INVALID) {
+            error_log(file_name, line_number, INVALID_OPCODE);
+            return 0;
+        }
+
+        out->line_type = LINE_INSTRUCTION;
+        out->opcode = opcode_identifier;
+
+        /* Handle instructions with no operands */
+        if (opcode_identifier == OPCODE_STOP || opcode_identifier == OPCODE_RTS) {
+            token = strtok(NULL, "\n");
+            if (token != NULL) {
+                token = cut_spaces_before_and_after_string(token);
+                if (token[0] != '\0') {
+                    error_log(file_name, line_number, EXTRANEOUS_TEXT_AFTER_COMMAND);
+                    return 0;
+                }
+            }
+            return 1;
+        }
+
+        /* Process remaining line for operands */
+        dynamic_operands_pointer = strstr(line, token);
+        if (dynamic_operands_pointer == NULL) return 1;
+        dynamic_operands_pointer += strlen(token);
+        dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
+
+        /* Parse operands */
+        if (dynamic_operands_pointer[0] == '\0') {
+            /* No operands found */
+            error_log(file_name,line_number,MISSING_INSTRUCTION_ARG);
+            out->operand_count = 0;
+            return 0;
+        } else {
+            if (!parse_instruction_operands(dynamic_operands_pointer, out, file_name, line_number)) {
+                return 0;
+            }
+        }
+
+        /* validate operand count match operand name*/
+        expected = expected_operands_for_each_opcode[out->opcode];
+        if (out->operand_count != expected) {
+            error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
+            return 0;
+        }
+
+        /* Verify addressing modes */
+        if (!verify_addressing_modes_are_valid(out, file_name, line_number)) {
+            return 0;
+        }
     }
 
     return 1;

@@ -98,6 +98,6 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table);
  * @param value New value to set.
  * @param are ARE field ('A', 'R', 'E').
  */
-void update_code_word(CodeImage *code_image, int address, unsigned int value, char are);
+void update_code_word(char *file_name,int line_number,CodeImage *code_image, int address, unsigned int value, char are);
 
 #endif

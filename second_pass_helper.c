@@ -308,7 +308,7 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
 }
 
 
-void update_code_word(CodeImage *code_image, int address, unsigned int value, char are) {
+void update_code_word(char *file_name,int line_number,CodeImage *code_image, int address, unsigned int value, char are) {
     int i;
     unsigned int final_value = value;
 
@@ -334,5 +334,5 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
         }
     }
 
-    error_log(INTERNAL,0,WORD_NOT_IN_ADDRESS);
+    error_log(file_name,line_number,WORD_NOT_IN_ADDRESS);
 }

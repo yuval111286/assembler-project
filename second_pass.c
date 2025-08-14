@@ -8,6 +8,102 @@
 
 
 
+/* Simplified operand parsing for second pass - no validation */
+int parse_instruction_operands_simple(char *operands, ParsedLine *out) {
+    char *token;
+    int i = 0;
+    int max_operands = expected_operands_for_each_opcode[out->opcode];
+
+    while (i < max_operands && (token = strtok((i == 0) ? operands : NULL, COMMA)) != NULL) {
+        token = cut_spaces_before_and_after_string(token);
+        strncpy(out->operands[i], token, MAX_LINE_LENGTH - 1);
+        out->operands[i][MAX_LINE_LENGTH - 1] = '\0';
+        i++;
+    }
+
+    out->operand_count = i;
+    return 1;
+}
+
+int parse_line_second_pass(char *line, ParsedLine *out, char *file_name, int line_number) {
+    char *buffer, *cleaned_buffer;
+    char *token, *dynamic_operands_pointer;
+
+    /* initial output ParsedLine */
+    out->label[0] = '\0';
+    out->directive_name[0] = '\0';
+    out->operand_count = 0;
+    out->opcode = OPCODE_INVALID;
+    out->line_type = LINE_INVALID;
+
+    buffer = malloc_allocation(MAX_LINE_LENGTH);
+
+    /* Copy line to buffer for tokenization */
+    strncpy(buffer, line, MAX_LINE_LENGTH - 1);
+    buffer[MAX_LINE_LENGTH - 1] = '\0';
+
+    cleaned_buffer = cut_spaces_before_and_after_string(buffer);
+    token = strtok(cleaned_buffer, " \t\n");
+
+    /* Handle Label - just extract, no validation needed */
+    if (token != NULL && token[strlen(token) - 1] == DOUBLE_DOTS) {
+        token[strlen(token) - 1] = '\0';  /* Remove ':' */
+        strncpy(out->label, token, MAX_LABEL_LEN);
+        out->label[MAX_LABEL_LEN] = '\0';
+        token = strtok(NULL, " \t\n");
+    }
+
+    /* Process directive or instruction - minimal parsing only */
+    if (token != NULL && token[0] == '.') {
+        /* Handle directive - just identify type */
+        out->line_type = LINE_DIRECTIVE;
+        copy_directive_name(token, out->directive_name);
+
+        /* Extract operands for directives that need them in second pass */
+        dynamic_operands_pointer = strstr(line, token);
+        if (dynamic_operands_pointer != NULL) {
+            dynamic_operands_pointer += strlen(token) + 1; /* +1 for the '.' */
+            dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
+
+            if (dynamic_operands_pointer[0] != '\0') {
+                /* Simple operand extraction for .entry directive */
+                if (strcmp(out->directive_name, DIR_ENTRY) == 0) {
+                    strncpy(out->operands[0], dynamic_operands_pointer, MAX_LINE_LENGTH - 1);
+                    out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
+                    out->operand_count = 1;
+                }
+            }
+        }
+    } else if (token != NULL) {
+        /* Handle instruction - just identify and extract operands */
+        out->line_type = LINE_INSTRUCTION;
+        out->opcode = identify_opcode(token);
+
+        /* Handle instructions with no operands */
+        if (out->opcode == OPCODE_STOP || out->opcode == OPCODE_RTS) {
+            free(buffer);
+            return 1;
+        }
+
+        /* Extract operands for instructions that have them */
+        dynamic_operands_pointer = strstr(line, token);
+        if (dynamic_operands_pointer != NULL) {
+            dynamic_operands_pointer += strlen(token);
+            dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
+
+            if (dynamic_operands_pointer[0] != '\0') {
+                /* Simple operand parsing - no validation needed */
+                parse_instruction_operands_simple(dynamic_operands_pointer, out);
+            }
+        }
+    }
+
+    free(buffer);
+    return 1;
+}
+
+
+
 int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                 int ic_final, int dc_final, unsigned int *data_image,int discover_errors) {
     FILE *fp;
@@ -31,7 +127,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
         line_number++;
 
         /* Parse the line */
-        if (!parse_line(line, &parsed, am_file, line_number)) {
+        if (!parse_line_second_pass(line, &parsed, am_file, line_number)) {
             continue;
         }
 
@@ -62,8 +158,12 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                                     are_field = ARE_RELOCATABLE;
                                 }
                             }
+                            else{
+                                error_log(am_file, line_number, UNDEFINED_LABEL);
+                                discover_errors = 1;
+                            }
 
-                            update_code_word(code_image, current_address + word_offset, encoded_value, are_field);
+                            update_code_word(am_file,line_number,code_image, current_address + word_offset, encoded_value, are_field);
                         }
                         word_offset++;
                         break;
@@ -90,8 +190,12 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
                                 are_field = ARE_RELOCATABLE;
                             }
                         }
+                        else{
+                            error_log(am_file, line_number, UNDEFINED_LABEL);
+                            discover_errors = 1;
+                        }
 
-                        update_code_word(code_image, current_address + word_offset, encoded_value, are_field);
+                        update_code_word(am_file,line_number,code_image, current_address + word_offset, encoded_value, are_field);
                         word_offset += 2; /* Matrix takes 2 additional words */
                         break;
                     }
