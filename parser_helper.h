@@ -71,7 +71,7 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number);
  * @param digit_or_letter_or_both Mode: 0=digits only 1=letters only 2=both.
  * @param file_name Source file name.
  * @param line_number Line number.
- * @return 1 if valid, 0 otherwise.
+ * @return 0 if valid, 1 otherwise.
  */
 int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_name, int line_number);
 
@@ -80,7 +80,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
  * @param tested_word String to check.
  * @return 1 if invalid characters found, 0 if valid.
  */
-int verify_string_is_valid(char *tested_word);
+int verify_string_has_invalid_chars(char *tested_word);
 
 /**
  * @brief Shift string one character forward.
@@ -149,7 +149,7 @@ int instruction_word_count(ParsedLine *parsed);
  * @param line Line to check.
  * @param file_name Source file name.
  * @param line_number Line number.
- * @return 1 if commas are valid, 0 otherwise.
+ * @return 0 if commas are valid, 1 otherwise.
  */
 int comma_validation(char *line, char *file_name, int line_number);
 

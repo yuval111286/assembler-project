@@ -53,10 +53,12 @@ unsigned int encode_signed_num(int num);
 int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char *file_name);
 
 /**
- * @brief Parse a number from string safely.
+ * @brief Parse a signed 10-bit number and convert to unsigned representation.
+ * Values from -512 to +511 and converts negative values to
+ * two's complement representation.
  * @param str String containing the number.
  * @param error_flag Pointer to int set to 1 if parsing failed.
- * @return Parsed number as unsigned short.
+ * @return Two's complement representation as unsigned short.
  */
 unsigned short parse_number_from_string(const char *str, int *error_flag);
 

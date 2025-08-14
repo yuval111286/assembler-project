@@ -160,13 +160,22 @@ char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
 int mcro_name_validation(char *mcro_name){
 
     char temp_name[MAX_LINE_LENGTH];
+    int len = strlen(mcro_name);
+
+    /*empty string*/
+    if (len <= 1) {
+        return 0;
+    }
     /* temp name for safety*/
     strncpy(temp_name, mcro_name, strlen(mcro_name) - 1);
     temp_name[strlen(mcro_name) - 1] = '\0';
 
     /* return validation result*/
-    return (mcro_name_only_letters_num_underscore(temp_name) && identify_opcode(temp_name) && identify_register(temp_name)
-    && identify_directive(temp_name) && is_save_word(temp_name));
+    return (mcro_name_only_letters_num_underscore(temp_name) &&
+            identify_opcode(temp_name) == OPCODE_INVALID &&
+            identify_register(temp_name) == -1 &&
+            identify_directive(temp_name) == -1 &&
+            is_save_word(temp_name));
 
 }
 
