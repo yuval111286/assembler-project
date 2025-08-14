@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     SymbolTable symbol_table;
     CodeImage code_image;
     unsigned int data_image[MAX_DATA_SIZE];
-    int IC_final, DC_final, file_name_len;
+    int IC_final, DC_final, file_name_len, discover_errors = 0;
 
     /*printing welcome message */
     printf(WELCOME);
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
         /*performing first pass step*/
         printf(FIRST_PASS);
-        first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image);
+        discover_errors = first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image);
 
         /*free mcro linked list after use*/
         if (mcro_head) {
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
         /*performing second pass*/
         printf(SECOND_PASS);
-        second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image);
+        second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image,discover_errors);
 
         /*releasing all resources*/
         free_symbol_table(&symbol_table);

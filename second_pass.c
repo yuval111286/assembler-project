@@ -331,10 +331,10 @@ void update_code_word(CodeImage *code_image, int address, unsigned int value, ch
 }
 
 int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
-                int ic_final, int dc_final, unsigned int *data_image) {
+                int ic_final, int dc_final, unsigned int *data_image,int discover_errors) {
     FILE *fp;
     char line[MAX_LINE_LENGTH];
-    int line_number = 0, discover_errors = 0, current_address = IC_INIT_VALUE;
+    int line_number = 0, current_address = IC_INIT_VALUE;
     ParsedLine parsed;
     ExternList extern_list;
 

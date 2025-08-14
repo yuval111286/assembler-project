@@ -42,7 +42,7 @@ char *turn_num_to_base_4(int number);
  * @return 0 if success, 1 if errors found.
  */
 int second_pass(char *file_name, SymbolTable *symbol_table, CodeImage *code_image,
-                int ic_final, int dc_final, unsigned int *data_image);
+                int ic_final, int dc_final, unsigned int *data_image,int discover_errors);
 
 /**
  * @brief Check if operand is a label.
