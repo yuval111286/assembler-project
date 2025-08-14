@@ -1,9 +1,7 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "code_image.h"
 #include "errors_handler.h"
-#include "utils.h"
+
 
 void init_code_image(CodeImage *img) {
     /* Start with an empty code image */

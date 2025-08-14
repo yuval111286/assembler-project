@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
 #include "first_pass.h"
 #include "second_pass.h"
 #include "preprocessor.h"
-#include "errors_handler.h"
+#include "user_interface.h"
 
 int main(int argc, char *argv[])
 {
-    char *as_file, *am_file;
+    char *as_file=NULL, *am_file=NULL;
     node *mcro_head;
     SymbolTable symbol_table;
     CodeImage code_image;
@@ -27,24 +26,21 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        as_file = change_ending_of_file(argv[argc], ".as");
-
+        as_file = argv[argc];
         mcro_head = NULL;
         printf(PREPROC);
         /*performing preprocessor step*/
-        if (preprocessor_full_flow(as_file, &mcro_head)) {
+        if (preprocessor_full_flow(as_file, &mcro_head,&am_file)) {
             if (mcro_head) {
                 free_linked_list(mcro_head);
             }
-            free(as_file);
-            printf(FINISH, argv[argc]);
+            printf(FINISH, as_file);
             continue;
         }
 
         init_symbol_table(&symbol_table);
         IC_final = 0;
         DC_final = 0;
-        am_file = change_ending_of_file(argv[argc], ".am");
 
         /*performing first pass step*/
         printf(FIRST_PASS);
@@ -61,9 +57,7 @@ int main(int argc, char *argv[])
 
         /*releasing all resources*/
         free_symbol_table(&symbol_table);
-        free(as_file);
-        free(am_file);
-        printf(FINISH, argv[argc]);
+        printf(FINISH, as_file);
     }
 
     /*finish going over all files*/

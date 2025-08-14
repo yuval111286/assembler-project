@@ -1,5 +1,5 @@
-#ifndef PROJECT_ERRORS_HANDLER_H
-#define PROJECT_ERRORS_HANDLER_H
+#ifndef ERRORS_HANDLER_H
+#define ERRORS_HANDLER_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,7 +39,6 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FILE_NOT_OPEN_READING "Can not open file for reading\n"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing\n"
 #define MEMORY_FAIL "Fail to allocate memory\n"
-#define ARG_NOT_AS_FILE "File does not .as file\n"
 #define FAIL_CLEAN_FILE "Can not create clean file with no spaces, empty line or note line\n"
 #define FAIL_TO_SET_POSITION_IN_FILE "Failed to set file position\n"
 
@@ -109,22 +108,4 @@ void error_log(char *file_name, int line, char *error_msg);
 #define SAME_NAME_ENTRY_AND_EXTERNAL_LABEL "Same label is external and entry\n"
 
 
-
-
-/*user interface*/
-#define WELCOME "\n"\
-"            MAMAN 14 ASSEMBLER PROJECT - YUVAL & LIHI \n"\
-"\n"\
-"     Please enter input files: ./assembler <file1> <file2> ... \n"\
-"     Machine language contains 8 registers (r0-r7)\n"\
-"     Opcodes : mov, cmp, add, sub, lea, clr, not, inc, dec, jmp\n"\
-"     bne, red, prn, jsr, rts, and stop\n"\
-"     Generates output files if no errors: .am .ob .ent .ext \n"\
-"     Errors shall be printed to the screen\n\n"
-#define LONG_FILE_NAME "File name too long, moving to next file %s \n\n"
-#define PREPROC "-- Processing PREPROCESSOR --\n"
-#define FIRST_PASS  "-- Processing FIRST PASS --\n"
-#define SECOND_PASS "-- Processing SECOND PASS --\n"
-#define FINISH "Finish processing file %s \n"
-#define GOODBYE "\nNo more files, end of assembler program. \nHope you enjoyed!\n"
-#endif /*PROJECT_ERRORS_HANDLER_H*/
+#endif /*ERRORS_HANDLER_H*/

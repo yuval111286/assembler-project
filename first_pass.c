@@ -10,10 +10,6 @@
 #include "code_image.h"
 
 
-unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
-    /* Shift the given value left by 2 bits and add the ARE bits  */
-    return (final_value << 2) | are_type;
-}
 
 unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_mask, int shift) {
     /* Mask the value to keep only allowed and insert into the encoded word */

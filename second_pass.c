@@ -6,7 +6,18 @@
 #include "errors_handler.h"
 #include "parser.h"
 #include "code_image.h"
-#include "first_pass.h"
+
+
+/**
+ * @brief Shift value left and set ARE bits.
+ * @param final_value Current value.
+ * @param are_type ARE type (A=0, R=1, E=2).
+ * @return Value with ARE bits set.
+ */
+unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
+    /* Shift the given value left by 2 bits and add the ARE bits  */
+    return (final_value << 2) | are_type;
+}
 
 
 

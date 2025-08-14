@@ -10,14 +10,6 @@
 
 
 /**
- * @brief Shift value left and set ARE bits.
- * @param final_value Current value.
- * @param are_type ARE type (A=0, R=1, E=2).
- * @return Value with ARE bits set.
- */
-unsigned int shift_and_set_are(unsigned int final_value, int are_type);
-
-/**
  * @brief Encode bits into a machine code word.
  * @param encoded_word Current encoded word value.
  * @param value Value to insert.

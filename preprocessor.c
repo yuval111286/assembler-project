@@ -335,32 +335,33 @@ int preprocessor_first_pass(char *org_file_name,char *file_name, int *line_count
  * @param total_line_num number of lines in file
  * @return 0 for success, -1 for fail
  */
-int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name,int total_line_num){
-
+int preprocessor_second_pass(node **head,char *as_file_name,int *line_counter,char **am_file_name,int total_line_num)
+{
     FILE *fp_as, *fp_am;
-    char line[MAX_LINE_LENGTH] ={0};
-    int found,i;
+    char line[MAX_LINE_LENGTH] = {0};
+    int found, i;
     node *macro_node;
 
-    /*open clean file for reading*/
-    fp_as = fopen(as_file_name,"r");
+    /* כאן לדוגמה אפשר לקבוע את שם קובץ ה-am */
+    *am_file_name = change_ending_of_file(as_file_name, ".am");
+
+    /* open clean file for reading */
+    fp_as = fopen(as_file_name, "r");
     if (fp_as == NULL) {
-        error_log(org_file_name,*line_counter,FILE_NOT_OPEN_READING);
+        error_log(*am_file_name, *line_counter, FILE_NOT_OPEN_READING);
         return -1;
     }
 
-    /*open am file for writing*/
-    fp_am = fopen(am_file_name,"w");
+    /* open am file for writing */
+    fp_am = fopen(*am_file_name, "w");
     if (fp_am == NULL) {
-        error_log(org_file_name,*line_counter,FILE_NOT_OPEN_WRITING);
-        /* close files */
+        error_log(*am_file_name, *line_counter, FILE_NOT_OPEN_WRITING);
         fclose(fp_as);
         return -1;
     }
 
-    for (i = 0; i < total_line_num ; i++) {
-        fgets(line, sizeof(line), fp_as);
-        if (line != NULL){
+    for (i = 0; i < total_line_num; i++) {
+        if (fgets(line, sizeof(line), fp_as) != NULL) {
             if (strncmp(line, MCRO, 5) == 0) {
                 /* skip lines until mcroend */
                 while (fgets(line, sizeof(line), fp_as) != NULL) {
@@ -370,62 +371,55 @@ int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name,
                     }
                 }
             }
-            /* search for mcro define in linked list*/
+
+            /* search for mcro define in linked list */
             macro_node = search_node_in_linked_list(*head, line, &found);
 
             if (found) {
-                /*mcro name will be switched with definition */
+                /* mcro name will be switched with definition */
                 fputs(macro_node->text, fp_am);
             } else {
                 /* regular line will be copied to am file */
                 fputs(line, fp_am);
-
             }
         }
     }
 
-
     fclose(fp_as);
     fclose(fp_am);
-
-
 
     return 0;
 }
 
 
-
-int preprocessor_full_flow(char *file_name,node **head){
+int preprocessor_full_flow(char *file_name,node **head,char **am_file_name){
 
     FILE  *first_copy;
-    char *am_file_name, clean_file_name[MAX_LINE_LENGTH];
+    char *as_file, clean_file_name[MAX_LINE_LENGTH];
     int indication, line_counter = 0,total_line_num;
 
     indication = 0;
 
-    if(check_as_file_ending(file_name)!=0){
-        error_log(file_name,line_counter,ARG_NOT_AS_FILE);
-        return 1;
-    }
+    as_file = change_ending_of_file(file_name, ".as");
 
     sprintf(clean_file_name, "%s_clean.as", file_name);
 
     /* create clean file with no comment line or spaces*/
-    first_copy = create_clean_file(file_name, clean_file_name);
+    first_copy = create_clean_file(as_file, clean_file_name);
     if (first_copy == NULL) {
         error_log(file_name,line_counter,FAIL_CLEAN_FILE);
         return 1;
     }
 
     /* map mcro definitions */
-    indication = preprocessor_first_pass(file_name,clean_file_name,&line_counter, head);
+    indication = preprocessor_first_pass(as_file,clean_file_name,&line_counter, head);
     if (indication){
         /* release mcro linked list, delete files */
         remove(clean_file_name);
         return 1;
     }
 
-    am_file_name = change_ending_of_file(file_name, ".am");
+    *am_file_name = change_ending_of_file(file_name, ".am");
     if (am_file_name == NULL) {
         remove(clean_file_name);
         return 1;
@@ -435,19 +429,15 @@ int preprocessor_full_flow(char *file_name,node **head){
 
     line_counter = 0;
     /*replace mcro call by its text*/
-    indication = preprocessor_second_pass(am_file_name,head,clean_file_name,&line_counter,am_file_name,total_line_num);
+    indication = preprocessor_second_pass(head,clean_file_name,&line_counter,am_file_name,total_line_num);
 
     if (indication){
         /* release mcro linked list, delete files */
-        /*free_linked_list(head);*/
-        free(am_file_name);
         remove(clean_file_name);
         return 1;
     }
 
     /* release mcro linked list, delete and close files */
-    /*free_linked_list(head);*/
-    free(am_file_name);
     remove(clean_file_name);
 
     return 0;

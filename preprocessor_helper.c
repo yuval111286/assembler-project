@@ -68,17 +68,6 @@ char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len_of_chars_to_c
     return str;
 }
 
-int check_as_file_ending(char *file_name)
-{
-    char *c;
-
-    /* cuts the exising ending of a file  */
-    c = strrchr(file_name, '.');
-    if (strcmp(c, ".as") == 0){
-        return 0;
-    }
-    return -1;
-}
 
 /**
  * @brief Checks if the line is a comment or empty

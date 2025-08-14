@@ -11,9 +11,10 @@
  *   extract mcro name and text and replace marco appearance by it's name
  *
  * @param file_name as file name
+ * @param am_file_name am file name
  * @return 0 if preprocessor succeed or 1 if fail
  */
-int preprocessor_full_flow(char *file_name,node **head);
+int preprocessor_full_flow(char *file_name,node **head,char **am_file_name);
 
 
 #endif 

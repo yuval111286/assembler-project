@@ -1,7 +1,7 @@
 # Compilation macros
 CC = gcc
 CFLAGS = -ansi -Wall -pedantic -g
-GLOBAL_DEPS = globals.h
+GLOBAL_DEPS = globals.h user_interface.h
 
 EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o preprocessor_helper.o first_pass.o second_pass.o linked_list.o errors_handler.o parser.o parser_helper.o code_image.o
 

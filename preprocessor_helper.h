@@ -11,7 +11,6 @@
  */
 char *skip_one_word(char *word);
 
-
 /**
  * @brief Read text from file and place it in string
  * @param fp File to read from
@@ -22,12 +21,6 @@ char *skip_one_word(char *word);
 char *copy_text_from_file_to_string(FILE *fp, fpos_t *pos, int len_of_chars_to_copy);
 
 
-/**
- *
- * @param file_name
- * @return 0 if file ends with .as, -1 if not
- */
-int check_as_file_ending(char *file_name);
 
 /**
  * @brief Create a cleaned version of file without comments and empty lines.
