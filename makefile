@@ -2,8 +2,7 @@
 CC = gcc
 CFLAGS = -ansi -Wall -pedantic -g
 GLOBAL_DEPS = globals.h user_interface.h
-
-EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o preprocessor_helper.o first_pass.o second_pass.o linked_list.o errors_handler.o parser.o parser_helper.o code_image.o
+EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o preprocessor_helper.o first_pass.o first_pass_helper.o second_pass.o second_pass_helper.o linked_list.o errors_handler.o parser.o parser_helper.o code_image.o
 
 # Executable target
 assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
@@ -18,11 +17,17 @@ preprocessor.o: preprocessor.c preprocessor.h preprocessor_helper.h $(GLOBAL_DEP
 preprocessor_helper.o: preprocessor_helper.c preprocessor_helper.h $(GLOBAL_DEPS)
 	$(CC) -c preprocessor_helper.c $(CFLAGS) -o $@
 
-first_pass.o: first_pass.c first_pass.h $(GLOBAL_DEPS) code_image.h
+first_pass.o: first_pass.c first_pass.h first_pass_helper.h $(GLOBAL_DEPS) code_image.h
 	$(CC) -c first_pass.c $(CFLAGS) -o $@
+
+first_pass_helper.o: first_pass_helper.c first_pass_helper.h $(GLOBAL_DEPS)
+	$(CC) -c first_pass_helper.c $(CFLAGS) -o $@
 
 second_pass.o: second_pass.c second_pass.h $(GLOBAL_DEPS)
 	$(CC) -c second_pass.c $(CFLAGS) -o $@
+
+second_pass_helper.o: second_pass_helper.c second_pass_helper.h $(GLOBAL_DEPS)
+	$(CC) -c second_pass_helper.c $(CFLAGS) -o $@
 
 linked_list.o: linked_list.c linked_list.h $(GLOBAL_DEPS)
 	$(CC) -c linked_list.c $(CFLAGS) -o $@
