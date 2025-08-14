@@ -20,6 +20,13 @@ void *malloc_allocation(size_t size);
 char *change_ending_of_file(char *file_name, char *new_ending);
 
 
+/**
+ * @param str line from file
+ * @returns clean string without space in the start and the end of the string.
+ */
+char *cut_spaces_before_and_after_string(char *str);
+
+
 
 
 #endif

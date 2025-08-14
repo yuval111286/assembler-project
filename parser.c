@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "parser.h"
-#include "analyze_text.h"
 #include "errors_handler.h"
 #include "globals.h"
 
