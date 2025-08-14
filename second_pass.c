@@ -20,7 +20,11 @@ unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
 }
 
 
-
+/**
+ * @brief Convert unsigned int to 5 digit base 4 string.
+ * @param word The unsigned integer to convert.
+ * @return Pointer to static string with base-4 representation.
+ */
 char *turn_line_to_base_4(unsigned int word) {
     static char word_is_coded_in_base4[6] = {0};
     char base4_options[4] = {'a', 'b', 'c', 'd'};
@@ -45,6 +49,11 @@ char *turn_line_to_base_4(unsigned int word) {
     return word_is_coded_in_base4;
 }
 
+/**
+ * @brief Convert address to 4 digit base 4 string.
+ * @param address The address to convert.
+ * @return Pointer to static string with base 4 representation.
+ */
 char *turn_address_to_base_4(unsigned int address) {
     static char address_is_coded_in_base4[5] = {0};
     char base4_options[4] = {'a', 'b', 'c', 'd'};
@@ -68,6 +77,11 @@ char *turn_address_to_base_4(unsigned int address) {
 }
 
 
+/**
+ * @brief Convert integer to base 4 string.
+ * @param number The integer to convert.
+ * @return Pointer to string with base 4 representation.
+ */
 char *turn_num_to_base_4(int number) {
     static char num_in_base4[10]={0};
     char temp[10]={0}, base4_chars[4] = {'a', 'b', 'c', 'd'};
@@ -102,6 +116,14 @@ char *turn_num_to_base_4(int number) {
 }
 
 
+/**
+ * @brief Check if operand is a label.
+ * Operand is a label if it’s not:
+ * immediate, matrix reference, register
+ *
+ * @param operand The operand string.
+ * @return 1 if label, 0 otherwise.
+ */
 int is_operand_label(char *operand) {
     /*check if not num  */
     if (operand[0] == LADDER) return 0;
@@ -115,6 +137,12 @@ int is_operand_label(char *operand) {
     return 1;
 }
 
+/**
+ * @brief Add external symbol reference to list.
+ * @param extern_list Pointer to extern reference list.
+ * @param symbol_name Name of the external symbol.
+ * @param address Address where symbol is used.
+ */
 void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address) {
     ExternSymbol *new_node;
 
@@ -134,6 +162,10 @@ void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address) 
     extern_list->head = new_node;
 }
 
+/**
+ * @brief Free all memory of extern reference list.
+ * @param extern_list Pointer to extern reference list.
+ */
 void free_extern_list(ExternList *extern_list) {
     ExternSymbol *current = extern_list->head;
     ExternSymbol *temp;
@@ -148,7 +180,14 @@ void free_extern_list(ExternList *extern_list) {
     extern_list->head = NULL;
 }
 
-
+/**
+ * @brief Write code image and data image to .ob file.
+ * @param img Pointer to code image.
+ * @param ic_size Final instruction counter.
+ * @param dc_size Final data counter.
+ * @param data_image Pointer to data image array.
+ * @param file_name Base file name without extension.
+ */
 void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsigned int *data_image, char *file_name) {
     FILE *fp;
     int i;
@@ -192,6 +231,11 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
 }
 
 
+/**
+ * @brief Write .ext file with external symbol references.
+ * @param base_filename Base file name without extension.
+ * @param extern_list Pointer to extern reference list.
+ */
 void write_ext_file(char *file_name, ExternList *extern_list) {
     FILE *fp;
     char *ext_file_name, *base4_address;
@@ -250,6 +294,11 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     free(ext_file_name);
 }
 
+/**
+ * @brief Write .ent file with entry symbol definitions.
+ * @param base_filename Base file name without extension.
+ * @param symbol_table Pointer to symbol table.
+ */
 void write_ent_file(char *file_name, SymbolTable *symbol_table) {
     FILE *fp;
     char *ent_file_name, *base4_address;
@@ -312,6 +361,14 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
     free(ent_file_name);
 }
 
+
+/**
+ * @brief Update a code word in code image.
+ * @param code_image Pointer to code image.
+ * @param address Address of the code word.
+ * @param value New value to set.
+ * @param are ARE field ('A', 'R', 'E').
+ */
 void update_code_word(CodeImage *code_image, int address, unsigned int value, char are) {
     int i;
     unsigned int final_value = value;
