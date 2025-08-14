@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "errors_handler.h"
+#include <ctype.h>
 
 
 void *malloc_allocation(size_t size) {
@@ -33,3 +34,21 @@ char *change_ending_of_file(char *file_name, char *new_ending) {
     return new_file_name;
 }
 
+char *cut_spaces_before_and_after_string(char *str) {
+    char *end_pointer_of_string;
+
+    /* Skip leading spaces */
+    while (isspace(*str)) str++;
+
+    /* If string is empty after trimming spaces at start */
+    if (*str == '\0') return str;
+
+    /* Move to the end and trim trailing spaces */
+    end_pointer_of_string = str + strlen(str) - 1;
+    while (end_pointer_of_string > str && isspace(*end_pointer_of_string)) {
+        *end_pointer_of_string = '\0'; /* Cut off trailing spaces */
+        end_pointer_of_string--;
+    }
+
+    return str;
+}

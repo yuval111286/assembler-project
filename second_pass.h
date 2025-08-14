@@ -47,13 +47,13 @@ int second_pass(char *file_name, SymbolTable *symbol_table, CodeImage *code_imag
 /**
  * @brief Check if operand is a label.
  * Operand is a label if it’s not:
- *  - Immediate (#value)
- *  - Matrix reference ([row][col])
- *  - Register (r0–r7)
+ *  - Immediate
+ *  - Matrix reference
+ *  - Register
  * @param operand The operand string.
  * @return 1 if label, 0 otherwise.
  */
-int is_label_operand(char *operand);
+int is_operand_label(char *operand);
 
 /**
  * @brief Add external symbol reference to list.

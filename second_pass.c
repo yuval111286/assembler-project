@@ -91,7 +91,7 @@ char *turn_num_to_base_4(int number) {
 }
 
 
-int is_label_operand(char *operand) {
+int is_operand_label(char *operand) {
     /*check if not num  */
     if (operand[0] == LADDER) return 0;
 
@@ -369,7 +369,7 @@ int second_pass(char *am_file, SymbolTable *symbol_table, CodeImage *code_image,
 
                 switch (addressing_mode) {
                     case ADDRESS_DIRECT:
-                        if (is_label_operand(operand)) {
+                        if (is_operand_label(operand)) {
                             Symbol *sym = get_symbol(symbol_table, operand);
                             unsigned int encoded_value = 0;
                             char are_field = ARE_ABSOLUTE;

@@ -3,8 +3,7 @@
 #include <ctype.h>
 #include "parser_helper.h"
 #include "errors_handler.h"
-#include "analyze_text.h"
-
+#include "utils.h"
 
 
 OpcodeEntry opcode_table[] = {

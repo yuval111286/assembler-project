@@ -2,28 +2,223 @@
 #include <string.h>
 #include <stdio.h>
 #include "preprocessor.h"
-#include "utils.h"
-#include "analyze_text.h"
 #include "parser.h"
+#include "preprocessor_helper.h"
 #include "errors_handler.h"
 
 
+/*macros for mcro start and mcroend end*/
+#define MCRO "mcro "
+#define MCROEND "mcroend\n"
+
+/*array of works that can not be mcro name*/
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro",NULL};
 
 
+/**
+ *@brief check if mcro name contain char different than letter, digit or underscore)
+ *
+ * @param mcro_name mcro name to be verified
+ * @return 1 if valid name 0 if not
+ */
+int mcro_name_only_letters_num_underscore(char *mcro_name){
 
-int check_as_file_ending(char *file_name)
-{
-    char *c;
-
-    /* cuts the exising ending of a file  */
-    c = strrchr(file_name, '.');
-    if (strcmp(c, ".as") == 0){
-        return 0;
+    int i;
+    for (i = 0; i < strlen(mcro_name); i++) {
+        if (!isalpha(mcro_name[i]) && !isdigit(mcro_name[i]) && mcro_name[i]!='_') {
+            return 0; /*mcro name contain forbidden char*/
+        }
     }
-    return -1;
+
+    return 1;
 }
 
+
+/**
+ *@brief check if mcro name is a saved word
+ * char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
+ *
+ * @param mcro_name mcro name to be verified
+ * @return 1 if valid name 0 if macro name is one of the saved word
+ */
+int is_save_word(char *mcro_name){
+
+    /*check if mcro_name is one of the forbidden saved word*/
+    char mcro_name_lower[MAX_LINE_LENGTH];
+    int i;
+
+    for (i = 0; mcro_name[i] != '\0'; i++) {
+        mcro_name_lower[i] = tolower(mcro_name[i]);
+    }
+    mcro_name_lower[i] = '\0';
+
+    for (i = 0; saved_words[i] != NULL; i++) {
+        if (strcmp(mcro_name_lower, saved_words[i]) == 0) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
+
+
+
+
+
+
+
+
+/**
+ * @brief check if mcro name contain char different than letter, digit or underscore, instruction, opcode or register
+ *
+ * @param mcro_name mcro name to be verified
+ * @return return 1 if the name is valid, 0 if invalid
+ */
+int mcro_name_validation(char *mcro_name){
+
+    char temp_name[MAX_LINE_LENGTH];
+    int len = strlen(mcro_name);
+
+    /*empty string*/
+    if (len <= 1) {
+        return 0;
+    }
+    /* temp name for safety*/
+    strncpy(temp_name, mcro_name, strlen(mcro_name) - 1);
+    temp_name[strlen(mcro_name) - 1] = '\0';
+
+    /* return validation result*/
+    return (mcro_name_only_letters_num_underscore(temp_name) &&
+            identify_opcode(temp_name) == OPCODE_INVALID &&
+            identify_register(temp_name) == -1 &&
+            identify_directive(temp_name) == -1 &&
+            is_save_word(temp_name));
+
+}
+
+
+/**
+ *@brief extract macro name from line and verify if valid name using internal functions
+ *
+ * @param org_file_name file name for report errors
+ * @param line line contains mcro name
+ * @param line_counter line counter for report errors
+ * @return mcro name for success , NULL if fails
+ */
+char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
+
+    char *mcro_name, *extra_text_after_mcro_name;
+
+    /* skip mcro word to reach mcro name*/
+    mcro_name = skip_one_word(line);
+
+    /* no mcro name exist*/
+    if(mcro_name == NULL)
+    {
+        error_log(org_file_name,*line_counter,MACRO_WITHOUT_NAME);
+        return NULL;
+    }
+    /* check for extra text after mcro name*/
+    extra_text_after_mcro_name= skip_one_word(mcro_name);
+    if(extra_text_after_mcro_name !=NULL)
+    {
+        error_log(org_file_name,*line_counter,EXTRA_TEXT_AFTER_MCRO_START);
+        return NULL;
+    }
+
+    /* check mcro name validity*/
+    if (!mcro_name_validation(mcro_name))
+    {
+        error_log(org_file_name,*line_counter,ILLEGAL_MACRO_NAME);
+        return NULL;
+    }
+
+    return mcro_name;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ *@brief Extracting macro text between mcro to mcroend
+ *
+ * @param org_file_name
+ * @param fp file
+ * @param pos position in file
+ * @param line_counter counter of lines reading from file
+ * @return
+ */
+char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_counter) {
+    char line[MAX_LINE_LENGTH]={0};
+    char *mcro;
+    int mcro_length = 0, internal_line_counter;
+
+
+    internal_line_counter = *line_counter;
+    /* return to first position */
+    if (fsetpos(fp, pos) != 0) {
+        error_log(org_file_name,*line_counter,FAIL_TO_SET_POSITION_IN_FILE);
+        return NULL;
+    }
+
+    while (fgets(line, MAX_LINE_LENGTH, fp)) {
+        internal_line_counter++;
+
+        /* check if mcro text is more than 80 chars*/
+        if (strlen(line) >= MAX_LINE_LENGTH - 1) {
+            error_log(org_file_name, internal_line_counter, LONG_LINE);
+            return NULL;
+        }
+
+        if (strncmp(line, MCROEND, 7) == 0) {
+            /*check for extra text after mcroend*/
+            if (strncmp(line, MCROEND, 8) != 0){
+                error_log(org_file_name,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
+                return NULL;
+            }
+
+            /* reach to mcroend*/
+            break;
+        }
+        mcro_length += strlen(line);
+    }
+
+    /* extract mcro text*/
+    mcro = copy_text_from_file_to_string(fp, pos, mcro_length);
+
+    *line_counter = internal_line_counter-1;
+
+    return mcro;
+}
+
+/**
+ *  @brief go over as file and extract mcro definitions
+ *
+ * @param org_file_name file name for report errors
+ * @param file_name clean file name with no comment or empty lines
+ * @param line_counter counter of lines in clean file
+ * @param head head of linked list of macros
+ * @return 0 for success, -1 for fail
+ */
 int preprocessor_first_pass(char *org_file_name,char *file_name, int *line_counter , node **head){
 
     FILE *fp;
@@ -125,136 +320,21 @@ int preprocessor_first_pass(char *org_file_name,char *file_name, int *line_count
     return 0;
 }
 
-char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
-
-    char *mcro_name, *extra_text_after_mcro_name;
-
-    /* skip mcro word to reach mcro name*/
-    mcro_name = skip_one_word(line);
-
-    /* no mcro name exist*/
-    if(mcro_name == NULL)
-    {
-        error_log(org_file_name,*line_counter,MACRO_WITHOUT_NAME);
-        return NULL;
-    }
-    /* check for extra text after mcro name*/
-    extra_text_after_mcro_name= skip_one_word(mcro_name);
-    if(extra_text_after_mcro_name !=NULL)
-    {
-        error_log(org_file_name,*line_counter,EXTRA_TEXT_AFTER_MCRO_START);
-        return NULL;
-    }
-
-    /* check mcro name validity*/
-    if (!mcro_name_validation(mcro_name))
-    {
-        error_log(org_file_name,*line_counter,ILLEGAL_MACRO_NAME);
-        return NULL;
-    }
-
-    return mcro_name;
-
-}
-
-int mcro_name_validation(char *mcro_name){
-
-    char temp_name[MAX_LINE_LENGTH];
-    int len = strlen(mcro_name);
-
-    /*empty string*/
-    if (len <= 1) {
-        return 0;
-    }
-    /* temp name for safety*/
-    strncpy(temp_name, mcro_name, strlen(mcro_name) - 1);
-    temp_name[strlen(mcro_name) - 1] = '\0';
-
-    /* return validation result*/
-    return (mcro_name_only_letters_num_underscore(temp_name) &&
-            identify_opcode(temp_name) == OPCODE_INVALID &&
-            identify_register(temp_name) == -1 &&
-            identify_directive(temp_name) == -1 &&
-            is_save_word(temp_name));
-
-}
-
-int mcro_name_only_letters_num_underscore(char *mcro_name){
-
-    int i;
-    for (i = 0; i < strlen(mcro_name); i++) {
-        if (!isalpha(mcro_name[i]) && !isdigit(mcro_name[i]) && mcro_name[i]!='_') {
-            return 0; /*mcro name contain forbidden char*/
-        }
-    }
-
-    return 1;
-}
-
-int is_save_word(char *mcro_name){
-
-    /*check if mcro_name is one of the forbidden saved word*/
-    char mcro_name_lower[MAX_LINE_LENGTH];
-    int i;
-
-    for (i = 0; mcro_name[i] != '\0'; i++) {
-        mcro_name_lower[i] = tolower(mcro_name[i]);
-    }
-    mcro_name_lower[i] = '\0';
-
-    for (i = 0; saved_words[i] != NULL; i++) {
-        if (strcmp(mcro_name_lower, saved_words[i]) == 0) {
-           return 0;
-        }
-    }
-
-    return 1;
-}
-
-char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_counter) {
-    char line[MAX_LINE_LENGTH]={0};
-    char *mcro;
-    int mcro_length = 0, internal_line_counter;
 
 
-    internal_line_counter = *line_counter;
-    /* return to first position */
-    if (fsetpos(fp, pos) != 0) {
-        error_log(org_file_name,*line_counter,FAIL_TO_SET_POSITION_IN_FILE);
-        return NULL;
-    }
-
-    while (fgets(line, MAX_LINE_LENGTH, fp)) {
-        internal_line_counter++;
-
-        /* check if mcro text is more than 80 chars*/
-        if (strlen(line) >= MAX_LINE_LENGTH - 1) {
-            error_log(org_file_name, internal_line_counter, LONG_LINE);
-            return NULL;
-        }
-
-        if (strncmp(line, MCROEND, 7) == 0) {
-            /*check for extra text after mcroend*/
-            if (strncmp(line, MCROEND, 8) != 0){
-                error_log(org_file_name,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
-                return NULL;
-            }
-
-            /* reach to mcroend*/
-            break;
-        }
-        mcro_length += strlen(line);
-    }
-
-    /* extract mcro text*/
-    mcro = copy_text_from_file_to_string(fp, pos, mcro_length);
-
-    *line_counter = internal_line_counter-1;
-
-    return mcro;
-}
 
 
+/**
+ * @brief go over as file and replace maco call in it's text
+ *
+ * @param org_file_name file name for report errors
+ * @param head head of linked list of macros
+ * @param as_file_name clean file name to read from
+ * @param line_counter counter of lines in clean file
+ * @param am_file_name am file name to write to
+ * @param total_line_num number of lines in file
+ * @return 0 for success, -1 for fail
+ */
 int preprocessor_second_pass(char *org_file_name,node **head,char *as_file_name, int *line_counter, char *am_file_name,int total_line_num){
 
     FILE *fp_as, *fp_am;
