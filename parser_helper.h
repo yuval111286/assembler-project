@@ -42,13 +42,13 @@ int identify_directive_without_dots(char *directive);
 
 /**
  * @brief Identify register number from name.
- * @param reg String containing register name (r0–r7).
- * @return Register number (0–7) or -1 if invalid.
+ * @param reg String containing register name r0–r7.
+ * @return Register number 0–7 or -1 if invalid.
  */
 int identify_register(char *reg);
 
 /**
- * @brief Validate if operand is a correct immediate value (#number).
+ * @brief Validate if operand is a correct immediate value.
  * @param immediate Immediate string to check.
  * @param file_name Source file name.
  * @param line_number Line number in file.

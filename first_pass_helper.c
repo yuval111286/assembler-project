@@ -31,7 +31,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
         len--;
     }
 
-    /* Try to parse the format "[rows][cols]" and also capture where parsing stopped */
+    /* Try to parse the format [rows][cols] and also capture where parsing stopped */
     if (sscanf(cleaned, MAT_DIM, rows, cols, &read_len) == 2) {
         if (cleaned[read_len] != '\0') {
             return 0;
@@ -49,8 +49,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
 
 
 unsigned int encode_signed_num(int num) {
-    /*for positive num return the num
-     *for negative num return two's complement representation*/
+    /*for positive num return the num for negative num return two's complement representation*/
     return (unsigned int)num & 0x3FF;
 }
 

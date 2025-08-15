@@ -15,12 +15,7 @@
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro",NULL};
 
 
-/**
- *@brief check if mcro name contain char different than letter, digit or underscore)
- *
- * @param mcro_name mcro name to be verified
- * @return 1 if valid name 0 if not
- */
+
 int mcro_name_only_letters_num_underscore(char *mcro_name){
 
     int i;
@@ -34,13 +29,6 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
 }
 
 
-/**
- *@brief check if mcro name is a saved word
- * char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro", NULL};
- *
- * @param mcro_name mcro name to be verified
- * @return 1 if valid name 0 if macro name is one of the saved word
- */
 int is_save_word(char *mcro_name){
 
     /*check if mcro_name is one of the forbidden saved word*/

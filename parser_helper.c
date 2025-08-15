@@ -5,7 +5,10 @@
 #include "errors_handler.h"
 #include "utils.h"
 
-
+/* 
+ * Opcode table
+ * Maps instruction mnemonic strings to their corresponding Opcode enum values.
+ */
 OpcodeEntry opcode_table[] = {
         {"mov", OPCODE_MOV},
         {"cmp", OPCODE_CMP},
@@ -26,7 +29,10 @@ OpcodeEntry opcode_table[] = {
         {NULL, OPCODE_INVALID}
 };
 
-
+/*
+ * Directive table 
+ * Matches directive strings to their Directive enum values.
+ */
 Directive_Mode directive_table[] = {
         {".data", DATA},
         {".string", STRING},
@@ -34,6 +40,10 @@ Directive_Mode directive_table[] = {
         {".entry", ENTRY},
         {".extern", EXTERN}
 };
+
+/*
+ * Directive table without leading dots.
+ */
 
 Directive_Mode directive_table_without_dots[] = {
         {"data", DATA},
@@ -43,6 +53,10 @@ Directive_Mode directive_table_without_dots[] = {
         {"extern", EXTERN}
 };
 
+/*
+ * Register table
+ * Maps register names (r0–r7) to their Register enum values.
+ */
 
 Register_Type register_table[] = {
         {"r0", R0},
@@ -75,8 +89,9 @@ const int expected_operands_for_each_opcode[16] = {
         0  /* stop */
 };
 
-/* Table of allowed addressing modes for each opcode*/
-/* 0=immediate, 1=direct, 2=matrix, 3=register */
+/* Table of allowed addressing modes for each opcode
+0=immediate, 1=direct, 2=matrix, 3=register */
+
 const int allowed_source_modes[16][4] = {
         /* mov  */ {1, 1, 1, 1},
         /* cmp  */ {1, 1, 1, 1},
@@ -96,6 +111,8 @@ const int allowed_source_modes[16][4] = {
         /* stop */ {0, 0, 0, 0}
 };
 
+/* Allowed destination addressing modes per opcode:
+   immediate direct matrix register */
 const int allowed_dest_modes[16][4] = {
         /* mov  */ {0, 1, 1, 1},
         /* cmp  */ {1, 1, 1, 1},
@@ -406,7 +423,7 @@ int get_addressing_mode( char *operand) {
     /* Register addressing: matches exactly r0 to r7 */
     if (identify_register(operand)!=-1) return ADDRESS_REGISTER;
 
-    /* Otherwise: assume direct addressing (a label) */
+   
     return ADDRESS_DIRECT;
 }
 
@@ -428,7 +445,7 @@ int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int l
             }
         }
 
-            /* For single-operand instructions, operand is destination */
+            /* For single operand instructions, operand is destination */
         else if (parsed->operand_count == 1) {
             if (src_mode >= 0 && src_mode <= 3) {
                 if (!allowed_dest_modes[opcode][src_mode]) {
@@ -439,7 +456,7 @@ int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int l
         }
     }
 
-    /* Validate destination operand for two-operand instructions */
+    /* Validate destination operand for two operand instructions */
     if (parsed->operand_count == 2) {
         int dest_mode = get_addressing_mode(parsed->operands[1]);
 
@@ -537,7 +554,7 @@ int verify_matrix_registers_are_valid(char *operand, char *file_name, int line_n
         point_after_second_reg++;
     }
 
-    /* If all checks pass, the matrix registers format is valid */
+    
     return 0;
 }
 
@@ -603,7 +620,7 @@ int comma_validation(char *line, char *file_name, int line_number) {
                 return 1;
             }
 
-            /* If a comma is followed by end of line, it's an extraneous comma */
+            /* If a comma is followed by end of line, its an extraneous comma */
             if (line[i] == '\0' || line[i] == '\n') {
                 error_log(file_name, line_number, COMMA_END_OF_LINE);
                 return 1;

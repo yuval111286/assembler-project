@@ -1,19 +1,46 @@
-; addressing modes
+.entry START
+.entry DATA1
+.extern EXTFUNC
+.extern EXTVAR
 
-.entry RESULT
-.extern EXT_LABEL
+START:  mov #5, r0
+        mov DATA1, r1
+        add r0, r1
+        cmp r1, DATA2
+        bne LOOP
+        jsr EXTFUNC
+        lea STR1, r2
+        prn r2
+        prn #123
+        clr r3
+        not r3
+        inc r3
+        dec r3
+        mov r3, r4
+        cmp r4, r5
+        lea MAT1, r6
+        add r6, r7
+        sub r7, r0
+        jmp END
 
-START:  mov #5, r0       
-        mov DATA, r1     
-        mov MAT[r1][r2], r2 
-        mov r3, r4       
-        cmp #10, DATA    
-        add r5, r6
-        sub MAT[r3][r4], r7
-        mov STR, r0
-        stop
+LOOP:   mov CODELBL, r2
+        prn r2
+        mov MAT1[r0][r1], r3
+        sub r4, r3
+        cmp #42, r5
+        bne EXTVAR
+        jsr EXTVAR
+        mov r6, r7
+        add r7, r0
+        sub r0, r1
+        cmp r1, r2
 
-DATA:   .data 10, 20, 30
-STR:    .string "Hello"
-MAT:    .mat [2][3] 1, 2, 3, 4, 5, 6
-RESULT: .data 0
+CODELBL: mov r0, r0
+         rts
+
+DATA1:  .data 1, -2, 300
+DATA2:  .data 0, 5, -5
+STR1:   .string "Hi"
+MAT1:   .mat [2][2], 10, 20, 30, 40
+
+END:    stop

@@ -10,12 +10,13 @@
 int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_number) {
     char *dynamic_operands_pointer;
 
-    /* Find operands part */
+    /* Locate directive in the line and move pointer to its operands */
     dynamic_operands_pointer = strstr(line, out->directive_name);
     if (dynamic_operands_pointer == NULL) return 0;
     dynamic_operands_pointer += strlen(out->directive_name) + 1; /* +1 for the '.' */
     dynamic_operands_pointer = cut_spaces_before_and_after_string(dynamic_operands_pointer);
 
+    /* Call the specific parser based on directive type */
     if (strcmp(out->directive_name, DIR_STRING) == 0) {
         return parse_string_directive(dynamic_operands_pointer, out, file_name, line_number);
     }
@@ -39,24 +40,30 @@ int parse_directive_line(char *line, ParsedLine *out, char *file_name, int line_
 int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     char *string_without_quotes;
 
+
+    /* Check if directive has no content */
     if(operands[0]=='\n'||operands[0]=='\0'){
         error_log(file_name, line_number, EMPTY_STRING_DIR);
         return 0;
     }
 
+     /* Ensure string starts and ends with quotes */
     if (operands[0] != '"' || operands[strlen(operands) - 1] != '"') {
         error_log(file_name, line_number, STRING_MISSING_QUOTES);
         return 0;
     }
-
+    
+    /* Copy string and remove quotes */
     strncpy(out->operands[0], operands, MAX_LINE_LENGTH - 1);
     string_without_quotes = strip_quotes(out->operands[0]);
 
+    /* Validate characters inside the string */
     if (verify_string_has_invalid_chars(string_without_quotes)) {
         error_log(file_name, line_number, INVALID_STRING);
         return 0;
     }
 
+    /* Store the processed string in output */
     strncpy(out->operands[0], string_without_quotes, MAX_LINE_LENGTH - 1);
     out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
     out->operand_count = 1;
@@ -67,47 +74,56 @@ int parse_string_directive(char *operands, ParsedLine *out, char *file_name, int
 int parse_data_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
     char *token;
     int i = 0;
-
+    
+    /* Check for missing operands */
     if (operands[0] == '\0') {
         error_log(file_name, line_number, MISSING_OPERANDS_DATA);
         return 0;
     }
 
+     /* Split operands by commas */
     token = strtok(operands, COMMA);
     while (token != NULL) {
         token = cut_spaces_before_and_after_string(token);
 
+         /*  Multiple consecutive commas */
         if (token[0] == '\0') {
             error_log(file_name, line_number, MULTIPLE_COMMAS);
             return 0;
         }
-
+        /* Validate that token is a valid number */
         if (is_digit_or_char(token, 0, file_name, line_number)) {
             return 0;
         }
 
+         /* Store validated operand */
         strncpy(out->operands[i], token, MAX_LINE_LENGTH - 1);
         out->operands[i][MAX_LINE_LENGTH - 1] = '\0';
         i++;
 
         token = strtok(NULL, COMMA);
     }
-
+     /* Save operand count */
     out->operand_count = i;
     return 1;
 }
 
 int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
+    /* Check for missing operand */
     if (operands[0] == '\0') {
         error_log(file_name, line_number, MISSING_OPERAND_EXTERN);
         return 0;
     }
 
+    /* Trim spaces around operand */
     operands = cut_spaces_before_and_after_string(operands);
 
+    /* Validate label format */
     if (!is_valid_label(operands, file_name, line_number)) {
         return 0;
     }
+
+    /* Label cannot be an opcode, directive, or register */
     if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
         error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
         return 0;
@@ -116,24 +132,30 @@ int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int
         return 0;
     }
 
+    /* Store valid operand */
     strncpy(out->operands[0], operands, MAX_LINE_LENGTH - 1);
     out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
     out->operand_count = 1;
 
-    return 1;
+    return 1; 
 }
 
 int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
+    /* Check for missing operand */
     if (operands[0] == '\0') {
         error_log(file_name, line_number, MISSING_OPERANDS_DATA);
         return 0;
     }
 
+    /* Trim spaces around operand */
     operands = cut_spaces_before_and_after_string(operands);
 
+    /* Validate label format */
     if (!is_valid_label(operands, file_name, line_number)) {
         return 0;
     }
+
+    /* Label cannot be an opcode, directive, or register */
     if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
         error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
         return 0;
@@ -142,59 +164,66 @@ int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int 
         return 0;
     }
 
+    /* Store valid operand */
     strncpy(out->operands[0], operands, MAX_LINE_LENGTH - 1);
     out->operands[0][MAX_LINE_LENGTH - 1] = '\0';
     out->operand_count = 1;
 
-    return 1;
+    return 1; 
 }
 
+
 int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int line_number) {
-    int n, m, mat_size,i;
-    char *mat_values, *token,*number;
+    int n, m, mat_size, i;
+    char *mat_values, *token, *number;
 
-
+    /* Validate matrix dimensions format */
     if (!is_valid_matrix_dim(operands, file_name, line_number)) {
         return 0;
     }
 
+    /* Read matrix dimensions and store size of dimension string */
     if (sscanf(operands, MAT_DIM_SPACE, &n, &m, &mat_size) != 2) {
         error_log(file_name, line_number, MATRIX_DIMENSION_FORMAT);
         return 0;
     }
 
-    /* Add matrix dimensions as first operand */
+    /* Save dimensions as first operand */
     strncpy(out->operands[0], operands, mat_size);
     out->operands[0][mat_size] = '\0';
     out->operand_count = 1;
 
-    /* Parse matrix values */
+    /* Get values part after the dimensions */
     mat_values = operands + mat_size;
     mat_values = cut_spaces_before_and_after_string(mat_values);
 
     if (mat_values[0] != '\0') {
+        /* Parse comma-separated values */
         token = strtok(mat_values, COMMA);
-
         while (token != NULL) {
             token = cut_spaces_before_and_after_string(token);
 
+            /* Multiple commas */
             if (token[0] == '\0') {
                 error_log(file_name, line_number, MULTIPLE_COMMAS);
                 return 0;
             }
-            number = token;
 
+            /* Validate that token is numeric */
+            number = token;
             if (is_digit_or_char(number, 0, file_name, line_number)) {
                 return 0;
             }
 
+            /* Store value */
             strncpy(out->operands[out->operand_count], token, MAX_LINE_LENGTH - 1);
             out->operands[out->operand_count][MAX_LINE_LENGTH - 1] = '\0';
             out->operand_count++;
 
             token = strtok(NULL, COMMA);
         }
-    } else{
+    } else {
+        /* No values provided: fill with zeros */
         for (i = 0; i < mat_size; i++) {
             strncpy(out->operands[out->operand_count], "0", MAX_LINE_LENGTH - 1);
             out->operands[out->operand_count][MAX_LINE_LENGTH - 1] = '\0';
@@ -202,7 +231,7 @@ int parse_mat_directive(char *operands, ParsedLine *out, char *file_name, int li
         }
     }
 
-    return 1;
+    return 1; 
 }
 
 int parse_instruction_operands(char *operands, ParsedLine *out, char *file_name, int line_number) {
@@ -248,7 +277,8 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
     switch (opcode) {
         case OPCODE_MOV:
-            if (position == 0) {
+        /* Validate MOV */
+            if (position == 0) { /* Source operand */
                 if (strchr(operand, LADDER)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
@@ -266,7 +296,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                         return 0;
                     }
                 }
-            } else {
+            } else { /* Destination operand */
                 if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_MOV);
                     return 0;
@@ -288,7 +318,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         case OPCODE_CMP:
-            /* Both operands: 0,1,2,3 */
+            /* Validate CMP */
             if (strchr(operand, LADDER)) {
                 if (is_valid_immediate(operand, file_name, line_number) == 1) {
                     return 0;
@@ -310,7 +340,8 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
 
         case OPCODE_ADD:
         case OPCODE_SUB:
-            if (position == 0) {
+        /* Validate ADD/SUB */
+            if (position == 0) {/* Source operand */
                 if (strchr(operand, LADDER)) {
                     if (is_valid_immediate(operand, file_name, line_number) == 1) {
                         return 0;
@@ -328,7 +359,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                         return 0;
                     }
                 }
-            } else {
+            } else {/* Destination operand */
                 if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_ADD_SUB);
                     return 0;
@@ -350,7 +381,8 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         case OPCODE_LEA:
-            if (position == 0) {
+        /* Validate LEA */
+            if (position == 0) {/* Source operand */
                 if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_SRC_LEA);
                     return 0;
@@ -366,7 +398,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
                 } else if (!is_valid_label(operand, file_name, line_number)) {
                     return 0;
                 }
-            } else {
+            } else {/* Destination operand */
                 if (strchr(operand, LADDER)){
                     error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_LEA);
                     return 0;
@@ -395,6 +427,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
+         /* Single operand, cannot be immediate */
             if (strchr(operand, LADDER)){
                 error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_REST_OP);
                 return 0;
@@ -415,6 +448,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         case OPCODE_PRN:
+        /* Validate PRN */
             if (strchr(operand, LADDER)) {
                 if (is_valid_immediate(operand, file_name, line_number) == 1) {
                     return 0;
@@ -435,10 +469,10 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
             break;
 
         default:
-            return 0;
+            return 0; /* Invalid opcode */
     }
 
-    return 1;
+    return 1; /* Operand is valid */
 }
 
 int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {

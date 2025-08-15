@@ -314,7 +314,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
     /* Close the source file */
     fclose(fp);
 
-    /* Save final IC and DC values for second pass */
+    /* Save final IC and DC values  */
     *IC_final = IC;
     *DC_final = DC;
 

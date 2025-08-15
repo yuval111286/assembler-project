@@ -1,7 +1,7 @@
 #ifndef CODE_IMAGE_H
 #define CODE_IMAGE_H
 
-#include "globals.h"  /* For CodeImage, CodeWord, IC_INIT_VALUE, etc. */
+#include "globals.h"  
 
 /**
  * @brief Initializes the code image structure.

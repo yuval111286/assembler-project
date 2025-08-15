@@ -5,9 +5,9 @@
 
 #define BITS_IN_WORD 10
 
-#define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1) /*511*/
+#define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1) /* 511 */
 
-#define MIN_NUM (-(1 << (BITS_IN_WORD-1)))/*512*/
+#define MIN_NUM (-(1 << (BITS_IN_WORD-1)))/* 512 */
 
 /* Maximum length of a name of input file */
 #define MAX_FILE_NAME_LENGTH 70
@@ -111,6 +111,7 @@ typedef enum {
     EXTERN
 } Directive;
 
+/* Directive name to enum mapping */
 typedef struct {
     char *name;
     Directive directive;
@@ -129,11 +130,13 @@ typedef enum {
     REGISTER_INVALID = -1
 } Register;
 
+/* Register name to enum mapping */
 typedef struct {
     char *name;
     Register reg;
 } Register_Type;
 
+/* ARE field types for machine code words */
 typedef enum {
     ARE_ABSOLUTE = 'A', /* 00 */
     ARE_RELOCATABLE = 'R', /* 10 */
@@ -143,14 +146,15 @@ typedef enum {
 /* setting code word and code image struct */
 
 typedef struct {
-    int address;            /* Memory address (starts at 100 address) */
-    unsigned int value;     /* Encoded machine word (10-bit integer) */
-    char ARE;               /* 'A', 'R', or 'E' */
+    int address;            
+    unsigned int value;     
+    char ARE;               
 } CodeWord;
 
+/* Code image storage for machine code words */
 typedef struct {
     CodeWord words[MAX_CODE_SIZE];
-    int size;               /* Number of words stored */
+    int size;               
 } CodeImage;
 
 
@@ -166,4 +170,4 @@ typedef struct {
     int line_number;
 } ParsedLine;
 
-#endif /* GLOBALS_H */
+#endif 

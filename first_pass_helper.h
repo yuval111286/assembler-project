@@ -16,7 +16,7 @@ unsigned int coding_word(int encoded_word, unsigned int value, unsigned int bit_
 
 /**
  * @brief Parse matrix dimensions from a token.
- * @param token String containing matrix dimensions ([n][m]).
+ * @param token String containing matrix dimensions [n][m].
  * @param rows Pointer to store number of rows.
  * @param cols Pointer to store number of columns.
  * @return 1 if valid dimensions, 0 otherwise.

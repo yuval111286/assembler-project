@@ -20,7 +20,7 @@ void error_log(char *file_name, int line, char *error_msg);
 
 #define ERROR_STRUCT "--ERROR--: In file %s at line: %d\n          The error is: %s\n"
 
-/*Preprocessor errors*/
+/* Preprocessor errors */
 #define LONG_LINE "Line is too long, more than 80 characters\n"
 #define MACRO_MULTI_DEF "Multi definitions for the same MACRO\n"
 #define ILLEGAL_MACRO_NAME "Macro name can not be instruction, directive, register " \
@@ -34,7 +34,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAIL_TO_SWITCH_MCRO_NAME "Fail to switch mcro name by it's content\n"
 
 
-/*Internal errors*/
+/* Internal errors */
 #define INTERNAL "internal"
 #define FILE_NOT_OPEN_READING "Can not open file for reading\n"
 #define FILE_NOT_OPEN_WRITING "Can not open file for writing\n"
@@ -110,4 +110,4 @@ void error_log(char *file_name, int line, char *error_msg);
 #define UNDEFINED_LABEL "Label is not defined\n"
 
 
-#endif /*ERRORS_HANDLER_H*/
+#endif 

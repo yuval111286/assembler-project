@@ -29,7 +29,7 @@ int parse_line_second_pass(char *line, ParsedLine *out) {
     char *buffer, *cleaned_buffer;
     char *token, *dynamic_operands_pointer;
 
-    /* initial output ParsedLine */
+    /* Initial output ParsedLine */
     out->label[0] = '\0';
     out->directive_name[0] = '\0';
     out->operand_count = 0;
@@ -44,16 +44,16 @@ int parse_line_second_pass(char *line, ParsedLine *out) {
     cleaned_buffer = cut_spaces_before_and_after_string(buffer);
     token = strtok(cleaned_buffer, " \t\n");
 
-    /* extract labels */
+    /* Extract labels */
     if (token != NULL && token[strlen(token) - 1] == DOUBLE_DOTS) {
-        /* emove ':' from label*/
+        /* Rmove ':' from label*/
         token[strlen(token) - 1] = '\0';
         strncpy(out->label, token, MAX_LABEL_LEN);
         out->label[MAX_LABEL_LEN] = '\0';
         token = strtok(NULL, " \t\n");
     }
 
-    /* Process directive or instruction - parsing without validations since it was performed in first pass */
+    /* Process directive or instruction parsing without validations since it was performed in first pass */
     if (token != NULL && token[0] == '.') {
         /* Handle directive - just identify type */
         out->line_type = LINE_DIRECTIVE;
@@ -75,7 +75,7 @@ int parse_line_second_pass(char *line, ParsedLine *out) {
             }
         }
     } else if (token != NULL) {
-        /* Handle instruction - just identify and extract operands */
+        /* Handle instruction  just identify and extract operands */
         out->line_type = LINE_INSTRUCTION;
         out->opcode = identify_opcode(token);
 

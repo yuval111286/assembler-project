@@ -32,7 +32,7 @@ int add_symbol(SymbolTable *table, char *name, int address, SymbolType type) {
 
     /* Set all fields of the new symbol */
     strncpy((*current).name, name, MAX_LABEL_LEN); /* Copy label name */
-    (*current).name[MAX_LABEL_LEN] = '\0';    /* Ensure null-termination */
+    (*current).name[MAX_LABEL_LEN] = '\0';    /* Ensure null termination */
     (*current).address = address;    /* Assign address */
     (*current).type = type;   /* Assign symbol type */
     (*current).is_entry = 0;    /* Initially not an entry */
@@ -51,7 +51,7 @@ int symbol_exists(SymbolTable *table, char *name) {
 
     /* Move the linked list of symbols */
     while (current != NULL) {
-        /* Compare current symbol's name to the target name */
+        /* Compare current symbols name to the target name */
         if (strcmp((*current).name, name) == 0) {
             return 1; 
         }
