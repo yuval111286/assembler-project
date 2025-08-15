@@ -5,8 +5,8 @@ mov: add r0, r1
 1badlabel: sub r2, r3
 dup: clr r1
 dup: not r2
-label_before_extern: .extern extlbl
-longlabelname_exceeding_max_length123: mov r0, r1
+labelbeforeextern: .extern extlbl
+longlabelnameexceedingmaxlength1234699774: mov r0, r1
 invalid-char!: mov r1, r2
 
 
@@ -34,11 +34,11 @@ invalid-char!: mov r1, r2
 mov #, r1
 mov #9999, r1
 add r1
-stop extra_text_here
-.entry not_defined_label
-.extern both_side
-.entry both_side
-rts trailing_garbage
+stop extratexthere
+.entry notdefinedlabel
+.extern bothside
+.entry bothside
+rts trailinggarbage
 prn
 lea #5, r1
 mov MAT[r9][r1], r0
