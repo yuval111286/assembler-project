@@ -78,7 +78,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             /* Validate operand count for this opcode */
             words = instruction_word_count(&parsed);
             if (words <= 0) {
-                error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
+                error_log(file_name, line_number, INVALID_OPERANDS_COUNT);
                 discover_errors = 1;
                 continue;
             }

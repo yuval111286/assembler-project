@@ -583,7 +583,7 @@ int parse_line(char *line, ParsedLine *out, char *file_name, int line_number) {
         /* validate operand count match operand name*/
         expected = expected_operands_for_each_opcode[out->opcode];
         if (out->operand_count != expected) {
-            error_log(file_name, line_number, INVALID_INSTRUCTION_OPERANDS);
+            error_log(file_name, line_number, INVALID_OPERANDS_COUNT);
             return 0;
         }
 
