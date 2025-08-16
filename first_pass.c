@@ -330,24 +330,6 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         discover_errors = 1;
     }
 
-    /* === DEBUG: CODE IMAGE OUTPUT === 
-   printf("\n--- CODE IMAGE DUMP (FIRST Pass) ---\n");
-
-    for (i = 0; i < code_image->size; i++) {
-        printf("DEBUG: IC=%d, value=%u (0x%03X), ARE=%c\n",
-               code_image->words[i].address,
-               code_image->words[i].value,
-               code_image->words[i].value,
-               code_image->words[i].ARE);
-    }
-
-     === DEBUG: DATA IMAGE OUTPUT === 
-    printf("\n--- DATA IMAGE DUMP (FIRST Pass) ---\n");
-
-    for (i = 0; i < DC; i++) {
-        printf("DEBUG: data_image[%d] = %u\n", i, data_image[i]);
-    }*/
-
      /*make sure IC + DC doesn't exceed allowed memory*/
     if ((IC + DC - IC_INIT_VALUE) > MAX_CODE_SIZE) {
         error_log(file_name, -1, TOTAL_MEMORY_OVERFLOW);
