@@ -1,4 +1,4 @@
-; Example maman 14
+
 
 .entry STR
 .entry LENGTH

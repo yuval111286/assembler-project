@@ -3,11 +3,14 @@
 
 #include <stdio.h>
 
+/*Number of bits in a machine word*/
 #define BITS_IN_WORD 10
 
-#define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1) /* 511 */
+/*Maximum positive number 511*/
+#define MAX_NUM ((1 << (BITS_IN_WORD-1)) - 1)
 
-#define MIN_NUM (-(1 << (BITS_IN_WORD-1)))/* 512 */
+/*Minimum negative number 512*/
+#define MIN_NUM (-(1 << (BITS_IN_WORD-1)))
 
 /* Maximum length of a name of input file */
 #define MAX_FILE_NAME_LENGTH 70
@@ -49,34 +52,33 @@
 
 
 /*ARE*/
-
 #define ABSOLUTE 0 /* 00 */
 #define EXTERNAL 1 /* 01 */
 #define RELOCATABLE 2 /* 10 */
 
 /* Type of line in source file */
 typedef enum {
-    LINE_DIRECTIVE,
-    LINE_INSTRUCTION,
-    LINE_INVALID
+    LINE_DIRECTIVE, /*Directive line*/
+    LINE_INSTRUCTION, /*Instruction line*/
+    LINE_INVALID /*Invalid line*/
 } LineType;
 
 /* Type of symbol in symbol table */
 typedef enum {
-    SYMBOL_CODE,
-    SYMBOL_DATA,
-    SYMBOL_EXTERN
+    SYMBOL_CODE, /*Symbol in code section*/
+    SYMBOL_DATA, /*Symbol in data section*/
+    SYMBOL_EXTERN /*External symbol*/
 } SymbolType;
 
 /* Addressing modes */
 typedef enum {
-    ADDRESS_IMMEDIATE = 0,
-    ADDRESS_DIRECT    = 1,
-    ADDRESS_MATRIX    = 2,
-    ADDRESS_REGISTER  = 3
+    ADDRESS_IMMEDIATE = 0, /*Immediate addressing (#5)*/
+    ADDRESS_DIRECT    = 1, /*Direct addressing (LABEL)*/
+    ADDRESS_MATRIX    = 2, /*Matrix addressing (M[r1][r2])*/
+    ADDRESS_REGISTER  = 3 /*Register addressing (r1)*/
 } AddressingMode;
 
-/* Opcodes */
+/* Opcodes according to manual*/
 typedef enum {
     OPCODE_MOV = 0,
     OPCODE_CMP,
@@ -99,23 +101,23 @@ typedef enum {
 
 /* Opcode mapping */
 typedef struct {
-    char *name;
-    Opcode opcode;
+    char *name; /*Instruction name*/
+    Opcode opcode; /*Num code*/
 } OpcodeEntry;
 
 /* Directive types */
 typedef enum {
-    DATA = 0,
-    STRING,
-    MAT,
-    ENTRY,
-    EXTERN
+    DATA = 0, /*Data directive (.data)*/
+    STRING,  /*String directive (.string)*/
+    MAT,     /*Matrix directive (.mat)*/
+    ENTRY,   /*Entry directive (.entry)*/
+    EXTERN   /*External directive (.extern)*/
 } Directive;
 
 /* Directive name to enum mapping */
 typedef struct {
-    char *name;
-    Directive directive;
+    char *name; /*Directive name*/
+    Directive directive; /*Num code*/
 } Directive_Mode;
 
 /* Register types */
@@ -133,8 +135,8 @@ typedef enum {
 
 /* Register name to enum mapping */
 typedef struct {
-    char *name;
-    Register reg;
+    char *name;   /*Register name ("r0", "r1")*/
+    Register reg; /*Reg num*/
 } Register_Type;
 
 /* ARE field types for machine code words */
@@ -147,28 +149,27 @@ typedef enum {
 /* setting code word and code image struct */
 
 typedef struct {
-    int address;            
-    unsigned int value;     
-    char ARE;               
+    int address; /*Memory address*/
+    unsigned int value;  /*Encoded value (10 bits)*/
+    char ARE;  /*A,R,E field ('A', 'R', 'E')*/
 } CodeWord;
 
 /* Code image storage for machine code words */
 typedef struct {
-    CodeWord words[MAX_CODE_SIZE];
-    int size;               
+    CodeWord words[MAX_CODE_SIZE]; /*Array of code words*/
+    int size;    /*Current number of words*/
 } CodeImage;
 
 
 /* Parsed Line Struct */
-
 typedef struct {
-    char label[MAX_LABEL_LEN + 1];
-    LineType line_type;
-    Opcode opcode;
-    char directive_name[8];
-    char operands[MAX_OPERANDS][MAX_LINE_LENGTH];
-    int operand_count;
-    int line_number;
+    char label[MAX_LABEL_LEN + 1]; /*Label*/
+    LineType line_type; /*Line type*/
+    Opcode opcode; /*Operation code*/
+    char directive_name[8]; /*Directive name*/
+    char operands[MAX_OPERANDS][MAX_LINE_LENGTH];/*Operand list*/
+    int operand_count;/*Number of operands*/
+    int line_number;/*Line number in file*/
 } ParsedLine;
 
 #endif 
