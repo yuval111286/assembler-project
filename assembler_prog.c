@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
             printf(FINISH, as_file);
             continue;
         }
+        printf(PREPROC_END);
+
 
         init_symbol_table(&symbol_table);
         IC_final = 0;
@@ -46,14 +48,20 @@ int main(int argc, char *argv[])
         printf(FIRST_PASS);
         discover_errors = first_pass(am_file, &symbol_table, &IC_final, &DC_final, &code_image, &mcro_head,data_image);
 
-        /*free mcro linked list after use*/
+        if (!discover_errors){
+            printf(FIRST_PASS_END);
+        }
+            /*free mcro linked list after use*/
         if (mcro_head) {
             free_linked_list(mcro_head);
         }
 
         /*performing second pass*/
         printf(SECOND_PASS);
-        second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image,discover_errors);
+        discover_errors = second_pass(am_file, &symbol_table, &code_image, IC_final, DC_final, data_image,discover_errors);
+        if (!discover_errors){
+            printf(SECOND_PASS_END);
+        }
 
         /*releasing all resources*/
         free_symbol_table(&symbol_table);

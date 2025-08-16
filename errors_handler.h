@@ -100,7 +100,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define MISSING_OPERANDS_DATA "Missing operands for .data directive\n"
 #define MATRIX_DIMENSION_FORMAT "[n][m] format is required for .mat dimensions\n"
 #define MULTIPLE_COMMAS "It's illegal to have multiple consecutive commas\n"
-#define COMMA_END_OF_LINE "Extra comma in the end of the line"
+#define COMMA_END_OF_LINE "Unnecessary comma in the end of the line\n"
 #define TOTAL_MEMORY_OVERFLOW "Total memory exceeded: IC + DC > 255\n"
 #define IMMEDIATE_OUT_OF_RANGE "Immediate value out of range (-512 to +511)\n"
 

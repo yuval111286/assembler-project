@@ -15,10 +15,14 @@
 "     bne, red, prn, jsr, rts, and stop\n"\
 "     Generates output files if no errors: .am .ob .ent .ext \n"\
 "     Errors shall be printed to the screen\n\n"
+
 #define LONG_FILE_NAME "File name too long, moving to next file %s \n\n"
-#define PREPROC "-- Processing PREPROCESSOR --\n"
-#define FIRST_PASS  "-- Processing FIRST PASS --\n"
-#define SECOND_PASS "-- Processing SECOND PASS --\n"
+#define PREPROC "-- Processing PREPROCESSOR --\n\n"
+#define PREPROC_END "-- PREPROCESSOR finish successfully --\n\n"
+#define FIRST_PASS  "-- Processing FIRST PASS --\n\n"
+#define FIRST_PASS_END  "-- FIRST PASS finish successfully--\n\n"
+#define SECOND_PASS "-- Processing SECOND PASS --\n\n"
+#define SECOND_PASS_END "-- SECOND PASS finish successfully --\n\n"
 #define FINISH "Finish processing file %s \n"
 #define GOODBYE "\nNo more files, end of assembler program. \nHope you enjoyed!\n"
 
