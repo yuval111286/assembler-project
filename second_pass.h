@@ -9,10 +9,8 @@
 /**
  * @brief Run the second pass of the assembler.
  * Completes encoding by:
- *  - Resolving label addresses
- *  - Handling .entry and marking symbols
- *  - Saving external references
- *  - Creating output files .ob, .ent, .ext
+ * Resolving label addresses, handling .entry and marking symbols, saving external references and finally creating output files .ob, .ent, .ext
+ *
  * @param file_name Base file name without extension.
  * @param symbol_table Pointer to symbol table from first pass.
  * @param code_image Pointer to code image to complete.

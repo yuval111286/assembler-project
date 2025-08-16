@@ -8,26 +8,45 @@
 
 
 
-/* Simplified operand parsing for second pass - no validation */
+/**
+ * @brief Simplified operand parsing for second pass - no validation
+ *
+ * @param operands split operands by comma
+ * @param out parsed line structure contains separate operand
+ * @return 1 for success
+ */
 int shorter_parse_instruction_operands_for_second_pass(char *operands, ParsedLine *out) {
     char *token;
-    int i = 0;
-    int max_operands = expected_operands_for_each_opcode[out->opcode];
+    int max_operands = expected_operands_for_each_opcode[out->opcode],i = 0;
 
-    while (i < max_operands && (token = strtok((i == 0) ? operands : NULL, COMMA)) != NULL) {
+    /* First token */
+    token = strtok(operands, COMMA);
+
+    /* Parse all operands */
+    while (i < max_operands && token != NULL) {
         token = cut_spaces_before_and_after_string(token);
+
         strncpy(out->operands[i], token, MAX_LINE_LENGTH - 1);
         out->operands[i][MAX_LINE_LENGTH - 1] = '\0';
         i++;
+
+        /* Next token */
+        token = strtok(NULL, COMMA);
     }
 
     out->operand_count = i;
     return 1;
 }
 
+/**
+ *@brief parsing line and separate operands, entering data to ParedLine
+ *
+ * @param line line to parse without discovering errors, it was done in the first pass
+ * @param out parsed line structure
+ * @return 1 for success
+ */
 int parse_line_second_pass(char *line, ParsedLine *out) {
-    char *buffer, *cleaned_buffer;
-    char *token, *dynamic_operands_pointer;
+    char *buffer, *cleaned_buffer,*token, *dynamic_operands_pointer;
 
     /* Initial output ParsedLine */
     out->label[0] = '\0';
