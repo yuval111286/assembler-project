@@ -63,22 +63,22 @@ int parse_line_second_pass(char *line, ParsedLine *out) {
     cleaned_buffer = cut_spaces_before_and_after_string(buffer);
     token = strtok(cleaned_buffer, " \t\n");
 
-    /* Extract labels */
+    /* extract labels */
     if (token != NULL && token[strlen(token) - 1] == DOUBLE_DOTS) {
-        /* Rmove ':' from label*/
+        /* remove ':' from label*/
         token[strlen(token) - 1] = '\0';
         strncpy(out->label, token, MAX_LABEL_LEN);
         out->label[MAX_LABEL_LEN] = '\0';
         token = strtok(NULL, " \t\n");
     }
 
-    /* Process directive or instruction parsing without validations since it was performed in first pass */
+    /* process directive or instruction parsing without validations since it was performed in first pass */
     if (token != NULL && token[0] == '.') {
         /* Handle directive - just identify type */
         out->line_type = LINE_DIRECTIVE;
         copy_directive_name(token, out->directive_name);
 
-        /* Extract operands for directives that need them in second pass */
+        /* extract operands for directives that need them in second pass */
         dynamic_operands_pointer = strstr(line, token);
         if (dynamic_operands_pointer != NULL) {
             dynamic_operands_pointer += strlen(token) + 1; /* +1 for the '.' */
@@ -94,17 +94,17 @@ int parse_line_second_pass(char *line, ParsedLine *out) {
             }
         }
     } else if (token != NULL) {
-        /* Handle instruction  just identify and extract operands */
+        /* handle instruction  just identify and extract operands */
         out->line_type = LINE_INSTRUCTION;
         out->opcode = identify_opcode(token);
 
-        /* Handle instructions with no operands */
+        /* handle instructions with no operands */
         if (out->opcode == OPCODE_STOP || out->opcode == OPCODE_RTS) {
             free(buffer);
             return 1;
         }
 
-        /* Extract operands for instructions that have them */
+        /* extract operands for instructions that have them */
         dynamic_operands_pointer = strstr(line, token);
         if (dynamic_operands_pointer != NULL) {
             dynamic_operands_pointer += strlen(token);
