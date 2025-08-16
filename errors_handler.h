@@ -82,7 +82,7 @@ void error_log(char *file_name, int line, char *error_msg);
 #define FAILED_ADD_INSTRUCTION_LABEL "Failed to add instruction label\n"
 #define FAILED_ADD_DATA_LABEL "Failed to add data label\n"
 #define ILLEGAL_EXTERN_LABEL "Label cannot be defined for .extern\n"
-#define INVALID_INSTRUCTION_OPERANDS "Invalid instruction operands\n"
+#define INVALID_INSTRUCTION_OPERANDS "Num of operands does not match instruction name\n"
 #define EXTERN_SYNTAX_ERROR "Invalid .extern syntax\n"
 #define DUPLICATE_EXTERN "Duplicate .extern definition\n"
 
