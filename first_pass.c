@@ -63,7 +63,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     continue;
                 }
             }
-            /* Label before .extern is illegal */
+            /* Label before .extern  */
             else if (identify_directive_without_dots(parsed.directive_name) == 4) {
                 error_log(file_name, line_number, ILLEGAL_EXTERN_LABEL);
                 discover_errors = 1;
@@ -127,7 +127,7 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
                     }
 
                     case ADDRESS_DIRECT: {
-                        /* Label address — will be resolved in second pass */
+                        /* Label address  */
                         add_code_word(code_image, IC, 0, ARE_ABSOLUTE);
                         IC++;
                         current_word++;
@@ -233,15 +233,16 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
         if (parsed.line_type == LINE_DIRECTIVE) {
             if (strcmp(parsed.directive_name, DIR_DATA) == 0) {
                 /* Store integers in data image */
-                for (i = 0; i < parsed.operand_count; i++) {
+                for (i = 0; i < parsed.operand_count; i++) { /* Loop through all numbers */
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
                         discover_errors = 1;
                         continue;
                     }
+                    /* Convert operand to int */ 
                     value = parse_number_from_string(parsed.operands[i], &error);
                     if (!error) {
-                        data_image[DC++] = (short)value;
+                        data_image[DC++] = (short)value; /* Save valid number in data image */
                     } else {
                         error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }
@@ -250,13 +251,13 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
             else if (strcmp(parsed.directive_name, DIR_STRING) == 0) {
                 /* Store string characters + null terminator in data image */
                 char *s = parsed.operands[0];
-                for (i = 0; s[i] != '\0'; i++) {
+                for (i = 0; s[i] != '\0'; i++) { /* Go over every char */
                     if (DC >= MAX_DATA_SIZE) {
                         error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
                         discover_errors = 1;
                         break;
                     }
-                    data_image[DC++] = (unsigned int)s[i];
+                    data_image[DC++] = (unsigned int)s[i]; /* Save ASCII value of char */
                 }
                 if (DC < MAX_DATA_SIZE) {
                     data_image[DC++] = 0; /* Null terminator */
@@ -277,22 +278,25 @@ int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *D
 
                 expected_values = mat_rows * mat_cols;
 
-                if (parsed.operand_count != 1 + expected_values) {
+                /* First operand is dimensions, rest are values */
+                if (parsed.operand_count != 1 + expected_values) { 
                     error_log(file_name, line_number, MATRIX_VALUE_COUNT_MISMATCH);
                     discover_errors = 1;
                     continue;
                 }
 
-                if (DC + 2 + expected_values > MAX_DATA_SIZE) {
+                /* Check space for dimensions + all values */
+                if (DC + 2 + expected_values > MAX_DATA_SIZE) { 
                     error_log(file_name, line_number, DATA_IMAGE_OVERFLOW);
                     discover_errors = 1;
                     continue;
                 }
-
+                
+                /* Start from index 1 (skip dimension operand) */
                 for (i = 1; i < parsed.operand_count; i++) {
                     value = parse_number_from_string(parsed.operands[i], &error);
                     if (!error) {
-                        data_image[DC++] = (short)value;
+                        data_image[DC++] = (short)value; /* Store matrix value */
                     } else {
                         error_log(file_name,line_number,FAIL_CONVERT_STRING_TO_NUM);
                     }

@@ -20,7 +20,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
         return 0;
     }
 
-    /* Copy the token and ensure it is null-terminated */
+    /* Copy the token and ensure it is null terminated */
     strncpy(cleaned, token, MAX_LINE_LENGTH - 1);
     cleaned[MAX_LINE_LENGTH - 1] = '\0';
 
@@ -49,7 +49,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols) {
 
 
 unsigned int encode_signed_num(int num) {
-    /*for positive num return the num for negative num return two's complement representation*/
+    /*for positive num return the num for negative num return two complement representation*/
     return (unsigned int)num & 0x3FF;
 }
 
@@ -60,7 +60,7 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
     int len,same_name = 0;
     char macro_name_without_last_char[MAX_LINE_LENGTH];
 
-    /* check if macro list is empty no need to check*/
+    /* Check if macro list is empty no need to check*/
     if (macro_head == NULL || *macro_head == NULL) {
         return 0;
     }
@@ -83,7 +83,7 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
 
     while (current_macro != NULL) {
 
-        /* For each macro, check against all symbols in symbol table */
+        /* For each macro check against all symbols in symbol table */
         current_symbol = symbol_table->head;
         while (current_symbol != NULL) {
 

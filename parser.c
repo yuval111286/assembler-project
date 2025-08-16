@@ -123,7 +123,7 @@ int parse_extern_directive(char *operands, ParsedLine *out, char *file_name, int
         return 0;
     }
 
-    /* Label cannot be an opcode, directive, or register */
+    /* Label cannot be an opcode, directive or register */
     if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
         error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
         return 0;
@@ -155,7 +155,7 @@ int parse_entry_directive(char *operands, ParsedLine *out, char *file_name, int 
         return 0;
     }
 
-    /* Label cannot be an opcode, directive, or register */
+    /* Label cannot be an opcode, directive or register */
     if (identify_opcode(operands) != OPCODE_INVALID || identify_directive(operands) != -1) {
         error_log(file_name, line_number, SAVED_WORD_AS_LABEL);
         return 0;
@@ -427,7 +427,7 @@ int validate_operand_for_instruction(char *operand, Opcode opcode, int position,
         case OPCODE_BNE:
         case OPCODE_JSR:
         case OPCODE_RED:
-         /* Single operand, cannot be immediate */
+         /* Single operand */
             if (strchr(operand, LADDER)){
                 error_log(file_name,line_number,IMM_NOT_VALID_ARG_DEST_REST_OP);
                 return 0;

@@ -12,7 +12,7 @@
 /* Maximum length of a name of input file */
 #define MAX_FILE_NAME_LENGTH 70
 
-/* Maximum length of a line in the input file (including newline and null) */
+/* Maximum length of a line in the input file  */
 #define MAX_LINE_LENGTH 81
 
 /* Maximum length of a label name */
@@ -21,16 +21,16 @@
 /* Maximum number of operands per instruction */
 #define MAX_OPERANDS 10
 
-/* Starting address for instructions (IC) */
+/* Starting address for instructions IC */
 #define IC_INIT_VALUE 100
 
-/* Maximum number of registers (r0–r7) */
+/* Maximum number of registers r0–r7 */
 #define NUM_REGISTERS 8
 
 /* Maximum number of directive options */
 #define NUM_DIRECTIVE 5
 
-/* Maximum number of digits in a 10-bit base-4 word: from 00000 to 33333 */
+/* Maximum number of digits in a 10bit base4 word: from 00000 to 33333 */
 #define WORD_BASE4_DIGITS 5
 
 /* Maximum code and data section sizes */
@@ -38,21 +38,21 @@
 #define MAX_DATA_SIZE 255
 
 
-/*groups of bit in encoded word*/
-#define ARE_BITS 0 /*0-1*/
-#define DEST_BITS 2 /*2-3*/
-#define SRC_BITS 4 /*4-5*/
-#define OPCODE_BITS 6 /*6-9*/
+/* Groups of bit in encoded word*/
+#define ARE_BITS 0 /* 0-1 */
+#define DEST_BITS 2 /* 2-3 */
+#define SRC_BITS 4 /* 4-5 */
+#define OPCODE_BITS 6 /* 6-9 */
 
-#define FOUR_BITS_MASK 0xF /*moving 4 places*/
-#define TWO_BITS_MASK  0x3 /*moving 2 places*/
+#define FOUR_BITS_MASK 0xF /* Moving 4 places */
+#define TWO_BITS_MASK  0x3 /* Moving 2 places */
 
 
 /*ARE*/
 
-#define ABSOLUTE 0 /*00*/
-#define EXTERNAL 1 /*01*/
-#define RELOCATABLE 2 /*10*/
+#define ABSOLUTE 0 /* 00 */
+#define EXTERNAL 1 /* 01 */
+#define RELOCATABLE 2 /* 10 */
 
 /* Type of line in source file */
 typedef enum {
@@ -97,6 +97,7 @@ typedef enum {
     OPCODE_INVALID = -1
 } Opcode;
 
+/* Opcode mapping */
 typedef struct {
     char *name;
     Opcode opcode;

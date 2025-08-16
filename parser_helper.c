@@ -55,7 +55,7 @@ Directive_Mode directive_table_without_dots[] = {
 
 /*
  * Register table
- * Maps register names (r0–r7) to their Register enum values.
+ * Maps register names r0–r7 to their Register enum values.
  */
 
 Register_Type register_table[] = {
@@ -90,45 +90,45 @@ const int expected_operands_for_each_opcode[16] = {
 };
 
 /* Table of allowed addressing modes for each opcode
-0=immediate, 1=direct, 2=matrix, 3=register */
+0 = immediate 1 = direct 2 = matrix 3 = register */
 
 const int allowed_source_modes[16][4] = {
-        /* mov  */ {1, 1, 1, 1},
-        /* cmp  */ {1, 1, 1, 1},
-        /* add  */ {1, 1, 1, 1},
-        /* sub  */ {1, 1, 1, 1},
-        /* lea  */ {0, 1, 1, 0},
-        /* clr  */ {0, 0, 0, 0},
-        /* not  */ {0, 0, 0, 0},
-        /* inc  */ {0, 0, 0, 0},
-        /* dec  */ {0, 0, 0, 0},
-        /* jmp  */ {0, 0, 0, 0},
-        /* bne  */ {0, 0, 0, 0},
-        /* red  */ {0, 0, 0, 0},
-        /* prn  */ {0, 0, 0, 0},
-        /* jsr  */ {0, 0, 0, 0},
-        /* rts  */ {0, 0, 0, 0},
+        /* mov */ {1, 1, 1, 1},
+        /* cmp */ {1, 1, 1, 1},
+        /* add */ {1, 1, 1, 1},
+        /* sub */ {1, 1, 1, 1},
+        /* lea */ {0, 1, 1, 0},
+        /* clr */ {0, 0, 0, 0},
+        /* not */ {0, 0, 0, 0},
+        /* inc */ {0, 0, 0, 0},
+        /* dec */ {0, 0, 0, 0},
+        /* jmp */ {0, 0, 0, 0},
+        /* bne */ {0, 0, 0, 0},
+        /* red */ {0, 0, 0, 0},
+        /* prn */ {0, 0, 0, 0},
+        /* jsr */ {0, 0, 0, 0},
+        /* rts */ {0, 0, 0, 0},
         /* stop */ {0, 0, 0, 0}
 };
 
 /* Allowed destination addressing modes per opcode:
    immediate direct matrix register */
 const int allowed_dest_modes[16][4] = {
-        /* mov  */ {0, 1, 1, 1},
-        /* cmp  */ {1, 1, 1, 1},
-        /* add  */ {0, 1, 1, 1},
-        /* sub  */ {0, 1, 1, 1},
-        /* lea  */ {0, 1, 1, 1},
-        /* clr  */ {0, 1, 1, 1},
-        /* not  */ {0, 1, 1, 1},
-        /* inc  */ {0, 1, 1, 1},
-        /* dec  */ {0, 1, 1, 1},
-        /* jmp  */ {0, 1, 1, 1},
-        /* bne  */ {0, 1, 1, 1},
-        /* jsr  */ {0, 1, 1, 1},
-        /* red  */ {0, 1, 1, 1},
-        /* prn  */ {1, 1, 1, 1},
-        /* rts  */ {0, 0, 0, 0},
+        /* mov */ {0, 1, 1, 1},
+        /* cmp */ {1, 1, 1, 1},
+        /* add */ {0, 1, 1, 1},
+        /* sub */ {0, 1, 1, 1},
+        /* lea */ {0, 1, 1, 1},
+        /* clr */ {0, 1, 1, 1},
+        /* not */ {0, 1, 1, 1},
+        /* inc */ {0, 1, 1, 1},
+        /* dec */ {0, 1, 1, 1},
+        /* jmp */ {0, 1, 1, 1},
+        /* bne */ {0, 1, 1, 1},
+        /* jsr */ {0, 1, 1, 1},
+        /* red */ {0, 1, 1, 1},
+        /* prn */ {1, 1, 1, 1},
+        /* rts */ {0, 0, 0, 0},
         /* stop */ {0, 0, 0, 0}
 };
 
@@ -147,7 +147,7 @@ int identify_opcode(char* op_code) {
         }
     }
 
-    /* If not found, return invalid opcode */
+    /* If not found return invalid opcode */
     return OPCODE_INVALID;
 }
 
@@ -162,7 +162,7 @@ int identify_directive(char *directive){
         }
     }
 
-    /* No match found */
+    
     return -1;
 }
 
@@ -176,8 +176,7 @@ int identify_directive_without_dots(char *directive){
         }
     }
 
-    /* No match found */
-    return -1;
+        return -1;
 }
 
 int identify_register(char *reg){
@@ -190,7 +189,7 @@ int identify_register(char *reg){
         }
     }
 
-    /* Register not found */
+    
     return -1;
 }
 
@@ -218,7 +217,7 @@ int is_valid_immediate(char *immediate, char* file_name, int line_number){
         return 1; /* Invalid characters found */
     }
 
-    /* Valid immediate value */
+    
     return 0;
 }
 
@@ -243,13 +242,13 @@ int is_valid_matrix_dim(char *mat_dim, char *file_name, int line_number)
             /* Validate that the first dimension contains only digits */
             n = is_digit_or_char(first_bracket + 1, 0, file_name, line_number);
             if (!n) {
-                return 1; /* Invalid first dimension */
+                return 1; 
             }
 
-            /* Locate the second dimension's opening bracket */
+            /* Locate the second dimensions opening bracket */
             third_bracket = strchr(second_bracket + 1, OPENING_BRACKET);
             if (third_bracket) {
-                /* Locate the second dimension's closing bracket */
+                /* Locate the second dimensions closing bracket */
                 forth_bracket = strchr(third_bracket + 1, CLOSED_BRACKET);
                 if (forth_bracket) {
                     *forth_bracket = '\0';
@@ -272,7 +271,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
     int i = 0;
 
     if (!digit_or_letter_or_both) {
-        /* Case 0: Check if the tested word contains only digits */
+        /* Check if the tested word contains only digits */
 
         if (tested_word[i] == '-' || tested_word[i] == '+') {
             i++; 
@@ -287,7 +286,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         }
 
     } else if (digit_or_letter_or_both == 1) {
-        /* Case 1: Check if the tested word contains only letters */
+        /* Check if the tested word contains only letters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalpha(tested_word[i])) {
                 error_log(file_name, line_number, NOT_LETTER);
@@ -296,7 +295,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         }
 
     } else if (digit_or_letter_or_both == 2) {
-        /* Case 2: Check if the tested word contains only alphanumeric characters */
+        /* Check if the tested word contains only alphanumeric characters */
         for (i = 0; i < strlen(tested_word); i++) {
             if (!isalnum((unsigned char)tested_word[i])) {
                 error_log(file_name, line_number, NOT_DIGIT_LETTER);
@@ -305,7 +304,7 @@ int is_digit_or_char(char *tested_word, int digit_or_letter_or_both, char *file_
         }
     }
 
-    return 0; /* String passed validation */
+    return 0; 
 }
 
 int verify_string_has_invalid_chars(char *tested_word) {
@@ -365,7 +364,7 @@ int is_valid_label(char *label, char *file_name, int line_number) {
     /* Check if label is null or empty */
     if (label == NULL || label[0] == '\0') {
         error_log(file_name, line_number, MISSING_LABEL_NAME);
-        return 0; /* Invalid label */
+        return 0; 
     }
 
     len = strlen(label);
@@ -400,18 +399,18 @@ int get_addressing_mode( char *operand) {
     int len;
 
     if (operand == NULL) {
-        return -1; /* Invalid operand */
+        return -1; 
     }
 
     len = strlen(operand);
 
-    /* Immediate addressing: begins with '#' followed by number */
+    /* Immediate addressing begins with '#' followed by number */
     if (operand[0] == LADDER) {
         if (len > 1 && (isdigit((unsigned char)operand[1]) ||
                         operand[1] == '+' || operand[1] == '-')) {
             return ADDRESS_IMMEDIATE;
         }
-        return -1; /* Invalid immediate operand */
+        return -1; 
     }
 
     /* Matrix addressing: contains both '[' and ']' characters */
@@ -445,7 +444,7 @@ int verify_addressing_modes_are_valid(ParsedLine *parsed, char *file_name, int l
             }
         }
 
-            /* For single operand instructions, operand is destination */
+            /* For single operand instructions operand is destination */
         else if (parsed->operand_count == 1) {
             if (src_mode >= 0 && src_mode <= 3) {
                 if (!allowed_dest_modes[opcode][src_mode]) {
@@ -569,7 +568,7 @@ int instruction_word_count(ParsedLine *parsed) {
 
     word_counter = 1; /* Every instruction has at least one base word */
 
-    /* Handle case where both operands are registers - they share one word */
+    /* Handle case where both operands are registers they share one word */
     if (parsed->operand_count == 2 &&
         get_addressing_mode(parsed->operands[0]) == ADDRESS_REGISTER &&
         get_addressing_mode(parsed->operands[1]) == ADDRESS_REGISTER) {

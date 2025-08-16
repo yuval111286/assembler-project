@@ -26,7 +26,7 @@ int parse_matrix_dimensions(const char *token, int *rows, int *cols);
 /**
  * @brief Encode signed number into machine code.
  * @param num Number to encode.
- * @return For positive numbers: same value. For negative numbers: two's complement representation.
+ * @return For positive numbers: same value. For negative numbers: twos complement representation.
  */
 unsigned int encode_signed_num(int num);
 
@@ -42,10 +42,10 @@ int check_mcro_name_not_label(SymbolTable *symbol_table, node **macro_head, char
 /**
  * @brief Parse a signed 10-bit number and convert to unsigned representation.
  * Values from -512 to +511 and converts negative values to
- * two's complement representation.
+ * twos complement representation.
  * @param str String containing the number.
  * @param error_flag Pointer to int set to 1 if parsing failed.
- * @return Two's complement representation as unsigned short.
+ * @return Twos complement representation as unsigned short.
  */
 unsigned short parse_number_from_string(const char *str, int *error_flag);
 
