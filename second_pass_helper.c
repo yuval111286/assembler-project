@@ -234,7 +234,7 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
             /*calculate address in base4*/
             base4_address = turn_address_to_base_4(current->address);
             /*write to extern file extern label name and address */
-            fprintf(fp, "%s\t%s", current->symbol_name, base4_address);
+            fprintf(fp, "%s\t%s\n", current->symbol_name, base4_address);
 
         }
         current = current->next;
