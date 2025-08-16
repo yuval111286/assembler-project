@@ -5,6 +5,21 @@
 #include "preprocessor.h"
 #include "user_interface.h"
 
+/**
+ *@brief MAIN function of assembler program
+ * Contains three main stages:
+ * 1. PREPROCESSOR - expands macros and creates .am file
+ * 2. First pass - performs initial encoding and builds symbol table
+ * 3. Second pass - completes encoding and generates output files
+ *
+ * @param argc num of as files to process
+ * @param argv array of as name files
+ * @return 0 for end of the assembler program
+ *
+ * @note The function handles multiple input files sequentially, providing user feedback for each processing stage
+ * and error reporting.
+ * @note If no errors are found output files (.am, .ob, .ent, .ext) are generated
+ */
 int main(int argc, char *argv[])
 {
     char *as_file=NULL, *am_file=NULL;
