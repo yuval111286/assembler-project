@@ -160,7 +160,7 @@ void write_code_image_to_ob_file(CodeImage *img, int ic_size, int dc_size, unsig
     strcpy(temp, turn_num_to_base_4(dc_size));
     strcpy(dc_size_in_base_4, temp);
 
-    fprintf(fp, "%s\t\t%s\n", ic_size_in_base_4,dc_size_in_base_4);
+    fprintf(fp, "%s\t%s\n", ic_size_in_base_4,dc_size_in_base_4);
 
     /* Go over code image section and code address and word */
     for (i = 0; i < (*img).size; i++) {
@@ -190,20 +190,12 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     FILE *fp;
     char *ext_file_name, *base4_address;
     ExternSymbol *current;
-    int count_extern_labels_during_print=0,num_of_extern_labels=0;
 
     /* See if there are extern labels */
     if (extern_list->head == NULL) {
         /* No extern labels so no need to create ext file */
         return;
     }
-
-    current = extern_list->head;
-    while (current != NULL) {
-        num_of_extern_labels++;
-        current = current->next;
-    }
-
 
     /* Create ext file name */
     ext_file_name = change_ending_of_file(file_name, ".ext");
@@ -222,21 +214,10 @@ void write_ext_file(char *file_name, ExternList *extern_list) {
     /* Writing all extern labels with matching addresses */
     current = extern_list->head;
     while (current != NULL) {
-
-        if (count_extern_labels_during_print==num_of_extern_labels-1)
-        {
-            /* Calculate address in base4 */
-            base4_address = turn_address_to_base_4(current->address);
-            /* Write to extern file extern label name and address */
-            fprintf(fp, "%s\t%s", current->symbol_name, base4_address);
-        }
-        else {
-            /*calculate address in base4*/
-            base4_address = turn_address_to_base_4(current->address);
-            /*write to extern file extern label name and address */
-            fprintf(fp, "%s\t%s\n", current->symbol_name, base4_address);
-
-        }
+        /*calculate address in base4*/
+        base4_address = turn_address_to_base_4(current->address);
+        /*write to extern file extern label name and address */
+        fprintf(fp, "%s\t%s\n", current->symbol_name, base4_address);
         current = current->next;
     }
 
@@ -249,7 +230,7 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
     FILE *fp;
     char *ent_file_name, *base4_address;
     Symbol *current;
-    int count_entry_labels_during_print=0,has_entries_labels = 0;
+    int has_entries_labels = 0;
 
     /* Check if there are any entry symbols */
     current = symbol_table->head;
@@ -284,21 +265,10 @@ void write_ent_file(char *file_name, SymbolTable *symbol_table) {
     current = symbol_table->head;
     while (current != NULL) {
         if (current->is_entry == 1) {
-            if(count_entry_labels_during_print == has_entries_labels)
-            {
-                /* Calculate address in base 4* */
-                base4_address = turn_address_to_base_4(current->address);
-                /* Write to file entry label name and address */
-                fprintf(fp, "%s\t%s", current->name, base4_address);
-
-            } else{
-                /* Calculate address in base 4 */
-                base4_address = turn_address_to_base_4(current->address);
-                /* Write to file entry label name and address */
-                fprintf(fp, "%s\t%s\n", current->name, base4_address);
-                count_entry_labels_during_print++;
-            }
-
+            /* Calculate address in base 4 */
+            base4_address = turn_address_to_base_4(current->address);
+            /* Write to file entry label name and address */
+            fprintf(fp, "%s\t%s\n", current->name, base4_address);
         }
         current = current->next;
     }

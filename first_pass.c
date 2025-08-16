@@ -9,7 +9,6 @@
 #include "first_pass_helper.h"
 
 
-
 int first_pass(char *file_name, SymbolTable *symbol_table, int *IC_final, int *DC_final, CodeImage *code_image, node **head,unsigned int *data_image)
 {
     FILE *fp;
