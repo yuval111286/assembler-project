@@ -2,14 +2,14 @@
 CC = gcc
 CFLAGS = -ansi -Wall -pedantic -g
 GLOBAL_DEPS = globals.h user_interface.h
-EXE_DEPS = assembler_prog.o utils.o symbol_table.o preprocessor.o preprocessor_helper.o first_pass.o first_pass_helper.o second_pass.o second_pass_helper.o linked_list.o errors_handler.o parser.o parser_helper.o code_image.o
+EXE_DEPS = assembler.o utils.o symbol_table.o preprocessor.o preprocessor_helper.o first_pass.o first_pass_helper.o second_pass.o second_pass_helper.o linked_list.o errors_handler.o parser.o parser_helper.o code_image.o
 
 # Executable target
 assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
 	$(CC) -g $(EXE_DEPS) $(CFLAGS) -o $@
 
-assembler_prog.o: assembler_prog.c $(GLOBAL_DEPS)
-	$(CC) -c assembler_prog.c $(CFLAGS) -o $@
+assembler.o: assembler.c $(GLOBAL_DEPS)
+	$(CC) -c assembler.c $(CFLAGS) -o $@
 
 preprocessor.o: preprocessor.c preprocessor.h preprocessor_helper.h $(GLOBAL_DEPS)
 	$(CC) -c preprocessor.c $(CFLAGS) -o $@
