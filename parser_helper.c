@@ -619,7 +619,7 @@ int comma_validation(char *line, char *file_name, int line_number) {
                 return 1;
             }
 
-            /* If a comma is followed by end of line, its an extraneous comma */
+            /* extra comma is displayed in end of line */
             if (line[i] == '\0' || line[i] == '\n') {
                 error_log(file_name, line_number, COMMA_END_OF_LINE);
                 return 1;
@@ -629,6 +629,5 @@ int comma_validation(char *line, char *file_name, int line_number) {
         }
     }
 
-    
     return 0;
 }
