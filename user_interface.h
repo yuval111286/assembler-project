@@ -17,7 +17,7 @@
 "     Errors shall be printed to the screen\n\n"
 
 #define LONG_FILE_NAME "File name too long, moving to next file %s \n\n"
-#define PREPROC "-- Processing PREPROCESSOR --\n\n"
+#define PREPROC "\n-- Processing PREPROCESSOR --\n\n"
 #define PREPROC_END "-- PREPROCESSOR finish successfully --\n\n"
 #define FIRST_PASS  "-- Processing FIRST PASS --\n\n"
 #define FIRST_PASS_END  "-- FIRST PASS finish successfully--\n\n"
