@@ -330,9 +330,6 @@ int preprocessor_second_pass(node **head,char *as_file_name,int *line_counter,ch
     int found, i;
     node *macro_node;
 
-    /* כאן לדוגמה אפשר לקבוע את שם קובץ ה-am */
-    *am_file_name = change_ending_of_file(as_file_name, ".am");
-
     /* open clean file for reading */
     fp_as = fopen(as_file_name, "r");
     if (fp_as == NULL) {
