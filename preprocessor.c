@@ -15,7 +15,12 @@
 char *saved_words[] = {"data", "string", "mat", "entry", "extern","mcroend","mcro",NULL};
 
 
-
+/**
+ * @brief go over mcro name and check if contains only letter,num or underscore
+ *
+ * @param mcro_name mcro name to be tested
+ * @return 0 if mcro name contain forbidden char, 1 if all set
+ */
 int mcro_name_only_letters_num_underscore(char *mcro_name){
 
     int i;
@@ -28,7 +33,12 @@ int mcro_name_only_letters_num_underscore(char *mcro_name){
     return 1;
 }
 
-
+/**
+ * @brief go over mcro name and check if it's not one of the word from the array of saved word
+ *
+ * @param mcro_name macro name to be tested
+ * @return 1 if mcro name is legal or 0 if not
+ */
 int is_save_word(char *mcro_name){
 
     /*check if mcro_name is one of the forbidden saved word*/
@@ -48,13 +58,6 @@ int is_save_word(char *mcro_name){
 
     return 1;
 }
-
-
-
-
-
-
-
 
 
 
@@ -126,24 +129,6 @@ char *identify_macro_name(char *org_file_name, char *line, int *line_counter){
     return mcro_name;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
