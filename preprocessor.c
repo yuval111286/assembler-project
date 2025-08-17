@@ -147,7 +147,6 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
     char *mcro;
     int mcro_length = 0, internal_line_counter;
 
-
     internal_line_counter = *line_counter;
     /* return to first position */
     if (fsetpos(fp, pos) != 0) {
@@ -161,14 +160,13 @@ char *extract_mcro_text(char *org_file_name , FILE *fp, fpos_t *pos, int *line_c
         /* check if mcro text is more than 80 chars*/
         if (strlen(line) >= MAX_LINE_LENGTH - 1) {
             error_log(org_file_name, internal_line_counter, LONG_LINE);
-            return NULL;
+            continue;
         }
 
         if (strncmp(line, MCROEND, 7) == 0) {
             /*check for extra text after mcroend*/
             if (strncmp(line, MCROEND, 8) != 0){
                 error_log(org_file_name,internal_line_counter,EXTRA_TEXT_AFTER_MCROEND);
-                return NULL;
             }
 
             /* reach to mcroend*/
