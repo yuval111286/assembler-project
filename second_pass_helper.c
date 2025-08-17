@@ -9,7 +9,12 @@ unsigned int shift_and_set_are(unsigned int final_value, int are_type) {
     return (final_value << 2) | are_type;
 }
 
-
+/**
+ * @brief Get unsigned int num and convert it to string encoded in base4
+ *
+ * @param number number to convert
+ * @return string of num encoded in base4
+ */
 char *turn_line_to_base_4(unsigned int word) {
     static char word_is_coded_in_base4[6] = {0};
     char base4_options[4] = {'a', 'b', 'c', 'd'};
@@ -34,7 +39,12 @@ char *turn_line_to_base_4(unsigned int word) {
     return word_is_coded_in_base4;
 }
 
-
+/**
+ * @brief Get unsigned int num and convert it to string encoded in base4
+ *
+ * @param number number to convert
+ * @return string of num encoded in base4
+ */
 char *turn_address_to_base_4(unsigned int address) {
     static char address_is_coded_in_base4[5] = {0};
     char base4_options[4] = {'a', 'b', 'c', 'd'};
@@ -57,7 +67,12 @@ char *turn_address_to_base_4(unsigned int address) {
     return address_is_coded_in_base4;
 }
 
-
+/**
+ * @brief Get int num and convert it to string encoded in base4
+ *
+ * @param number number to convert
+ * @return string of num encoded in base4
+ */
 char *turn_num_to_base_4(int number) {
     static char num_in_base4[10]={0};
     char temp[10]={0}, base4_chars[4] = {'a', 'b', 'c', 'd'};
@@ -110,17 +125,17 @@ int is_operand_label(char *operand) {
 void add_extern_symbol(ExternList *extern_list, char *symbol_name, int address) {
     ExternSymbol *new_node;
 
-    /* Memory for new extern reference */
+    /* memory for new extern reference */
     new_node = malloc_allocation(sizeof(ExternSymbol));
     if (new_node == NULL) {
         return;
     }
 
-    /* Copy symbol name */
+    /* copy symbol name */
     strncpy(new_node->symbol_name, symbol_name, MAX_LABEL_LEN);
     new_node->symbol_name[MAX_LABEL_LEN] = '\0';
 
-    /* Set address and link to list */
+    /* set address and link to list */
     new_node->address = address;
     new_node->next = extern_list->head;
     extern_list->head = new_node;
